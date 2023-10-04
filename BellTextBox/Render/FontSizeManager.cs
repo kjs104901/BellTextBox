@@ -5,31 +5,44 @@ namespace Bell.Render;
 public class FontSizeManager
 {
     private readonly TextBox _textBox;
-    private readonly Dictionary<RectSize, Dictionary<char, RectSize>> _sizeCacheDictionary = new();
+    private readonly Dictionary<RectSize, Dictionary<char, float>> _sizeCacheDictionary = new();
 
     private RectSize _referenceSize;
-    private Dictionary<char, RectSize> _sizeCache;
+    
+    private Dictionary<char, float> _sizeWidthCache;
+    private float _sizeHeight;
     
     public FontSizeManager(TextBox textBox)
     {
         _textBox = textBox;
-        _sizeCache = new();
+        _sizeWidthCache = new();
+        UpdateReferenceSize();
     }
 
     public void UpdateReferenceSize()
     {
         _referenceSize = _textBox.TextBoxBackend.GetRenderSize('#');
-        _sizeCacheDictionary.TryAdd(_referenceSize, new Dictionary<char, RectSize>());
-        _sizeCache = _sizeCacheDictionary[_referenceSize];
+        _sizeCacheDictionary.TryAdd(_referenceSize, new Dictionary<char, float>());
+        _sizeWidthCache = _sizeCacheDictionary[_referenceSize];
+
+        _sizeHeight = _referenceSize.Height;
     }
 
-    public RectSize GetFonRectSize(char c)
+    public float GetFontWidth(char c)
     {
-        if (false == _sizeCache.TryGetValue(c, out RectSize rectSize))
+        if (false == _sizeWidthCache.TryGetValue(c, out float fontWidth))
         {
-            rectSize = _textBox.TextBoxBackend.GetRenderSize(c);
-            _sizeCache[c] = rectSize;
+            var rectSize = _textBox.TextBoxBackend.GetRenderSize(c);
+
+            fontWidth = rectSize.Width;
+            _sizeWidthCache[c] = fontWidth;
+            _sizeHeight = Math.Max(_sizeHeight, rectSize.Height);
         }
-        return rectSize;
+        return fontWidth;
+    }
+
+    public float GetFontHeight()
+    {
+        return _sizeHeight;
     }
 }

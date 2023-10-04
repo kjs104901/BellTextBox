@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text;
+using Bell.Languages;
 using Bell.Render;
 
 namespace Bell.Data;

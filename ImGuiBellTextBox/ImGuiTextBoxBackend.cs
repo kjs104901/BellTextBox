@@ -36,6 +36,6 @@ public class ImGuiTextBoxBackend : ITextBoxBackend
 
     RectSize ITextBoxBackend.GetRenderSize(char c)
     {
-        throw new NotImplementedException();
+        ImGui.
     }
 }
