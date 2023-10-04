@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using Bell.Commands;
 using Bell.Data;
+using Bell.Render;
 
 namespace Bell;
 
@@ -10,17 +11,19 @@ public partial class TextBox
     public Page Page { get; set; }
     public readonly List<string> AutoCompleteList = new();
     public readonly StringBuilder StringBuilder = new();
+    public FontSizeManager FontSizeManager { get; set; }
     
     // Action
     private readonly CommandSetHistory _commandSetHistory = new();
     private readonly Cursor _cursor = new();
     
-    private readonly ITextBoxBackend _textBoxBackend;
+    public ITextBoxBackend TextBoxBackend { get; set; }
     
     public TextBox(ITextBoxBackend textBoxBackend)
     {
-        _textBoxBackend = textBoxBackend;
+        TextBoxBackend = textBoxBackend;
         Page = new Page(this);
+        FontSizeManager = new FontSizeManager(this);
     }
     
     // Method
@@ -46,7 +49,7 @@ public partial class TextBox
 
     public void Render()
     {
-        _textBoxBackend.Render(this, Page.Text.LineRenders);
+        TextBoxBackend.Render(this, Page.Text.GetLineRenders());
     }
 
     private void DoAction(Command command)
