@@ -36,6 +36,7 @@ public class ImGuiTextBoxBackend : ITextBoxBackend
 
     RectSize ITextBoxBackend.GetRenderSize(char c)
     {
-        ImGui.
+        Vector2 fontSize = ImGui.CalcTextSize(c.ToString());
+        return new RectSize { Width = fontSize.X, Height = fontSize.Y };
     }
 }
