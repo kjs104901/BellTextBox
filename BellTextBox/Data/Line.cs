@@ -34,9 +34,8 @@ public class Line
     public List<uint> Cutoffs => _cutoffsCache.Get();
     private readonly Cache<List<uint>> _cutoffsCache;
     
-    
-    public LineRender LineRender => _lineRenderCache.Get();
-    private readonly Cache<LineRender> _lineRenderCache;
+    public List<LineRender> LineRenders => _lineRendersCache.Get();
+    private readonly Cache<List<LineRender>> _lineRendersCache;
 
     public bool Visible = false;
     public bool Folded = false;
@@ -65,7 +64,7 @@ public class Line
         _cutoffsCache = new(new(), UpdateCutoff);
         _foldableCache = new(false, UpdateFoldable);
         _stringCache = new(string.Empty, UpdateString);
-        _lineRenderCache = new(new LineRender { Text = String }, UpdateLineRender);
+        _lineRendersCache = new(new List<LineRender>(), UpdateLineRenders);
     }
 
     public void SetString(string line)
@@ -75,7 +74,7 @@ public class Line
         
         _foldableCache.SetDirty();
         _stringCache.SetDirty();
-        _lineRenderCache.SetDirty();
+        _lineRendersCache.SetDirty();
     }
 
     private Dictionary<uint, Style> UpdateStyles(Dictionary<uint, Style> styles)
@@ -109,11 +108,19 @@ public class Line
         return _textBox.StringBuilder.ToString();
     }
 
-    private LineRender UpdateLineRender(LineRender _)
+    public LineRender GetLineRender(int wrapIndex)
     {
-        return new LineRender
+        //TODO check range?
+        return LineRenders[wrapIndex];
+    }
+    
+    private List<LineRender> UpdateLineRenders(List<LineRender> lineRenders)
+    {
+        lineRenders.Clear();
+        lineRenders.Add(new LineRender
         {
             Text = String
-        };
+        });
+        return lineRenders;
     }
 }

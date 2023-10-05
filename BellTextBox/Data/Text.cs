@@ -10,7 +10,7 @@ public class Text
     public List<LineView> LineViews => _lineViewCache.Get();
     private readonly Cache<List<LineView>> _lineViewCache;
 
-    public List<LineRender> LineRenders = new(); //TODO cache?
+    private readonly List<LineRender> _lineRenders = new();
     
     public Text(TextBox textBox)
     {
@@ -33,12 +33,12 @@ public class Text
     
     public List<LineRender> GetLineRenders()
     {
-        LineRenders.Clear();
+        _lineRenders.Clear();
         foreach (LineView lineView in LineViews)
         {
-            LineRenders.Add(_lines[lineView.LineIndex].LineRender);
+            _lineRenders.Add(_lines[lineView.LineIndex].GetLineRender(lineView.WrapIndex));
         }
-        return LineRenders;
+        return _lineRenders;
     }
 
     private List<LineView> UpdateLineViews(List<LineView> lineViews)
