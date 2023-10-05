@@ -49,6 +49,7 @@ public partial class TextBox
 
     public void Render()
     {
+        FontSizeManager.UpdateReferenceSize();
         TextBoxBackend.Render(this, Page.Text.GetLineRenders());
     }
 

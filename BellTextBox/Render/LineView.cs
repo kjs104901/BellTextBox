@@ -3,5 +3,5 @@
 public struct LineView
 {
     public int LineIndex;
-    public int WrapIndex;
+    public int RenderIndex;
 }

@@ -36,7 +36,7 @@ public class Text
         _lineRenders.Clear();
         foreach (LineView lineView in LineViews)
         {
-            _lineRenders.Add(_lines[lineView.LineIndex].GetLineRender(lineView.WrapIndex));
+            _lineRenders.Add(_lines[lineView.LineIndex].GetLineRender(lineView.RenderIndex));
         }
         return _lineRenders;
     }
@@ -47,7 +47,10 @@ public class Text
         int i = 0;
         foreach (Line line in _lines)
         {
-            lineViews.Add(new LineView { LineIndex = i, WrapIndex = 0 });
+            for (int j = 0; j < line.RenderCount; j++)
+            {
+                lineViews.Add(new LineView { LineIndex = i, RenderIndex = j });
+            }
             i++;
         }
         return lineViews;

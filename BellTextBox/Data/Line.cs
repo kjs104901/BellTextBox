@@ -38,10 +38,10 @@ public class Line
     public List<LineRender> LineRenders => _lineRendersCache.Get();
     private readonly Cache<List<LineRender>> _lineRendersCache;
 
-    public bool Visible = false;
+    public bool Visible = true;
     public bool Folded = false;
     
-    public int ViewCount => Visible ? Cutoffs.Count + 1 : 0;
+    public int RenderCount => Visible ? LineRenders.Count : 0;
 
     private Marker Marker
     {
@@ -61,6 +61,7 @@ public class Line
     public Line(TextBox textBox)
     {
         _textBox = textBox;
+        
         _stylesCache = new(new(), UpdateStyles);
         _cutoffsCache = new(new(), UpdateCutoff);
         _foldableCache = new(false, UpdateFoldable);
@@ -73,6 +74,8 @@ public class Line
         _chars.Clear();
         _chars.AddRange(line);
         
+        _stylesCache.SetDirty();
+        _cutoffsCache.SetDirty();
         _foldableCache.SetDirty();
         _stringCache.SetDirty();
         _lineRendersCache.SetDirty();
@@ -86,8 +89,17 @@ public class Line
 
     private HashSet<int> UpdateCutoff(HashSet<int> cutoffs)
     {
-        //TODO calculate cutoff
         cutoffs.Clear();
+        float widthAccumulated = 0.0f;
+        for (int i = 0; i < _chars.Count; i++)
+        {
+            widthAccumulated += _textBox.FontSizeManager.GetFontWidth(_chars[i]);
+            if (widthAccumulated > 100)
+            {
+                cutoffs.Add(i);
+                widthAccumulated = 0;
+            }
+        }
         return cutoffs;
     }
 
@@ -109,10 +121,10 @@ public class Line
         return _textBox.StringBuilder.ToString();
     }
 
-    public LineRender GetLineRender(int wrapIndex)
+    public LineRender GetLineRender(int renderIndex)
     {
         //TODO check range?
-        return LineRenders[wrapIndex];
+        return LineRenders[renderIndex];
     }
     
     private List<LineRender> UpdateLineRenders(List<LineRender> lineRenders)
@@ -142,7 +154,7 @@ public class Line
                 _buffers.Clear();
             }
         }
-        ;
+        
         lineRender.Text = String.Concat(_buffers);
         lineRenders.Add(lineRender);
 

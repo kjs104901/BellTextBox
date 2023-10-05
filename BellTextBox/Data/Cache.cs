@@ -10,7 +10,7 @@ public class Cache<T>
     {
         _value = initValue;
         _updateFunc = updateFunc;
-        _isDirty = false;
+        _isDirty = true;
     }
 
     public T Get()
