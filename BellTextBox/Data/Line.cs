@@ -85,12 +85,17 @@ public class Line
     private Dictionary<int, FontStyle> UpdateStyles(Dictionary<int, FontStyle> styles)
     {
         styles.Clear();
-        
-        styles[4] = FontStyle.BlockCommentFontStyle;
-        styles[5] = FontStyle.BlockCommentFontStyle;
-        styles[6] = FontStyle.BlockCommentFontStyle;
-        styles[7] = FontStyle.BlockCommentFontStyle;
-        
+        for (int i = 0; i < _chars.Count; i++)
+        {
+            if (char.IsLower(_chars[i]))
+            {
+                styles[i] = FontStyle.BlockCommentFontStyle;
+            }
+            else if (false == char.IsAscii(_chars[i]))
+            {
+                styles[i] = FontStyle.LineCommentFontStyle;
+            }
+        }
         return styles;
     }
 
@@ -141,22 +146,25 @@ public class Line
 
         LineRender lineRender = LineRender.Create();
         _buffers.Clear();
-        FontStyle fontStyle = FontStyle.DefaultFontStyle;
+        FontStyle fontStyle = FontStyle.NullFontStyle;
         
         for (int i = 0; i < _chars.Count; i++)
         {
             _buffers.Add(_chars[i]);
 
-            if (false == Styles.TryGetValue(i, out var charFontStyle))
-                charFontStyle = FontStyle.DefaultFontStyle;
-
-            bool nextStyle = fontStyle != charFontStyle;
-            if (nextStyle)
+            if (Styles.TryGetValue(i, out var charFontStyle))
+            {
+                if (FontStyle.NullFontStyle == fontStyle)
+                    fontStyle = charFontStyle;
+                
+            }
+            //TODO FIX Bug
+            if (fontStyle != charFontStyle)
             {
                 lineRender.TextRenders.Add(new() { Text = String.Concat(_buffers), FontStyle = fontStyle });
                 _buffers.Clear();
+                fontStyle = charFontStyle;
             }
-            fontStyle = charFontStyle;
 
             if (Cutoffs.Contains(i))
             {
@@ -165,7 +173,7 @@ public class Line
 
                 lineRender = LineRender.Create();
                 _buffers.Clear();
-                fontStyle = FontStyle.DefaultFontStyle;
+                fontStyle = FontStyle.NullFontStyle;
             }
         }
 

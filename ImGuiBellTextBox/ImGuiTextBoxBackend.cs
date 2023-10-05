@@ -31,11 +31,15 @@ public class ImGuiTextBoxBackend : ITextBoxBackend
             {
                 if (textRender.FontStyle == FontStyle.BlockCommentFontStyle)
                 {
-                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.3f, 0.4f, 0.6f, 1.0f));
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.3f, 0.4f, 0.8f, 1.0f));
+                }
+                else if (textRender.FontStyle == FontStyle.LineCommentFontStyle)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.9f, 0.1f, 0.1f, 1.0f));
                 }
                 else
                 {
-                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.6f, 0.4f, 0.2f, 1.0f));
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.4f, 0.8f, 0.2f, 1.0f));
                 }
                 ImGui.Text(textRender.Text);
                 ImGui.SameLine();
