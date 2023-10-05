@@ -3,6 +3,7 @@ using Bell;
 using ImGuiNET;
 using System.Numerics;
 using Bell.Data;
+using Bell.Languages;
 
 namespace ImGuiBellTextBox;
 
@@ -26,7 +27,21 @@ public class ImGuiTextBoxBackend : ITextBoxBackend
         ImGui.Text("----- textEditor start -----");
         foreach (LineRender lineRender in lineRenders)
         {
-            ImGui.Text(lineRender.Text);
+            foreach (TextRender textRender in lineRender.TextRenders)
+            {
+                if (textRender.FontStyle == FontStyle.BlockCommentFontStyle)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.3f, 0.4f, 0.6f, 1.0f));
+                }
+                else
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.6f, 0.4f, 0.2f, 1.0f));
+                }
+                ImGui.Text(textRender.Text);
+                ImGui.SameLine();
+                ImGui.PopStyleColor();
+            }
+            ImGui.Text(" "); //Next line
         }
         ImGui.Text("----- textEditor end -----");
 

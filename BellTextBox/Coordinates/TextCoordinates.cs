@@ -2,10 +2,10 @@
 
 public struct TextCoordinates : IEquatable<TextCoordinates>
 {
-    public uint Row;
-    public uint Column;
+    public int Row;
+    public int Column;
 
-    public TextCoordinates(uint row, uint column)
+    public TextCoordinates(int row, int column)
     {
         Row = row;
         Column = column;

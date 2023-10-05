@@ -1,9 +1,42 @@
-﻿namespace Bell.Render;
+﻿using Bell.Data;
+using Bell.Languages;
+
+namespace Bell.Render;
 
 public struct LineRender
 {
-    //(위치, 줄, 선택 여부, 마커, highlighter (범위 + 스타일 index), 자동완성 리스트, wrapped)
+    //선택 여부, 자동완성 리스트, wrapped)
     // 커서, 선택 영역, find 결과 영역
     // 그릴 w, h 정보도 포함
+
+    public int Index; // 실제 줄
+    public int LineIndex; // 텍스트 라인 줄
+    public int RenderIndex; // 텍스트 라인 wrap 된 줄
+
+    // 위치
+    public float PosX;
+    public float PosY;
+
+    // 마커
+    public Marker Marker;
+
+    public List<TextRender> TextRenders;
+
+    public static LineRender NullLineRender = new()
+        { TextRenders = new List<TextRender>() { new() { Text = "!!ERROR!!" } } };
+
+    public static LineRender Create()
+    {
+        return new LineRender()
+        {
+            Marker = Marker.None,
+            TextRenders = new()
+        };
+    }
+}
+
+public struct TextRender
+{
     public string Text;
+    public FontStyle FontStyle;
 }

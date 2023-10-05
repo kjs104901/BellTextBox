@@ -27,22 +27,22 @@ public partial class TextBox
     }
     
     // Method
-    public List<uint> FindText(string text)
+    public List<int> FindText(string text)
     {
         return new();
     }
 
-    public bool Goto(uint lineNumber)
+    public bool Goto(int lineNumber)
     {
         return true;
     }
     
-    public bool Fold(uint lineNumber)
+    public bool Fold(int lineNumber)
     {
         return true;
     }
 
-    public bool Unfold(uint lineNumber)
+    public bool Unfold(int lineNumber)
     {
         return true;
     }

@@ -21,7 +21,7 @@ public struct PageCoordinates
         return true;
     }
 
-    public bool ToLineNumber(Text text, out uint lineNumber)
+    public bool ToLineNumber(Text text, out int lineNumber)
     {
         // TODO find line number
         lineNumber = 0;

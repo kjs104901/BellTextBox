@@ -9,7 +9,7 @@ namespace Bell.Data;
 public enum Marker
 {
     None = 0,
-    
+
     Fold = 1 << 0,
     Unfold = 1 << 1
 }
@@ -17,30 +17,30 @@ public enum Marker
 public class Line
 {
     private readonly TextBox _textBox;
-    
-    public uint Index = 0;
-    
+
+    public int Index = 0;
+
     private List<char> _chars = new();
     private List<char> _buffers = new();
-    
+
     public string String => _stringCache.Get();
     private readonly Cache<string> _stringCache;
 
     public Dictionary<int, FontStyle> Styles => _stylesCache.Get();
     private readonly Cache<Dictionary<int, FontStyle>> _stylesCache;
-    
+
     public bool Foldable => _foldableCache.Get();
     private readonly Cache<bool> _foldableCache;
 
     public HashSet<int> Cutoffs => _cutoffsCache.Get();
     private readonly Cache<HashSet<int>> _cutoffsCache;
-    
+
     public List<LineRender> LineRenders => _lineRendersCache.Get();
     private readonly Cache<List<LineRender>> _lineRendersCache;
 
     public bool Visible = true;
     public bool Folded = false;
-    
+
     public int RenderCount => Visible ? LineRenders.Count : 0;
 
     private Marker Marker
@@ -54,6 +54,7 @@ public class Line
                 if (Foldable)
                     return Marker.Fold;
             }
+
             return Marker.None;
         }
     }
@@ -61,7 +62,7 @@ public class Line
     public Line(TextBox textBox)
     {
         _textBox = textBox;
-        
+
         _stylesCache = new(new(), UpdateStyles);
         _cutoffsCache = new(new(), UpdateCutoff);
         _foldableCache = new(false, UpdateFoldable);
@@ -73,7 +74,7 @@ public class Line
     {
         _chars.Clear();
         _chars.AddRange(line);
-        
+
         _stylesCache.SetDirty();
         _cutoffsCache.SetDirty();
         _foldableCache.SetDirty();
@@ -83,7 +84,13 @@ public class Line
 
     private Dictionary<int, FontStyle> UpdateStyles(Dictionary<int, FontStyle> styles)
     {
-        //TODO
+        styles.Clear();
+        
+        styles[4] = FontStyle.BlockCommentFontStyle;
+        styles[5] = FontStyle.BlockCommentFontStyle;
+        styles[6] = FontStyle.BlockCommentFontStyle;
+        styles[7] = FontStyle.BlockCommentFontStyle;
+        
         return styles;
     }
 
@@ -100,6 +107,7 @@ public class Line
                 widthAccumulated = 0;
             }
         }
+
         return cutoffs;
     }
 
@@ -111,6 +119,7 @@ public class Line
             if (trimmedString.StartsWith(folding.Start))
                 return true;
         }
+
         return false;
     }
 
@@ -123,39 +132,44 @@ public class Line
 
     public LineRender GetLineRender(int renderIndex)
     {
-        //TODO check range?
-        return LineRenders[renderIndex];
+        return LineRenders.Count <= renderIndex ? LineRender.NullLineRender : LineRenders[renderIndex];
     }
-    
+
     private List<LineRender> UpdateLineRenders(List<LineRender> lineRenders)
     {
         lineRenders.Clear();
 
-        LineRender lineRender = new LineRender();
+        LineRender lineRender = LineRender.Create();
         _buffers.Clear();
-        
         FontStyle fontStyle = FontStyle.DefaultFontStyle;
+        
         for (int i = 0; i < _chars.Count; i++)
         {
             _buffers.Add(_chars[i]);
 
             if (false == Styles.TryGetValue(i, out var charFontStyle))
                 charFontStyle = FontStyle.DefaultFontStyle;
-            
+
             bool nextStyle = fontStyle != charFontStyle;
+            if (nextStyle)
+            {
+                lineRender.TextRenders.Add(new() { Text = String.Concat(_buffers), FontStyle = fontStyle });
+                _buffers.Clear();
+            }
             fontStyle = charFontStyle;
 
             if (Cutoffs.Contains(i))
             {
-                lineRender.Text = String.Concat(_buffers);
+                lineRender.TextRenders.Add(new() { Text = String.Concat(_buffers), FontStyle = fontStyle });
                 lineRenders.Add(lineRender);
-                
-                lineRender = new LineRender();
+
+                lineRender = LineRender.Create();
                 _buffers.Clear();
+                fontStyle = FontStyle.DefaultFontStyle;
             }
         }
-        
-        lineRender.Text = String.Concat(_buffers);
+
+        lineRender.TextRenders.Add(new() { Text = String.Concat(_buffers), FontStyle = fontStyle });
         lineRenders.Add(lineRender);
 
         return lineRenders;

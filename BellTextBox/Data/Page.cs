@@ -15,8 +15,8 @@ public class Page
     private ViewCoordinates _viewStart = new ();
     private ViewCoordinates _viewEnd = new ();
 
-    private uint _viewLineStart = 0;
-    private uint _viewLineEnd = 0;
+    private int _viewLineStart = 0;
+    private int _viewLineEnd = 0;
     private bool _viewLineDirty = false;
 
     public Page(TextBox textBox)
