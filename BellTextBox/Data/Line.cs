@@ -94,7 +94,7 @@ public class Line
         for (int i = 0; i < _chars.Count; i++)
         {
             widthAccumulated += _textBox.FontSizeManager.GetFontWidth(_chars[i]);
-            if (widthAccumulated > 100)
+            if (widthAccumulated + _textBox.FontSizeManager.GetFontReferenceWidth() > 100)
             {
                 cutoffs.Add(i);
                 widthAccumulated = 0;

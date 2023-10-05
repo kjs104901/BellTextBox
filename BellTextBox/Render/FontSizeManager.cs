@@ -28,6 +28,11 @@ public class FontSizeManager
         _sizeHeight = _referenceSize.Height;
     }
 
+    public float GetFontReferenceWidth()
+    {
+        return _referenceSize.Width;
+    }
+
     public float GetFontWidth(char c)
     {
         if (false == _sizeWidthCache.TryGetValue(c, out float fontWidth))
