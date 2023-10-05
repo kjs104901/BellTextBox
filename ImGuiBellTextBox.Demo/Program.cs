@@ -44,7 +44,6 @@ internal class Program
         _guiRenderer.RecreateFontDeviceTexture(_gd);
         
         var editor = new TextBox(new ImGuiTextBoxBackend());
-        editor.Page.Text.Set("Hello World\nNext Line\n한글");
         
         while (_window.Exists)
         {
@@ -65,8 +64,9 @@ internal class Program
             {
             }
             
-            ImGui.InputText("Test", ref _textInput, 1024);
+            ImGui.InputTextMultiline("Test", ref _textInput, 1024, new Vector2(-1, 300));
 
+            editor.Page.Text.Set(_textInput);
             editor.Render();
 
             ImGui.PopFont();
