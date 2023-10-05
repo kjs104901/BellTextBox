@@ -21,18 +21,19 @@ public class Line
     public uint Index = 0;
     
     private List<char> _chars = new();
+    private List<char> _buffers = new();
     
     public string String => _stringCache.Get();
     private readonly Cache<string> _stringCache;
 
-    public Dictionary<uint, Style> Styles => _stylesCache.Get();
-    private readonly Cache<Dictionary<uint, Style>> _stylesCache;
+    public Dictionary<int, FontStyle> Styles => _stylesCache.Get();
+    private readonly Cache<Dictionary<int, FontStyle>> _stylesCache;
     
     public bool Foldable => _foldableCache.Get();
     private readonly Cache<bool> _foldableCache;
 
-    public List<uint> Cutoffs => _cutoffsCache.Get();
-    private readonly Cache<List<uint>> _cutoffsCache;
+    public HashSet<int> Cutoffs => _cutoffsCache.Get();
+    private readonly Cache<HashSet<int>> _cutoffsCache;
     
     public List<LineRender> LineRenders => _lineRendersCache.Get();
     private readonly Cache<List<LineRender>> _lineRendersCache;
@@ -77,13 +78,13 @@ public class Line
         _lineRendersCache.SetDirty();
     }
 
-    private Dictionary<uint, Style> UpdateStyles(Dictionary<uint, Style> styles)
+    private Dictionary<int, FontStyle> UpdateStyles(Dictionary<int, FontStyle> styles)
     {
         //TODO
         return styles;
     }
 
-    private List<uint> UpdateCutoff(List<uint> cutoffs)
+    private HashSet<int> UpdateCutoff(HashSet<int> cutoffs)
     {
         //TODO calculate cutoff
         cutoffs.Clear();
@@ -117,10 +118,34 @@ public class Line
     private List<LineRender> UpdateLineRenders(List<LineRender> lineRenders)
     {
         lineRenders.Clear();
-        lineRenders.Add(new LineRender
+
+        LineRender lineRender = new LineRender();
+        _buffers.Clear();
+        
+        FontStyle fontStyle = FontStyle.DefaultFontStyle;
+        for (int i = 0; i < _chars.Count; i++)
         {
-            Text = String
-        });
+            _buffers.Add(_chars[i]);
+
+            if (false == Styles.TryGetValue(i, out var charFontStyle))
+                charFontStyle = FontStyle.DefaultFontStyle;
+            
+            bool nextStyle = fontStyle != charFontStyle;
+            fontStyle = charFontStyle;
+
+            if (Cutoffs.Contains(i))
+            {
+                lineRender.Text = String.Concat(_buffers);
+                lineRenders.Add(lineRender);
+                
+                lineRender = new LineRender();
+                _buffers.Clear();
+            }
+        }
+        ;
+        lineRender.Text = String.Concat(_buffers);
+        lineRenders.Add(lineRender);
+
         return lineRenders;
     }
 }
