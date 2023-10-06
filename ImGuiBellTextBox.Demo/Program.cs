@@ -69,6 +69,8 @@ internal class Program
             editor.Page.Text.Set(_textInput);
             editor.Render();
 
+            ImGui.InputText("Test2", ref _textInput, 1024);
+
             ImGui.PopFont();
             ImGui.End();
 

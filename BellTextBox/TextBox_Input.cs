@@ -180,7 +180,7 @@ public partial class TextBox
         }
     }
     
-    private void ProcessKeyboardChars(char[] keyboardInputChars)
+    private void ProcessKeyboardChars(List<char> keyboardInputChars)
     {
         CommandSet commandSet = new();
         foreach (char keyboardInputChar in keyboardInputChars)

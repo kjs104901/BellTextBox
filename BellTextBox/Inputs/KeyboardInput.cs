@@ -36,5 +36,5 @@ public enum HotKeys : uint
 public struct KeyboardInput
 {
     public HotKeys HotKeys;
-    public char[] Chars;
+    public List<char> Chars;
 }
