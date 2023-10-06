@@ -145,39 +145,56 @@ public class Line
         lineRenders.Clear();
 
         LineRender lineRender = LineRender.Create();
+
+
+        bool isFirstCharInLine = true;
+        FontStyle groupStyle = FontStyle.DefaultFontStyle;
         _buffers.Clear();
-        FontStyle fontStyle = FontStyle.NullFontStyle;
         
         for (int i = 0; i < _chars.Count; i++)
         {
-            _buffers.Add(_chars[i]);
-
-            if (Styles.TryGetValue(i, out var charFontStyle))
+            if (isFirstCharInLine)
             {
-                if (FontStyle.NullFontStyle == fontStyle)
-                    fontStyle = charFontStyle;
+                if (Styles.TryGetValue(i, out var firstStyle))
+                {
+                    groupStyle = firstStyle;
+                }
+                _buffers.Add(_chars[i]);
+
+                isFirstCharInLine = false;
+                continue;
+            }
+            
+            if (false == Styles.TryGetValue(i, out var charStyle))
+            {
+                charStyle = FontStyle.DefaultFontStyle;
+            }
+
+            if (groupStyle != charStyle) // need new group
+            {
+                lineRender.TextRenders.Add(new() { Text = String.Concat(_buffers), FontStyle = groupStyle });
                 
-            }
-            //TODO FIX Bug
-            if (fontStyle != charFontStyle)
-            {
-                lineRender.TextRenders.Add(new() { Text = String.Concat(_buffers), FontStyle = fontStyle });
+                groupStyle = charStyle;
                 _buffers.Clear();
-                fontStyle = charFontStyle;
             }
-
-            if (Cutoffs.Contains(i))
+            
+            _buffers.Add(_chars[i]);
+            
+            if (Cutoffs.Contains(i)) // need new line
             {
-                lineRender.TextRenders.Add(new() { Text = String.Concat(_buffers), FontStyle = fontStyle });
+                lineRender.TextRenders.Add(new() { Text = String.Concat(_buffers), FontStyle = groupStyle });
                 lineRenders.Add(lineRender);
 
                 lineRender = LineRender.Create();
+
+                isFirstCharInLine = true;
+                groupStyle = FontStyle.DefaultFontStyle;
                 _buffers.Clear();
-                fontStyle = FontStyle.NullFontStyle;
             }
         }
-
-        lineRender.TextRenders.Add(new() { Text = String.Concat(_buffers), FontStyle = fontStyle });
+        
+        // Add remains
+        lineRender.TextRenders.Add(new() { Text = String.Concat(_buffers), FontStyle = groupStyle });
         lineRenders.Add(lineRender);
 
         return lineRenders;

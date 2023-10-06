@@ -17,7 +17,6 @@ public class FontStyle : IComparable<FontStyle>
         _id = id;
     }
 
-    public static FontStyle NullFontStyle = new("Null");
     public static FontStyle DefaultFontStyle = new("Default");
     public static FontStyle LineCommentFontStyle = new("LineComment");
     public static FontStyle BlockCommentFontStyle = new("BlockComment");
