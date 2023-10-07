@@ -42,8 +42,13 @@ internal class Program
         var imFontPtr = ImGui.GetIO().Fonts
             .AddFontFromFileTTF(@"gulim.ttc", 13.0f, null, ImGui.GetIO().Fonts.GetGlyphRangesKorean());
         _guiRenderer.RecreateFontDeviceTexture(_gd);
-        
-        var editor = new TextBox(new ImGuiTextBoxBackend());
+
+        var backend = new ImGuiTextBoxBackend
+        {
+            ImGuiSize = new Vector2(-1, -1)
+        };
+
+        var editor = new TextBox(backend);
         
         while (_window.Exists)
         {

@@ -10,6 +10,8 @@ namespace ImGuiBellTextBox;
 
 public class ImGuiTextBoxBackend : ITextBoxBackend
 {
+    public Vector2 ImGuiSize { get; set; }
+
     public void SetClipboard(string text)
     {
         throw new NotImplementedException();
@@ -48,26 +50,33 @@ public class ImGuiTextBoxBackend : ITextBoxBackend
         (ImGuiKey.Tab, HotKeys.Tab),
     };
 
-    public void Render(TextBox textBox, List<LineRender> lineRenders)
+    public void Render(Action<KeyboardInput, MouseInput, ViewInput> inputAction, PageRender pageRender,
+        List<LineRender> lineRenders)
     {
-        ImGui.BeginChild("Editor", new Vector2(0, 0), true, ImGuiWindowFlags.HorizontalScrollbar);
+        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, new Vector2(0, 0));
+        ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, new Vector2(0, 0));
+
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0, 0));
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, new Vector2(0, 0));
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowMinSize, new Vector2(0, 0));
+
+        ImGui.BeginChild("Editor", ImGuiSize, true, ImGuiWindowFlags.HorizontalScrollbar);
         var contentRegion = ImGui.GetWindowContentRegionMax();
         {
-            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0, 0));
-            ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, new Vector2(0, 0));
             ImGui.SetNextWindowSize(new Vector2(contentRegion.X, contentRegion.Y));
             ImGui.Begin("TEST",
                 ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove |
                 ImGuiWindowFlags.HorizontalScrollbar | ImGuiWindowFlags.NoNavFocus | ImGuiWindowFlags.NoNavInputs |
                 ImGuiWindowFlags.ChildWindow);
-            
+
             {
-                ImGui.BeginChild("Page", new Vector2(800, 1000), false, ImGuiWindowFlags.NoScrollbar);
-                
+                ImGui.BeginChild("Page", new Vector2(pageRender.Size.Width, pageRender.Size.Height), false,
+                    ImGuiWindowFlags.NoScrollbar);
+
                 KeyboardInput keyboardInput = new();
                 MouseInput mouseInput = new();
                 ViewInput viewInput = new();
-                
+
                 keyboardInput.Chars = _keyboardInput;
 
                 if (ImGui.IsWindowFocused())
@@ -97,8 +106,8 @@ public class ImGuiTextBoxBackend : ITextBoxBackend
                     var cursor = ImGui.GetCursorScreenPos();
                     mouseInput.X = mouse.X - cursor.X;
                     mouseInput.Y = mouse.Y - cursor.Y;
-                    
-                    
+
+
                     ImGui.SetMouseCursor(ImGuiMouseCursor.TextInput);
 
                     if (ImGui.IsMouseClicked(0))
@@ -107,16 +116,15 @@ public class ImGuiTextBoxBackend : ITextBoxBackend
                         mouseInput.MouseKey = MouseKey.DoubleClick;
                     if (ImGui.IsMouseDragging(0) && ImGui.IsMouseDown(0))
                         mouseInput.MouseKey = MouseKey.Dragging;
-                    
+
                     viewInput.X = ImGui.GetScrollX();
                     viewInput.Y = ImGui.GetScrollY();
                     viewInput.W = contentRegion.X;
                     viewInput.H = contentRegion.Y;
 
-                    textBox.Input(keyboardInput, mouseInput, viewInput);
+                    inputAction(keyboardInput, mouseInput, viewInput);
                 }
 
-                
                 ImGui.Text("----- textEditor start -----");
                 ImGui.Text($"keyboardInput: {keyboardInput.HotKeys} {string.Join(',', keyboardInput.Chars)}");
                 ImGui.Text($"mouseInput: {mouseInput.X} {mouseInput.Y} {mouseInput.MouseKey}");
@@ -150,21 +158,16 @@ public class ImGuiTextBoxBackend : ITextBoxBackend
                 ImGui.Text("----- textEditor end -----");
                 ImGui.EndChild();
             }
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
+
+
             ImGui.End();
             ImGui.PopStyleVar();
             ImGui.PopStyleVar();
+            ImGui.PopStyleVar();
+            ImGui.PopStyleVar();
+            ImGui.PopStyleVar();
         }
-        
+
         ImGui.EndChild();
     }
 

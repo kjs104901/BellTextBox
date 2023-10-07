@@ -50,7 +50,17 @@ public partial class TextBox
     public void Render()
     {
         FontSizeManager.UpdateReferenceSize();
-        TextBoxBackend.Render(this, Page.Text.GetLineRenders());
+
+        var pageRender = new PageRender //TODO get from page
+        {
+            Size = new RectSize
+            {
+                Width = 500,
+                Height = 800
+            }
+        };
+        
+        TextBoxBackend.Render(Input, pageRender, Page.Text.GetLineRenders());
     }
 
     private void DoAction(Command command)
