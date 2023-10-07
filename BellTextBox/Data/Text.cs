@@ -19,7 +19,7 @@ public class Text
         _lineViewCache = new Cache<List<LineView>>(new List<LineView>(), UpdateLineViews);
     }
     
-    public void Set(string text)
+    public void SetText(string text)
     {
         _lines.Clear();
         foreach (string lineText in text.Split("\n"))

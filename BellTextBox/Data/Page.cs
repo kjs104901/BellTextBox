@@ -1,4 +1,5 @@
 ﻿using Bell.Coordinates;
+using Bell.Render;
 
 namespace Bell.Data;
 
@@ -8,8 +9,8 @@ public class Page
     
     public readonly Text Text;
 
-    public RectSize Size => _sizeCache.Get();
-    private readonly Cache<RectSize> _sizeCache;
+    public PageRender Render => _renderCache.Get();
+    private readonly Cache<PageRender> _renderCache;
     
     // View
     private ViewCoordinates _viewStart = new ();
@@ -23,8 +24,14 @@ public class Page
     {
         _textBox = textBox;
         Text = new Text(_textBox);
+        
+        _renderCache = new Cache<PageRender>(new PageRender(), UpdateRender);
+    }
 
-        _sizeCache = new Cache<RectSize>(new RectSize(), UpdateSize);
+    public void SetText(string text)
+    {
+        Text.SetText(text);
+        _renderCache.SetDirty();
     }
     
     public void UpdateView(ViewCoordinates start, ViewCoordinates end)
@@ -35,8 +42,10 @@ public class Page
         _viewLineDirty = true;
     }
 
-    private RectSize UpdateSize(RectSize _)
+    private PageRender UpdateRender(PageRender render)
     {
-        return new();
+        render.Size.Width = 500; //TODO find width from render
+        render.Size.Height = Text.LineViews.Count * _textBox.FontSizeManager.GetFontHeight();
+        return render;
     }
 }

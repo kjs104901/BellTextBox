@@ -47,20 +47,15 @@ public partial class TextBox
         return true;
     }
 
+    public void SetText(string text)
+    {
+        Page.SetText(text);
+    }
+
     public void Render()
     {
         FontSizeManager.UpdateReferenceSize();
-
-        var pageRender = new PageRender //TODO get from page
-        {
-            Size = new RectSize
-            {
-                Width = 500,
-                Height = 800
-            }
-        };
-        
-        TextBoxBackend.Render(Input, pageRender, Page.Text.GetLineRenders());
+        TextBoxBackend.Render(Input, Page.Render, Page.Text.GetLineRenders());
     }
 
     private void DoAction(Command command)

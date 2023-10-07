@@ -71,7 +71,7 @@ internal class Program
             
             ImGui.InputTextMultiline("Test", ref _textInput, 1024, new Vector2(-1, 300));
 
-            editor.Page.Text.Set(_textInput);
+            editor.SetText(_textInput);
             editor.Render();
 
             //ImGui.SameLine();
