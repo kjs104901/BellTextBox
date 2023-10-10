@@ -5,47 +5,47 @@ namespace Bell.Data;
 public class Text
 {
     private readonly TextBox _textBox;
+
+    private string _textString = "";
     
-    private readonly List<Line> _lines = new();
+    public List<Line> Lines => _linesCache.Get();
+    private readonly Cache<List<Line>> _linesCache;
+    
     public List<LineView> LineViews => _lineViewCache.Get();
     private readonly Cache<List<LineView>> _lineViewCache;
-
-    private readonly List<LineRender> _lineRenders = new();
     
     public Text(TextBox textBox)
     {
         _textBox = textBox;
 
+        _linesCache = new Cache<List<Line>>(new List<Line>(), UpdateLines);
         _lineViewCache = new Cache<List<LineView>>(new List<LineView>(), UpdateLineViews);
     }
     
     public void SetText(string text)
     {
-        _lines.Clear();
-        foreach (string lineText in text.Split("\n"))
+        _textString = text;
+        _linesCache.SetDirty();
+        _lineViewCache.SetDirty();
+    }
+
+    private List<Line> UpdateLines(List<Line> lines)
+    {
+        lines.Clear();
+        foreach (string lineText in _textString.Split("\n"))
         {
             Line line = new Line(_textBox);
             line.SetString(lineText);
-            _lines.Add(line);
+            lines.Add(line);
         }
-        _lineViewCache.SetDirty();
+        return lines;
     }
     
-    public List<LineRender> GetLineRenders()
-    {
-        _lineRenders.Clear();
-        foreach (LineView lineView in LineViews)
-        {
-            _lineRenders.Add(_lines[lineView.LineIndex].GetLineRender(lineView.RenderIndex));
-        }
-        return _lineRenders;
-    }
-
     private List<LineView> UpdateLineViews(List<LineView> lineViews)
     {
         lineViews.Clear();
         int i = 0;
-        foreach (Line line in _lines)
+        foreach (Line line in Lines)
         {
             for (int j = 0; j < line.RenderCount; j++)
             {

@@ -12,13 +12,12 @@ public class Page
     public PageRender Render => _renderCache.Get();
     private readonly Cache<PageRender> _renderCache;
     
+    public List<LineRender> LineRenders => _lineRendersCache.Get();
+    private readonly Cache<List<LineRender>> _lineRendersCache;
+    
     // View
-    private ViewCoordinates _viewStart = new ();
-    private ViewCoordinates _viewEnd = new ();
-
-    private int _viewLineStart = 0;
-    private int _viewLineEnd = 0;
-    private bool _viewLineDirty = false;
+    private ViewCoordinates _viewStart;
+    private ViewCoordinates _viewEnd;
 
     public Page(TextBox textBox)
     {
@@ -26,6 +25,7 @@ public class Page
         Text = new Text(_textBox);
         
         _renderCache = new Cache<PageRender>(new PageRender(), UpdateRender);
+        _lineRendersCache = new Cache<List<LineRender>>(new List<LineRender>(), UpdateLineRenders);
     }
 
     public void SetText(string text)
@@ -39,7 +39,24 @@ public class Page
         _viewStart = start;
         _viewEnd = end;
         
-        _viewLineDirty = true;
+        _lineRendersCache.SetDirty();
+    }
+    
+    private List<LineRender> UpdateLineRenders(List<LineRender> lineRenders)
+    {
+        lineRenders.Clear();
+        // TODO find line view range from _viewStart, _viewEnd
+        int i = 0;
+        foreach (LineView lineView in Text.LineViews)
+        {
+            var lineRender = Text.Lines[lineView.LineIndex].GetLineRender(lineView.RenderIndex);
+
+            lineRender.PosX = 0;
+            lineRender.PosY = (i++) * _textBox.FontSizeManager.GetFontHeight();
+            
+            lineRenders.Add(lineRender);
+        }
+        return lineRenders;
     }
 
     private PageRender UpdateRender(PageRender render)

@@ -72,7 +72,7 @@ public class ImGuiBackend : ITextBoxBackend
                 ImGuiWindowFlags.ChildWindow);
 
             {
-                ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(1.0f, 0.4f, 0.0f, 1.0f));
+                //ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
                 ImGui.BeginChild("Page", new Vector2(pageRender.Size.Width, pageRender.Size.Height + 300), false,
                     ImGuiWindowFlags.NoScrollbar);
 
@@ -82,6 +82,8 @@ public class ImGuiBackend : ITextBoxBackend
 
                 keyboardInput.Chars = _keyboardInput;
 
+                var cursor = ImGui.GetCursorScreenPos();
+                
                 if (ImGui.IsWindowFocused())
                 {
                     var io = ImGui.GetIO();
@@ -106,11 +108,9 @@ public class ImGuiBackend : ITextBoxBackend
                     keyboardInput.Chars = _keyboardInput;
 
                     var mouse = ImGui.GetMousePos();
-                    var cursor = ImGui.GetCursorScreenPos();
                     mouseInput.X = mouse.X - cursor.X;
                     mouseInput.Y = mouse.Y - cursor.Y;
-
-
+                    
                     ImGui.SetMouseCursor(ImGuiMouseCursor.TextInput);
 
                     if (ImGui.IsMouseClicked(0))
@@ -124,46 +124,53 @@ public class ImGuiBackend : ITextBoxBackend
                     viewInput.Y = ImGui.GetScrollY();
                     viewInput.W = contentRegion.X;
                     viewInput.H = contentRegion.Y;
-
-                    inputAction(keyboardInput, mouseInput, viewInput);
                 }
+                inputAction(keyboardInput, mouseInput, viewInput);
 
-                ImGui.Text("----- textEditor start -----");
-                ImGui.Text($"keyboardInput: {keyboardInput.HotKeys} {string.Join(',', keyboardInput.Chars)}");
-                ImGui.Text($"mouseInput: {mouseInput.X} {mouseInput.Y} {mouseInput.MouseKey}");
-                ImGui.Text($"viewInput: {viewInput.X} {viewInput.Y} {viewInput.W} {viewInput.H}");
-                ImGui.Text($"IsWindowFocused: {ImGui.IsWindowFocused()}");
+                //ImGui.Text($"keyboardInput: {keyboardInput.HotKeys} {string.Join(',', keyboardInput.Chars)}");
+                //ImGui.Text($"mouseInput: {mouseInput.X} {mouseInput.Y} {mouseInput.MouseKey}");
+                //ImGui.Text($"viewInput: {viewInput.X} {viewInput.Y} {viewInput.W} {viewInput.H}");
+                //ImGui.Text($"IsWindowFocused: {ImGui.IsWindowFocused()}");
                 foreach (LineRender lineRender in lineRenders)
                 {
-                    foreach (TextRender textRender in lineRender.TextRenders)
+                    float width = 0.0f;
+                    foreach (TextBlockRender textBlockRender in lineRender.TextBlockRenders)
                     {
-                        if (textRender.FontStyle == FontStyle.BlockCommentFontStyle)
+                        var color = new Vector4(0.4f, 0.8f, 0.2f, 1.0f);
+                        if (textBlockRender.FontStyle == FontStyle.BlockCommentFontStyle)
                         {
-                            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.3f, 0.4f, 0.8f, 1.0f));
+                            //ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.3f, 0.4f, 0.8f, 1.0f));
+                            color = new Vector4(0.3f, 0.4f, 0.8f, 1.0f);
                         }
-                        else if (textRender.FontStyle == FontStyle.LineCommentFontStyle)
+                        else if (textBlockRender.FontStyle == FontStyle.LineCommentFontStyle)
                         {
-                            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.9f, 0.1f, 0.1f, 1.0f));
+                            //ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.9f, 0.1f, 0.1f, 1.0f));
+                            color = new Vector4(0.9f, 0.1f, 0.1f, 1.0f);
                         }
-                        else
-                        {
-                            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.4f, 0.8f, 0.2f, 1.0f));
-                        }
+                        //else
+                        //{
+                        //    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.4f, 0.8f, 0.2f, 1.0f));
+                        //}
 
-                        ImGui.Text(textRender.Text);
-                        //drawList.AddText();
+                        //ImGui.Text(textRender.Text);
+                        drawList.AddText(new Vector2(cursor.X + lineRender.PosX + width,
+                                cursor.Y +lineRender.PosY), 
+                            ImGui.ColorConvertFloat4ToU32(color),
+                            textBlockRender.Text);
                         
-                        ImGui.SameLine();
-                        ImGui.PopStyleColor();
+                        width += textBlockRender.Width;
+                        
+                        //ImGui.SameLine();
+                        //ImGui.PopStyleColor();
                     }
 
-                    ImGui.Text(" "); //Next line
+                    //ImGui.Text(" "); //Next line
                 }
 
-                ImGui.Text("----- textEditor end -----");
+                //ImGui.Text("----- textEditor end -----");
                 ImGui.EndChild();
                 
-                ImGui.PopStyleColor();
+                //ImGui.PopStyleColor();
             }
 
 
@@ -174,7 +181,6 @@ public class ImGuiBackend : ITextBoxBackend
             ImGui.PopStyleVar();
             ImGui.PopStyleVar();
         }
-
         ImGui.EndChild();
     }
 

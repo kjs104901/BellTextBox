@@ -55,7 +55,7 @@ public partial class TextBox
     public void Render()
     {
         FontSizeManager.UpdateReferenceSize();
-        TextBoxBackend.Render(Input, Page.Render, Page.Text.GetLineRenders());
+        TextBoxBackend.Render(Input, Page.Render, Page.LineRenders);
     }
 
     private void DoAction(Command command)

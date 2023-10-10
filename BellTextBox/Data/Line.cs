@@ -150,8 +150,8 @@ public class Line
         bool isFirstCharInLine = true;
         FontStyle groupStyle = FontStyle.DefaultFontStyle;
 
-        float bufferWidth = 0.0f;
         _buffers.Clear();
+        float bufferWidth = 0.0f;
         
         for (int i = 0; i < _chars.Count; i++)
         {
@@ -175,17 +175,19 @@ public class Line
 
             if (groupStyle != charStyle) // need new group
             {
-                lineRender.TextRenders.Add(new() { Text = String.Concat(_buffers), FontStyle = groupStyle });
+                lineRender.TextBlockRenders.Add(new() { Text = String.Concat(_buffers), FontStyle = groupStyle, Width = bufferWidth});
                 
                 groupStyle = charStyle;
                 _buffers.Clear();
+                bufferWidth = 0.0f;
             }
             
             _buffers.Add(_chars[i]);
+            bufferWidth += _textBox.FontSizeManager.GetFontWidth(_chars[i]);
             
             if (Cutoffs.Contains(i)) // need new line
             {
-                lineRender.TextRenders.Add(new() { Text = String.Concat(_buffers), FontStyle = groupStyle });
+                lineRender.TextBlockRenders.Add(new() { Text = String.Concat(_buffers), FontStyle = groupStyle, Width = bufferWidth });
                 lineRenders.Add(lineRender);
 
                 lineRender = LineRender.Create();
@@ -193,11 +195,12 @@ public class Line
                 isFirstCharInLine = true;
                 groupStyle = FontStyle.DefaultFontStyle;
                 _buffers.Clear();
+                bufferWidth = 0.0f;
             }
         }
         
         // Add remains
-        lineRender.TextRenders.Add(new() { Text = String.Concat(_buffers), FontStyle = groupStyle });
+        lineRender.TextBlockRenders.Add(new() { Text = String.Concat(_buffers), FontStyle = groupStyle, Width = bufferWidth });
         lineRenders.Add(lineRender);
 
         return lineRenders;

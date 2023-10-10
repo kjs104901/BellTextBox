@@ -20,23 +20,24 @@ public struct LineRender
     // 마커
     public Marker Marker;
 
-    public List<TextRender> TextRenders;
+    public List<TextBlockRender> TextBlockRenders;
 
     public static LineRender NullLineRender = new()
-        { TextRenders = new List<TextRender>() { new() { Text = "!!ERROR!!" } } };
+        { TextBlockRenders = new List<TextBlockRender>() { new() { Text = "!!ERROR!!" } } };
 
     public static LineRender Create()
     {
         return new LineRender()
         {
             Marker = Marker.None,
-            TextRenders = new()
+            TextBlockRenders = new()
         };
     }
 }
 
-public struct TextRender
+public struct TextBlockRender
 {
     public string Text;
     public FontStyle FontStyle;
+    public float Width;
 }
