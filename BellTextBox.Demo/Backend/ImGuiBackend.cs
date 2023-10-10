@@ -6,9 +6,9 @@ using Bell.Data;
 using Bell.Inputs;
 using Bell.Languages;
 
-namespace ImGuiBellTextBox;
+namespace BellTextBox.Demo.Backend;
 
-public class ImGuiTextBoxBackend : ITextBoxBackend
+public class ImGuiBackend : ITextBoxBackend
 {
     public Vector2 ImGuiSize { get; set; }
 
