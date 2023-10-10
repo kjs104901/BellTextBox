@@ -149,6 +149,8 @@ public class Line
 
         bool isFirstCharInLine = true;
         FontStyle groupStyle = FontStyle.DefaultFontStyle;
+
+        float bufferWidth = 0.0f;
         _buffers.Clear();
         
         for (int i = 0; i < _chars.Count; i++)
@@ -160,6 +162,7 @@ public class Line
                     groupStyle = firstStyle;
                 }
                 _buffers.Add(_chars[i]);
+                bufferWidth += _textBox.FontSizeManager.GetFontWidth(_chars[i]);
 
                 isFirstCharInLine = false;
                 continue;

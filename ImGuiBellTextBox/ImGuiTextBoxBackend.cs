@@ -73,7 +73,7 @@ public class ImGuiTextBoxBackend : ITextBoxBackend
 
             {
                 ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(1.0f, 0.4f, 0.0f, 1.0f));
-                ImGui.BeginChild("Page", new Vector2(pageRender.Size.Width, pageRender.Size.Height), false,
+                ImGui.BeginChild("Page", new Vector2(pageRender.Size.Width, pageRender.Size.Height + 300), false,
                     ImGuiWindowFlags.NoScrollbar);
 
                 KeyboardInput keyboardInput = new();
@@ -150,7 +150,7 @@ public class ImGuiTextBoxBackend : ITextBoxBackend
                             ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.4f, 0.8f, 0.2f, 1.0f));
                         }
 
-                        //ImGui.Text(textRender.Text);
+                        ImGui.Text(textRender.Text);
                         //drawList.AddText();
                         
                         ImGui.SameLine();
