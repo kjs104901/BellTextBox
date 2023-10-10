@@ -16,12 +16,21 @@
 
 // TODO forward backward enum?
 
-internal class InputForwardChar : EditCommand
+internal enum EditDirection
 {
-    private char _c;
-    public InputForwardChar(char c)
+    Forward,
+    Backward
+}
+
+internal class InputChar : EditCommand
+{
+    private EditDirection _direction;
+    private char[] _chars;
+    
+    public InputChar(EditDirection direction, char[] chars)
     {
-        _c = c;
+        _direction = direction;
+        _chars = chars;
     }
     
     public override void Do(TextBox textBox)
@@ -33,8 +42,17 @@ internal class InputForwardChar : EditCommand
     }
 }
 
-internal class UnindentSelection : EditCommand
+internal class DeleteCommand : EditCommand
 {
+    private EditDirection _direction;
+    private int _count;
+
+    public DeleteCommand(EditDirection direction, int count)
+    {
+        _direction = direction;
+        _count = count;
+    }
+    
     public override void Do(TextBox textBox)
     {
     }
@@ -44,8 +62,15 @@ internal class UnindentSelection : EditCommand
     }
 }
 
-internal class DeleteForwardCommand : EditCommand
+internal class SplitLine : EditCommand
 {
+    private EditDirection _direction;
+    
+    public SplitLine(EditDirection direction)
+    {
+        _direction = direction;
+    }
+    
     public override void Do(TextBox textBox)
     {
     }
@@ -55,67 +80,13 @@ internal class DeleteForwardCommand : EditCommand
     }
 }
 
-internal class DeleteBackwardCommand : EditCommand
+internal class MergeLine : EditCommand
 {
-    public override void Do(TextBox textBox)
+    private EditDirection _direction;
+    
+    public MergeLine(EditDirection direction)
     {
-    }
-
-    public override void Undo(TextBox textBox)
-    {
-    }
-}
-
-internal class SplitLineForward : EditCommand
-{
-    public override void Do(TextBox textBox)
-    {
-    }
-
-    public override void Undo(TextBox textBox)
-    {
-    }
-}
-
-internal class SplitLineBackward : EditCommand
-{
-    public override void Do(TextBox textBox)
-    {
-    }
-
-    public override void Undo(TextBox textBox)
-    {
-    }
-}
-
-internal class MergeLineForward : EditCommand
-{
-    public override void Do(TextBox textBox)
-    {
-    }
-
-    public override void Undo(TextBox textBox)
-    {
-    }
-}
-
-internal class MergeLineBackward : EditCommand
-{
-    public override void Do(TextBox textBox)
-    {
-    }
-
-    public override void Undo(TextBox textBox)
-    {
-    }
-}
-
-internal class InputBackwardChar : EditCommand
-{
-    private char _c;
-    public InputBackwardChar(char c)
-    {
-        _c = c;
+        _direction = direction;
     }
     
     public override void Do(TextBox textBox)
@@ -128,6 +99,17 @@ internal class InputBackwardChar : EditCommand
 }
 
 internal class IndentSelection : EditCommand
+{
+    public override void Do(TextBox textBox)
+    {
+    }
+
+    public override void Undo(TextBox textBox)
+    {
+    }
+}
+
+internal class UnindentSelection : EditCommand
 {
     public override void Do(TextBox textBox)
     {

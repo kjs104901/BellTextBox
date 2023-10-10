@@ -59,7 +59,7 @@ public partial class TextBox
                 }
                 else
                 {
-                    commandSet.Add(new DeleteForwardCommand());
+                    commandSet.Add(new DeleteCommand(EditDirection.Forward, 1));
                 }
             }
             DoActionSet(commandSet);
@@ -76,7 +76,7 @@ public partial class TextBox
             else
             {
                 //TODO 시작이었다면 위로 머지
-                commandSet.Add(new DeleteBackwardCommand());
+                commandSet.Add(new DeleteCommand(EditDirection.Backward, 1));
             }
             DoActionSet(commandSet);
         }
@@ -105,7 +105,7 @@ public partial class TextBox
             }
             else
             {
-                commandSet.Add(new InputForwardChar('\t'));
+                commandSet.Add(new InputChar(EditDirection.Forward, new[] {'\t'}));
             }
             DoActionSet(commandSet);
         }
@@ -211,7 +211,7 @@ public partial class TextBox
             if (keyboardInputChar < 32)
                 continue;
 
-            commandSet.Add(new InputForwardChar(keyboardInputChar));
+            commandSet.Add(new InputChar(EditDirection.Forward, new[] {keyboardInputChar}));
         }
         DoActionSet(commandSet);
     }
