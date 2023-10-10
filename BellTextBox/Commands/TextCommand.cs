@@ -1,21 +1,5 @@
 ﻿namespace Bell.Commands;
 
-// InputChar
-// InputString
-
-// DeleteBackward
-// DeleteForward
-
-// IndentSelection
-// DeleteSelection
-
-// SplitLine
-// MergeForwardLine
-// MergeBackwardLine
-// DeleteLine
-
-// TODO forward backward enum?
-
 internal enum EditDirection
 {
     Forward,

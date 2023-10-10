@@ -215,6 +215,14 @@ public partial class TextBox
         }
         DoActionSet(commandSet);
     }
+
+    private void DeleteSelection()
+    {
+        // delete forward Cursor~
+        // merge line forward
+        // delete forward Cursor~
+        // ...
+    }
     
     private void ProcessMouseInput(HotKeys hk, MouseInput mouseInput)
     {
