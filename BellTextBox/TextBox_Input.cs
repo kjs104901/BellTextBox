@@ -6,6 +6,8 @@ namespace Bell;
 
 public partial class TextBox
 {
+    public string ClipboardText = "";
+    
     public void Input(KeyboardInput keyboardInput, MouseInput mouseInput, ViewInput viewInput)
     {
         ProcessKeyboardHotKeys(keyboardInput.HotKeys);
@@ -13,14 +15,13 @@ public partial class TextBox
         ProcessMouseInput(keyboardInput.HotKeys, mouseInput);
         ProcessViewInput(viewInput);
     }
-    
 
     private void ProcessKeyboardHotKeys(HotKeys hk)
     {
         if (hk.HasFlag(HotKeys.Ctrl | HotKeys.Z)) // Undo
-            _commandSetHistory.Undo();
+            CommandSetHistory.Undo();
         else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.Y)) // Redo
-            _commandSetHistory.Redo();
+            CommandSetHistory.Redo();
         else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.C)) // copy
             DoAction(new CopyCommand());
         else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.V)) // Paste
@@ -29,8 +30,9 @@ public partial class TextBox
         {
             CommandSet commandSet = new();
             commandSet.Add(new CopyCommand());
-            commandSet.Add(new DeleteSelectionCommand());
-            commandSet.Add(new MoveCursorSelectionCommand(CursorMove.Origin));
+            //TODO Delete select
+            //commandSet.Add(new DeleteSelectionCommand());
+            //commandSet.Add(new MoveCursorSelectionCommand(CursorMove.Origin));
             DoActionSet(commandSet);
         }
         else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.A)) // Select All
@@ -43,16 +45,17 @@ public partial class TextBox
         else if (hk.HasFlag(HotKeys.Delete)) // Delete
         {
             CommandSet commandSet = new();
-            if (_cursor.HasSelection)
+            if (Cursor.HasSelection)
             {
-                commandSet.Add(new DeleteSelectionCommand());
-                commandSet.Add(new MoveCursorSelectionCommand(CursorMove.Origin));
+                //TODO Delete select
+                //commandSet.Add(new DeleteSelectionCommand());
+                //commandSet.Add(new MoveCursorSelectionCommand(CursorMove.Origin));
             }
             else
             {
                 if (hk.HasFlag(HotKeys.Shift))
                 {
-                    commandSet.Add(new DeleteLineCommand());
+                    //commandSet.Add(new DeleteLineCommand());
                 }
                 else
                 {
@@ -64,10 +67,11 @@ public partial class TextBox
         else if (hk.HasFlag(HotKeys.Backspace)) // Backspace
         {
             CommandSet commandSet = new();
-            if (_cursor.HasSelection)
+            if (Cursor.HasSelection)
             {
-                commandSet.Add(new DeleteSelectionCommand());
-                commandSet.Add(new MoveCursorSelectionCommand(CursorMove.Origin));
+                //TODO Delete select
+                //commandSet.Add(new DeleteSelectionCommand());
+                //commandSet.Add(new MoveCursorSelectionCommand(CursorMove.Origin));
             }
             else
             {
@@ -79,10 +83,11 @@ public partial class TextBox
         else if (hk.HasFlag(HotKeys.Enter)) // Enter
         {
             CommandSet commandSet = new();
-            if (_cursor.HasSelection)
+            if (Cursor.HasSelection)
             {
-                commandSet.Add(new DeleteSelectionCommand());
-                commandSet.Add(new MoveCursorSelectionCommand(CursorMove.Origin));
+                //TODO Delete select
+                //commandSet.Add(new DeleteSelectionCommand());
+                //commandSet.Add(new MoveCursorSelectionCommand(CursorMove.Origin));
             }
             //TODO SplitLine
             //actionSet.Add(new InputChar('\n'));
@@ -91,13 +96,16 @@ public partial class TextBox
         else if (hk.HasFlag(HotKeys.Tab)) // Tab
         {
             CommandSet commandSet = new();
-            if (_cursor.HasSelection)
+            if (Cursor.HasSelection)
             {
-                commandSet.Add(new IndentSelection());
+                if (hk.HasFlag(HotKeys.Shift))
+                    commandSet.Add(new UnindentSelection());
+                else
+                    commandSet.Add(new IndentSelection());
             }
             else
             {
-                commandSet.Add(new InputChar('\t'));
+                commandSet.Add(new InputForwardChar('\t'));
             }
             DoActionSet(commandSet);
         }
@@ -203,7 +211,7 @@ public partial class TextBox
             if (keyboardInputChar < 32)
                 continue;
 
-            commandSet.Add(new InputChar(keyboardInputChar));
+            commandSet.Add(new InputForwardChar(keyboardInputChar));
         }
         DoActionSet(commandSet);
     }

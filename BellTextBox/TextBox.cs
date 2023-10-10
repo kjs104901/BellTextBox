@@ -14,8 +14,8 @@ public partial class TextBox
     public FontSizeManager FontSizeManager { get; set; }
     
     // Action
-    private readonly CommandSetHistory _commandSetHistory = new();
-    private readonly Cursor _cursor = new();
+    internal readonly CommandSetHistory CommandSetHistory = new();
+    internal readonly Cursor Cursor = new();
     
     public ITextBoxBackend TextBoxBackend { get; set; }
     
@@ -68,6 +68,6 @@ public partial class TextBox
     private void DoActionSet(CommandSet commandSet)
     {
         commandSet.Do(this);
-        _commandSetHistory.AddHistory(commandSet);
+        CommandSetHistory.AddHistory(commandSet);
     }
 }

@@ -14,24 +14,12 @@
 // MergeBackwardLine
 // DeleteLine
 
-/* undo 정보
-    public string? Added;
-    public Coordinates AddedStart;
-    public Coordinates AddedEnd;
+// TODO forward backward enum?
 
-    public string? Removed;
-    public Coordinates RemovedStart;
-    public Coordinates RemovedEnd;
-
-    public SelectionState Before;
-    public SelectionState After;
-
- */
-
-internal class InputChar : EditCommand
+internal class InputForwardChar : EditCommand
 {
     private char _c;
-    public InputChar(char c)
+    public InputForwardChar(char c)
     {
         _c = c;
     }
@@ -45,18 +33,7 @@ internal class InputChar : EditCommand
     }
 }
 
-internal class IndentSelection : EditCommand
-{
-    public override void Do(TextBox textBox)
-    {
-    }
-
-    public override void Undo(TextBox textBox)
-    {
-    }
-}
-
-internal class DeleteSelectionCommand : EditCommand
+internal class UnindentSelection : EditCommand
 {
     public override void Do(TextBox textBox)
     {
@@ -89,7 +66,7 @@ internal class DeleteBackwardCommand : EditCommand
     }
 }
 
-internal class DeleteLineCommand : EditCommand
+internal class SplitLineForward : EditCommand
 {
     public override void Do(TextBox textBox)
     {
@@ -100,6 +77,66 @@ internal class DeleteLineCommand : EditCommand
     }
 }
 
+internal class SplitLineBackward : EditCommand
+{
+    public override void Do(TextBox textBox)
+    {
+    }
+
+    public override void Undo(TextBox textBox)
+    {
+    }
+}
+
+internal class MergeLineForward : EditCommand
+{
+    public override void Do(TextBox textBox)
+    {
+    }
+
+    public override void Undo(TextBox textBox)
+    {
+    }
+}
+
+internal class MergeLineBackward : EditCommand
+{
+    public override void Do(TextBox textBox)
+    {
+    }
+
+    public override void Undo(TextBox textBox)
+    {
+    }
+}
+
+internal class InputBackwardChar : EditCommand
+{
+    private char _c;
+    public InputBackwardChar(char c)
+    {
+        _c = c;
+    }
+    
+    public override void Do(TextBox textBox)
+    {
+    }
+
+    public override void Undo(TextBox textBox)
+    {
+    }
+}
+
+internal class IndentSelection : EditCommand
+{
+    public override void Do(TextBox textBox)
+    {
+    }
+
+    public override void Undo(TextBox textBox)
+    {
+    }
+}
 
 internal class CopyCommand : Command
 {
@@ -108,13 +145,10 @@ internal class CopyCommand : Command
     }
 }
 
-internal class PasteCommand : EditCommand
+internal class PasteCommand : Command
 {
     public override void Do(TextBox textBox)
     {
-    }
-
-    public override void Undo(TextBox textBox)
-    {
+        //ClipboardText
     }
 }
