@@ -59,7 +59,7 @@ public class ImGuiBackend : ITextBoxBackend
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0, 0));
         ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, new Vector2(0, 0));
         ImGui.PushStyleVar(ImGuiStyleVar.WindowMinSize, new Vector2(0, 0));
-
+        
         ImGui.BeginChild("Editor", ImGuiSize, true, ImGuiWindowFlags.HorizontalScrollbar);
         var contentRegion = ImGui.GetWindowContentRegionMax();
         {
@@ -70,10 +70,13 @@ public class ImGuiBackend : ITextBoxBackend
                 ImGuiWindowFlags.ChildWindow);
 
             {
+                var scrollX = ImGui.GetScrollX();
+                var scrollY = ImGui.GetScrollY();
+                
                 var drawList = ImGui.GetWindowDrawList();
 
-                //ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-                ImGui.BeginChild("Page", new Vector2(pageRender.Size.Width, pageRender.Size.Height + 300), false,
+                ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.2f, 0.1f, 0.1f, 1.0f));
+                ImGui.BeginChild("Page", new Vector2(pageRender.Size.Width, pageRender.Size.Height), false,
                     ImGuiWindowFlags.NoScrollbar);
 
                 KeyboardInput keyboardInput = new();
@@ -120,13 +123,14 @@ public class ImGuiBackend : ITextBoxBackend
                     if (ImGui.IsMouseDragging(0) && ImGui.IsMouseDown(0))
                         mouseInput.MouseKey = MouseKey.Dragging;
 
-                    viewInput.X = ImGui.GetScrollX();
-                    viewInput.Y = ImGui.GetScrollY();
-                    viewInput.W = contentRegion.X;
-                    viewInput.H = contentRegion.Y;
-                    
-                    inputAction(keyboardInput, mouseInput, viewInput);
                 }
+                
+                viewInput.X = scrollX;
+                viewInput.Y = scrollY;
+                viewInput.W = contentRegion.X;
+                viewInput.H = contentRegion.Y;
+                
+                inputAction(keyboardInput, mouseInput, viewInput);
 
                 //ImGui.Text($"keyboardInput: {keyboardInput.HotKeys} {string.Join(',', keyboardInput.Chars)}");
                 //ImGui.Text($"mouseInput: {mouseInput.X} {mouseInput.Y} {mouseInput.MouseKey}");
@@ -171,7 +175,7 @@ public class ImGuiBackend : ITextBoxBackend
                 //ImGui.Text("----- textEditor end -----");
                 ImGui.EndChild();
                 
-                //ImGui.PopStyleColor();
+                ImGui.PopStyleColor();
             }
 
 

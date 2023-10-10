@@ -35,7 +35,7 @@ public class Text
         foreach (string lineText in _textString.Split("\n"))
         {
             Line line = new Line(_textBox);
-            line.SetString(lineText);
+            line.SetString(lineText.Trim('\r'));
             lines.Add(line);
         }
         return lines;

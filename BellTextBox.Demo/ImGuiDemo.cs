@@ -22,7 +22,54 @@ class ImGuiDemo
     private static void ThreadMain()
     {
         Vector3 clearColor = new(0.45f, 0.55f, 0.6f);
-        string textInput = "hello world\n헬로우 월드\nabc 123";
+        string textInput = @"--- START ---
+
+hello world
+헬로우 월드
+abc 123s
+윷?? 
+
+hello world
+헬로우 월드
+abc 123s
+윷?? 
+
+hello world
+헬로우 월드
+abc 123s
+윷?? 
+
+hello world
+헬로우 월드
+abc 123s
+윷?? 
+
+hello world
+헬로우 월드
+abc 123s
+윷?? 
+
+hello world
+헬로우 월드
+abc 123s
+윷?? 
+
+hello world
+헬로우 월드
+abc 123s
+윷?? 
+
+hello world
+헬로우 월드
+abc 123s
+윷?? 
+
+hello world
+헬로우 월드
+abc 123s
+윷??
+
+--- END ---";
     
         VeldridStartup.CreateWindowAndGraphicsDevice(
             new WindowCreateInfo(50, 50, 1280, 720, WindowState.Normal, "ImGui.NET Sample Program"),

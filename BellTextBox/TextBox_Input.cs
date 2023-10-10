@@ -7,7 +7,7 @@ namespace Bell;
 public partial class TextBox
 {
     public string ClipboardText = "";
-    
+
     public void Input(KeyboardInput keyboardInput, MouseInput mouseInput, ViewInput viewInput)
     {
         ProcessKeyboardHotKeys(keyboardInput.HotKeys);
@@ -62,6 +62,7 @@ public partial class TextBox
                     commandSet.Add(new DeleteCommand(EditDirection.Forward, 1));
                 }
             }
+
             DoActionSet(commandSet);
         }
         else if (hk.HasFlag(HotKeys.Backspace)) // Backspace
@@ -78,6 +79,7 @@ public partial class TextBox
                 //TODO 시작이었다면 위로 머지
                 commandSet.Add(new DeleteCommand(EditDirection.Backward, 1));
             }
+
             DoActionSet(commandSet);
         }
         else if (hk.HasFlag(HotKeys.Enter)) // Enter
@@ -89,6 +91,7 @@ public partial class TextBox
                 //commandSet.Add(new DeleteSelectionCommand());
                 //commandSet.Add(new MoveCursorSelectionCommand(CursorMove.Origin));
             }
+
             //TODO SplitLine
             //actionSet.Add(new InputChar('\n'));
             DoActionSet(commandSet);
@@ -105,8 +108,9 @@ public partial class TextBox
             }
             else
             {
-                commandSet.Add(new InputChar(EditDirection.Forward, new[] {'\t'}));
+                commandSet.Add(new InputChar(EditDirection.Forward, new[] { '\t' }));
             }
+
             DoActionSet(commandSet);
         }
         else if (hk.HasFlag(HotKeys.UpArrow)) // Move Up
@@ -180,14 +184,13 @@ public partial class TextBox
             if (false == hk.HasFlag(HotKeys.Shift))
                 commandSet.Add(new MoveCursorSelectionCommand(CursorMove.Origin));
             DoActionSet(commandSet);
-            
         }
         else if (hk.HasFlag(HotKeys.Insert))
         {
             Overwrite = !Overwrite;
         }
     }
-    
+
     private void ProcessKeyboardChars(List<char> keyboardInputChars)
     {
         CommandSet commandSet = new();
@@ -201,18 +204,19 @@ public partial class TextBox
                 //Todo enter
                 continue;
             }
-            
+
             if (keyboardInputChar == '\t')
             {
                 //Todo tab
                 continue;
             }
-            
+
             if (keyboardInputChar < 32)
                 continue;
 
-            commandSet.Add(new InputChar(EditDirection.Forward, new[] {keyboardInputChar}));
+            commandSet.Add(new InputChar(EditDirection.Forward, new[] { keyboardInputChar }));
         }
+
         DoActionSet(commandSet);
     }
 
@@ -223,12 +227,10 @@ public partial class TextBox
         // delete forward Cursor~
         // ...
     }
-    
+
     private void ProcessMouseInput(HotKeys hk, MouseInput mouseInput)
     {
-        ViewCoordinates viewCoordinates = new(mouseInput.X, mouseInput.Y);
-        if (false == viewCoordinates.ToPageCoordinates(
-                Page,
+        if (false == Page.ToPageCoordinates(new(mouseInput.X, mouseInput.Y),
                 out PageCoordinates pageCoordinates,
                 out bool isLine, out bool isMarker))
         {
@@ -269,7 +271,7 @@ public partial class TextBox
             {
                 CommandSet commandSet = new();
                 commandSet.Add(new MoveCursorOriginCommand(textCoordinates));
-                
+
                 commandSet.Add(new MoveCursorSelectionCommand(CursorMove.StartOfLine));
                 commandSet.Add(new MoveCursorOriginCommand(CursorMove.EndOfLine));
                 DoActionSet(commandSet);
@@ -278,7 +280,7 @@ public partial class TextBox
             {
                 CommandSet commandSet = new();
                 commandSet.Add(new MoveCursorOriginCommand(textCoordinates));
-                
+
                 commandSet.Add(new MoveCursorSelectionCommand(CursorMove.StartOfWord));
                 commandSet.Add(new MoveCursorOriginCommand(CursorMove.EndOfWord));
                 DoActionSet(commandSet);
@@ -292,8 +294,8 @@ public partial class TextBox
 
     private void ProcessViewInput(ViewInput viewInput)
     {
-        ViewCoordinates start = new (viewInput.X, viewInput.Y);
-        ViewCoordinates end = new (viewInput.X + viewInput.W, viewInput.Y + viewInput.H);
+        ViewCoordinates start = new(viewInput.X, viewInput.Y);
+        ViewCoordinates end = new(viewInput.X + viewInput.W, viewInput.Y + viewInput.H);
         Page.UpdateView(start, end);
     }
 }

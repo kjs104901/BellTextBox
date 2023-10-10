@@ -145,13 +145,13 @@ public class Line
         lineRenders.Clear();
 
         LineRender lineRender = LineRender.Create();
-
-
+        
         bool isFirstCharInLine = true;
         FontStyle groupStyle = FontStyle.DefaultFontStyle;
 
         _buffers.Clear();
         float bufferWidth = 0.0f;
+        int wrapIndex = 0;
         
         for (int i = 0; i < _chars.Count; i++)
         {
@@ -189,6 +189,7 @@ public class Line
             {
                 lineRender.TextBlockRenders.Add(new() { Text = String.Concat(_buffers), FontStyle = groupStyle, Width = bufferWidth });
                 lineRenders.Add(lineRender);
+                wrapIndex++;
 
                 lineRender = LineRender.Create();
 
@@ -200,8 +201,11 @@ public class Line
         }
         
         // Add remains
-        lineRender.TextBlockRenders.Add(new() { Text = String.Concat(_buffers), FontStyle = groupStyle, Width = bufferWidth });
-        lineRenders.Add(lineRender);
+        if (_buffers.Count > 0 || wrapIndex == 0)
+            lineRender.TextBlockRenders.Add(new() { Text = String.Concat(_buffers), FontStyle = groupStyle, Width = bufferWidth });
+        
+        if (lineRender.TextBlockRenders.Count > 0)
+            lineRenders.Add(lineRender);
 
         return lineRenders;
     }

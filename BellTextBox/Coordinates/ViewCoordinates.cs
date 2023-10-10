@@ -12,15 +12,4 @@ public struct ViewCoordinates
         X = x;
         Y = y;
     }
-
-    public bool ToPageCoordinates(Page page, out PageCoordinates coordinates, out bool isLine, out bool isMarker)
-    {
-        //TODO
-        //view.X + X - HeaderWidth;
-        //view.Y + Y;
-        coordinates = new PageCoordinates(0, 0);
-        isLine = false;
-        isMarker = false;
-        return true;
-    }
 }
