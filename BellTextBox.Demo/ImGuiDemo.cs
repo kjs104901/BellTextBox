@@ -1,10 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
 using Bell;
-using BellTextBox.Demo.Backend;
 using ImGuiNET;
 using Veldrid;
-using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
 
 namespace BellTextBox.Demo;

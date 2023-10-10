@@ -6,7 +6,7 @@ using Bell.Data;
 using Bell.Inputs;
 using Bell.Languages;
 
-namespace BellTextBox.Demo.Backend;
+namespace BellTextBox.Demo;
 
 public class ImGuiBackend : ITextBoxBackend
 {
