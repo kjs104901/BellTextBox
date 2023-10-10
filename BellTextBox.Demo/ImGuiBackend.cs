@@ -53,8 +53,6 @@ public class ImGuiBackend : ITextBoxBackend
     public void Render(Action<KeyboardInput, MouseInput, ViewInput> inputAction, PageRender pageRender,
         List<LineRender> lineRenders)
     {
-        var drawList = ImGui.GetWindowDrawList();
-        
         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, new Vector2(0, 0));
         ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, new Vector2(0, 0));
 
@@ -72,6 +70,8 @@ public class ImGuiBackend : ITextBoxBackend
                 ImGuiWindowFlags.ChildWindow);
 
             {
+                var drawList = ImGui.GetWindowDrawList();
+
                 //ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
                 ImGui.BeginChild("Page", new Vector2(pageRender.Size.Width, pageRender.Size.Height + 300), false,
                     ImGuiWindowFlags.NoScrollbar);
@@ -124,8 +124,9 @@ public class ImGuiBackend : ITextBoxBackend
                     viewInput.Y = ImGui.GetScrollY();
                     viewInput.W = contentRegion.X;
                     viewInput.H = contentRegion.Y;
+                    
+                    inputAction(keyboardInput, mouseInput, viewInput);
                 }
-                inputAction(keyboardInput, mouseInput, viewInput);
 
                 //ImGui.Text($"keyboardInput: {keyboardInput.HotKeys} {string.Join(',', keyboardInput.Chars)}");
                 //ImGui.Text($"mouseInput: {mouseInput.X} {mouseInput.Y} {mouseInput.MouseKey}");
