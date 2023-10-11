@@ -73,7 +73,7 @@ public partial class TextBox : IDisposable
         
         FontSizeManager.UpdateReferenceSize();
 
-        TextBoxBackend.StartTextBox();
+        TextBoxBackend.Begin();
         TextBoxBackend.Input();
         
         ProcessKeyboardHotKeys(TextBoxBackend.KeyboardInput.HotKeys);
@@ -82,7 +82,6 @@ public partial class TextBox : IDisposable
         ProcessViewInput(TextBoxBackend.ViewInput);
 
         TextBoxBackend.PageRender = Page.Render;
-        TextBoxBackend.StartPage();
         foreach (LineRender lineRender in Page.LineRenders)
         {
             float width = 0.0f;
@@ -95,8 +94,8 @@ public partial class TextBox : IDisposable
                 width += textBlockRender.Width;
             }
         }
-        TextBoxBackend.EndPage();
-        TextBoxBackend.EndTextBox();
+        
+        TextBoxBackend.End();
     }
 
     private void DoAction(Command command)

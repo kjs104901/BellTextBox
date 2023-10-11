@@ -2,7 +2,7 @@
 
 namespace Bell.Render;
 
-public struct PageRender
+public struct PageRender // TODO Delete
 {
     public RectSize Size;
 }

@@ -1,4 +1,7 @@
-﻿namespace Bell.Coordinates;
+﻿using Bell.Data;
+using Bell.Render;
+
+namespace Bell.Coordinates;
 
 public class CoordinatesManager : IDisposable
 {
@@ -32,9 +35,7 @@ public class CoordinatesManager : IDisposable
             row = 0;
         if (row >= _textBox.Text.LineViews.Count)
             row = _textBox.Text.LineViews.Count - 1;
-
-        textCoordinates.Row = row;
-
+        
         if (pageCoordinates.X < -_textBox.LineNumberWidth)
         {
             textCoordinates.IsLineNumber = true;
@@ -47,8 +48,37 @@ public class CoordinatesManager : IDisposable
         }
         else
         {
-            textCoordinates.Column = 0; //TODO
+            LineView lineView = _textBox.Text.LineViews[row];
+            Line line = _textBox.Text.Lines[lineView.LineIndex];
+            LineRender lineRender = line.LineRenders[lineView.RenderIndex];
+
+            int column = 0;
+            float pageX = pageCoordinates.X;
+            foreach (var textBlockRender in lineRender.TextBlockRenders)
+            {
+                if (pageX < textBlockRender.Width)
+                {
+                    foreach (char c in textBlockRender.Text)
+                    {
+                        var fontWidth = _textBox.FontSizeManager.GetFontWidth(c);
+                        
+                        if (pageX < fontWidth)
+                            break;
+
+                        column += 1;
+                        pageX -= fontWidth;
+                    }
+                    break;
+                }
+
+                column += textBlockRender.Text.Length;
+                pageX -= textBlockRender.Width;
+            }
+            
+            textCoordinates.Column = column;
         }
+        
+        textCoordinates.Row = row;
         
         return textCoordinates;
     }

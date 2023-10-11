@@ -28,12 +28,6 @@ public class ImGuiBackend : TextBoxBackend
         throw new NotImplementedException();
     }
 
-    public override RectSize GetCharRenderSize(char c)
-    {
-        Vector2 fontSize = ImGui.CalcTextSize(c.ToString());
-        return new RectSize { Width = fontSize.X, Height = fontSize.Y };
-    }
-
     private readonly List<ValueTuple<ImGuiKey, HotKeys>> _keyboardMapping = new()
     {
         (ImGuiKey.A, HotKeys.A),
@@ -65,6 +59,45 @@ public class ImGuiBackend : TextBoxBackend
         KeyboardInput.Chars = new();
     }
 
+    public override void Begin()
+    {
+        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, new Vector2(0, 0));
+        ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, new Vector2(0, 0));
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0, 0));
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, new Vector2(0, 0));
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowMinSize, new Vector2(0, 0));
+
+        ImGui.BeginChild("##TextBox", Size, true, ImGuiWindowFlags.HorizontalScrollbar);
+        _contentSize = ImGui.GetWindowContentRegionMax();
+
+        ImGui.SetNextWindowSize(new Vector2(_contentSize.X, _contentSize.Y));
+        ImGui.Begin("##TextBoxWindow",
+            ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove |
+            ImGuiWindowFlags.HorizontalScrollbar | ImGuiWindowFlags.NoNavFocus | ImGuiWindowFlags.NoNavInputs |
+            ImGuiWindowFlags.ChildWindow);
+
+        _scroll.X = ImGui.GetScrollX();
+        _scroll.Y = ImGui.GetScrollY();
+
+        _drawList = ImGui.GetWindowDrawList();
+        
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.2f, 0.1f, 0.1f, 1.0f));
+        ImGui.BeginChild("##Page", new Vector2(PageRender.Size.Width, PageRender.Size.Height), false,
+            ImGuiWindowFlags.NoScrollbar);
+
+        _screenPos = ImGui.GetCursorScreenPos();
+    }
+
+    public override void End()
+    {
+        ImGui.EndChild();
+        ImGui.PopStyleColor();
+        
+        ImGui.End();
+        ImGui.EndChild();
+        ImGui.PopStyleVar(5);
+    }
+    
     public override void Input()
     {
         // TODO make reset func
@@ -75,6 +108,10 @@ public class ImGuiBackend : TextBoxBackend
         MouseInput.Y = 0.0f;
         MouseInput.MouseKey = MouseKey.None;
 
+        _drawList.AddText(_screenPos, ImGui.ColorConvertFloat4ToU32(new Vector4(0.2f, 0.1f, 0.1f, 1.0f)),
+            ImGui.IsWindowFocused().ToString());
+
+        ImGui.Text(ImGui.IsWindowFocused().ToString());
         if (ImGui.IsWindowFocused())
         {
             var io = ImGui.GetIO();
@@ -115,50 +152,10 @@ public class ImGuiBackend : TextBoxBackend
         ViewInput.H = _contentSize.Y;
     }
 
-    public override void StartTextBox()
+    public override RectSize GetCharRenderSize(char c)
     {
-        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, new Vector2(0, 0));
-        ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, new Vector2(0, 0));
-
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0, 0));
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, new Vector2(0, 0));
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowMinSize, new Vector2(0, 0));
-
-        ImGui.BeginChild("##TextBox", Size, true, ImGuiWindowFlags.HorizontalScrollbar);
-        _contentSize = ImGui.GetWindowContentRegionMax();
-
-        ImGui.SetNextWindowSize(new Vector2(_contentSize.X, _contentSize.Y));
-        ImGui.Begin("##TextBoxWindow",
-            ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove |
-            ImGuiWindowFlags.HorizontalScrollbar | ImGuiWindowFlags.NoNavFocus | ImGuiWindowFlags.NoNavInputs |
-            ImGuiWindowFlags.ChildWindow);
-
-        _scroll.X = ImGui.GetScrollX();
-        _scroll.Y = ImGui.GetScrollY();
-
-        _drawList = ImGui.GetWindowDrawList();
-    }
-
-    public override void EndTextBox()
-    {
-        ImGui.End();
-        ImGui.PopStyleVar(5);
-        ImGui.EndChild();
-    }
-
-    public override void StartPage()
-    {
-        ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.2f, 0.1f, 0.1f, 1.0f));
-        ImGui.BeginChild("##Page", new Vector2(PageRender.Size.Width, PageRender.Size.Height), false,
-            ImGuiWindowFlags.NoScrollbar);
-
-        _screenPos = ImGui.GetCursorScreenPos();
-    }
-
-    public override void EndPage()
-    {
-        ImGui.EndChild();
-        ImGui.PopStyleColor();
+        Vector2 fontSize = ImGui.CalcTextSize(c.ToString());
+        return new RectSize { Width = fontSize.X, Height = fontSize.Y };
     }
 
     public override void RenderText(Vector2 pos, string text, FontStyle fontStyle)

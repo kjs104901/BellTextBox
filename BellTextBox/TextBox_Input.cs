@@ -231,7 +231,10 @@ public partial class TextBox
 
         if (textCoordinates.IsMarker)
         {
-            //TODO find line and fold unfold
+            if (MouseKey.Click == mouseInput.MouseKey)
+            {
+                //TODO fold unfold
+            }
             return;
         }
 

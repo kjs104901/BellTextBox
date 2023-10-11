@@ -14,11 +14,9 @@ public abstract class TextBoxBackend
 
     public PageRender PageRender;
     
+    public abstract void Begin();
+    public abstract void End();
     public abstract void Input();
-    public abstract void StartTextBox();
-    public abstract void EndTextBox();
-    public abstract void StartPage();
-    public abstract void EndPage();
 
     public abstract void SetClipboard(string text);
     public abstract string GetClipboard();
