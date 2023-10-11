@@ -3,7 +3,7 @@
 public class FontStyle : IComparable<FontStyle>
 {
     private readonly string _id;
-    
+
     public float R;
     public float G;
     public float B;
@@ -17,9 +17,9 @@ public class FontStyle : IComparable<FontStyle>
         _id = id;
     }
 
-    public static FontStyle DefaultFontStyle = new("Default");
-    public static FontStyle LineCommentFontStyle = new("LineComment");
-    public static FontStyle BlockCommentFontStyle = new("BlockComment");
+    public static FontStyle DefaultFontStyle = new("Default") { R = 0.4f, G = 0.8f, B = 0.2f, A = 1.0f };
+    public static FontStyle LineCommentFontStyle = new("LineComment") { R = 0.3f, G = 0.4f, B = 0.8f, A = 1.0f };
+    public static FontStyle BlockCommentFontStyle = new("BlockComment") { R = 0.9f, G = 0.1f, B = 0.1f, A = 1.0f };
 
     public int CompareTo(FontStyle? other)
     {

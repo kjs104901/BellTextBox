@@ -95,7 +95,7 @@ abc 123s
 
         var backend = new ImGuiBackend
         {
-            ImGuiSize = new Vector2(-1, -1)
+            Size = new Vector2(-1, -1)
         };
 
         var editor = new TextBox(backend);

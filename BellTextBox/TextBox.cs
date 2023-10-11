@@ -1,6 +1,8 @@
-﻿using System.Text;
+﻿using System.Numerics;
+using System.Text;
 using Bell.Commands;
 using Bell.Data;
+using Bell.Languages;
 using Bell.Render;
 
 namespace Bell;
@@ -12,20 +14,20 @@ public partial class TextBox
     public readonly List<string> AutoCompleteList = new();
     public readonly StringBuilder StringBuilder = new();
     public FontSizeManager FontSizeManager { get; set; }
-    
+
     // Action
     internal readonly CommandSetHistory CommandSetHistory = new();
     internal readonly Cursor Cursor = new();
-    
-    public ITextBoxBackend TextBoxBackend { get; set; }
-    
-    public TextBox(ITextBoxBackend textBoxBackend)
+
+    public TextBoxBackend TextBoxBackend { get; set; }
+
+    public TextBox(TextBoxBackend textBoxBackend)
     {
         TextBoxBackend = textBoxBackend;
         Page = new Page(this);
         FontSizeManager = new FontSizeManager(this);
     }
-    
+
     // Method
     public List<int> FindText(string text)
     {
@@ -36,7 +38,7 @@ public partial class TextBox
     {
         return true;
     }
-    
+
     public bool Fold(int lineNumber)
     {
         return true;
@@ -55,7 +57,31 @@ public partial class TextBox
     public void Render()
     {
         FontSizeManager.UpdateReferenceSize();
-        TextBoxBackend.Render(Input, Page.Render, Page.LineRenders);
+
+        TextBoxBackend.StartTextBox();
+        TextBoxBackend.Input();
+        
+        ProcessKeyboardHotKeys(TextBoxBackend.KeyboardInput.HotKeys);
+        ProcessKeyboardChars(TextBoxBackend.KeyboardInput.Chars);
+        ProcessMouseInput(TextBoxBackend.KeyboardInput.HotKeys, TextBoxBackend.MouseInput);
+        ProcessViewInput(TextBoxBackend.ViewInput);
+
+        TextBoxBackend.PageRender = Page.Render;
+        TextBoxBackend.StartPage();
+        foreach (LineRender lineRender in Page.LineRenders)
+        {
+            float width = 0.0f;
+            foreach (TextBlockRender textBlockRender in lineRender.TextBlockRenders)
+            {
+                TextBoxBackend.RenderText(
+                    new Vector2(lineRender.PosX + width, lineRender.PosY),
+                    textBlockRender.Text,
+                    textBlockRender.FontStyle);
+                width += textBlockRender.Width;
+            }
+        }
+        TextBoxBackend.EndPage();
+        TextBoxBackend.EndTextBox();
     }
 
     private void DoAction(Command command)
@@ -64,7 +90,7 @@ public partial class TextBox
         commandSet.Add(command);
         DoActionSet(commandSet);
     }
-    
+
     private void DoActionSet(CommandSet commandSet)
     {
         commandSet.Do(this);

@@ -8,14 +8,6 @@ public partial class TextBox
 {
     public string ClipboardText = "";
 
-    public void Input(KeyboardInput keyboardInput, MouseInput mouseInput, ViewInput viewInput)
-    {
-        ProcessKeyboardHotKeys(keyboardInput.HotKeys);
-        ProcessKeyboardChars(keyboardInput.Chars);
-        ProcessMouseInput(keyboardInput.HotKeys, mouseInput);
-        ProcessViewInput(viewInput);
-    }
-
     private void ProcessKeyboardHotKeys(HotKeys hk)
     {
         if (hk.HasFlag(HotKeys.Ctrl | HotKeys.Z)) // Undo

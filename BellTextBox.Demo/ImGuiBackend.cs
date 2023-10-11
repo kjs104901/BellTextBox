@@ -8,21 +8,31 @@ using Bell.Languages;
 
 namespace BellTextBox.Demo;
 
-public class ImGuiBackend : ITextBoxBackend
+public class ImGuiBackend : TextBoxBackend
 {
-    public Vector2 ImGuiSize { get; set; }
+    public Vector2 Size;
 
-    public void SetClipboard(string text)
+    private Vector2 _contentSize;
+    private Vector2 _scroll;
+    private ImDrawListPtr _drawList;
+
+    private Vector2 _screenPos;
+
+    public override void SetClipboard(string text)
     {
         throw new NotImplementedException();
     }
 
-    public string GetClipboard()
+    public override string GetClipboard()
     {
         throw new NotImplementedException();
     }
 
-    private readonly List<char> _keyboardInput = new();
+    public override RectSize GetCharRenderSize(char c)
+    {
+        Vector2 fontSize = ImGui.CalcTextSize(c.ToString());
+        return new RectSize { Width = fontSize.X, Height = fontSize.Y };
+    }
 
     private readonly List<ValueTuple<ImGuiKey, HotKeys>> _keyboardMapping = new()
     {
@@ -50,8 +60,62 @@ public class ImGuiBackend : ITextBoxBackend
         (ImGuiKey.Tab, HotKeys.Tab),
     };
 
-    public void Render(Action<KeyboardInput, MouseInput, ViewInput> inputAction, PageRender pageRender,
-        List<LineRender> lineRenders)
+    public ImGuiBackend()
+    {
+        KeyboardInput.Chars = new();
+    }
+
+    public override void Input()
+    {
+        // TODO make reset func
+        KeyboardInput.HotKeys = HotKeys.None;
+        KeyboardInput.Chars.Clear();
+
+        MouseInput.X = 0.0f;
+        MouseInput.Y = 0.0f;
+        MouseInput.MouseKey = MouseKey.None;
+
+        if (ImGui.IsWindowFocused())
+        {
+            var io = ImGui.GetIO();
+            if (io.KeyShift)
+                KeyboardInput.HotKeys |= HotKeys.Shift;
+            if (io.KeyCtrl)
+                KeyboardInput.HotKeys |= HotKeys.Ctrl;
+            if (io.KeyAlt)
+                KeyboardInput.HotKeys |= HotKeys.Alt;
+            foreach (var keyMap in _keyboardMapping)
+            {
+                if (ImGui.IsKeyPressed(ImGui.GetKeyIndex(keyMap.Item1)))
+                    KeyboardInput.HotKeys |= keyMap.Item2;
+            }
+
+            for (int i = 0; i < io.InputQueueCharacters.Size; i++)
+            {
+                KeyboardInput.Chars.Add((char)io.InputQueueCharacters[i]);
+            }
+
+            var mouse = ImGui.GetMousePos();
+            MouseInput.X = mouse.X - _screenPos.X;
+            MouseInput.Y = mouse.Y - _screenPos.Y;
+
+            ImGui.SetMouseCursor(ImGuiMouseCursor.TextInput);
+
+            if (ImGui.IsMouseClicked(0))
+                MouseInput.MouseKey = MouseKey.Click;
+            if (ImGui.IsMouseDoubleClicked(0))
+                MouseInput.MouseKey = MouseKey.DoubleClick;
+            if (ImGui.IsMouseDragging(0) && ImGui.IsMouseDown(0))
+                MouseInput.MouseKey = MouseKey.Dragging;
+        }
+
+        ViewInput.X = _scroll.X;
+        ViewInput.Y = _scroll.Y;
+        ViewInput.W = _contentSize.X;
+        ViewInput.H = _contentSize.Y;
+    }
+
+    public override void StartTextBox()
     {
         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, new Vector2(0, 0));
         ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, new Vector2(0, 0));
@@ -59,139 +123,48 @@ public class ImGuiBackend : ITextBoxBackend
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0, 0));
         ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, new Vector2(0, 0));
         ImGui.PushStyleVar(ImGuiStyleVar.WindowMinSize, new Vector2(0, 0));
-        
-        ImGui.BeginChild("Editor", ImGuiSize, true, ImGuiWindowFlags.HorizontalScrollbar);
-        var contentRegion = ImGui.GetWindowContentRegionMax();
-        {
-            ImGui.SetNextWindowSize(new Vector2(contentRegion.X, contentRegion.Y));
-            ImGui.Begin("TEST",
-                ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove |
-                ImGuiWindowFlags.HorizontalScrollbar | ImGuiWindowFlags.NoNavFocus | ImGuiWindowFlags.NoNavInputs |
-                ImGuiWindowFlags.ChildWindow);
 
-            {
-                var scrollX = ImGui.GetScrollX();
-                var scrollY = ImGui.GetScrollY();
-                
-                var drawList = ImGui.GetWindowDrawList();
+        ImGui.BeginChild("##TextBox", Size, true, ImGuiWindowFlags.HorizontalScrollbar);
+        _contentSize = ImGui.GetWindowContentRegionMax();
 
-                ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.2f, 0.1f, 0.1f, 1.0f));
-                ImGui.BeginChild("Page", new Vector2(pageRender.Size.Width, pageRender.Size.Height), false,
-                    ImGuiWindowFlags.NoScrollbar);
+        ImGui.SetNextWindowSize(new Vector2(_contentSize.X, _contentSize.Y));
+        ImGui.Begin("##TextBoxWindow",
+            ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove |
+            ImGuiWindowFlags.HorizontalScrollbar | ImGuiWindowFlags.NoNavFocus | ImGuiWindowFlags.NoNavInputs |
+            ImGuiWindowFlags.ChildWindow);
 
-                KeyboardInput keyboardInput = new();
-                MouseInput mouseInput = new();
-                ViewInput viewInput = new();
+        _scroll.X = ImGui.GetScrollX();
+        _scroll.Y = ImGui.GetScrollY();
 
-                keyboardInput.Chars = _keyboardInput;
+        _drawList = ImGui.GetWindowDrawList();
+    }
 
-                var cursor = ImGui.GetCursorScreenPos();
-                
-                if (ImGui.IsWindowFocused())
-                {
-                    var io = ImGui.GetIO();
-                    if (io.KeyShift)
-                        keyboardInput.HotKeys |= HotKeys.Shift;
-                    if (io.KeyCtrl)
-                        keyboardInput.HotKeys |= HotKeys.Ctrl;
-                    if (io.KeyAlt)
-                        keyboardInput.HotKeys |= HotKeys.Alt;
-                    foreach (var keyMap in _keyboardMapping)
-                    {
-                        if (ImGui.IsKeyPressed(ImGui.GetKeyIndex(keyMap.Item1)))
-                            keyboardInput.HotKeys |= keyMap.Item2;
-                    }
-
-                    _keyboardInput.Clear();
-                    for (int i = 0; i < io.InputQueueCharacters.Size; i++)
-                    {
-                        _keyboardInput.Add((char)io.InputQueueCharacters[i]);
-                    }
-
-                    keyboardInput.Chars = _keyboardInput;
-
-                    var mouse = ImGui.GetMousePos();
-                    mouseInput.X = mouse.X - cursor.X;
-                    mouseInput.Y = mouse.Y - cursor.Y;
-                    
-                    ImGui.SetMouseCursor(ImGuiMouseCursor.TextInput);
-
-                    if (ImGui.IsMouseClicked(0))
-                        mouseInput.MouseKey = MouseKey.Click;
-                    if (ImGui.IsMouseDoubleClicked(0))
-                        mouseInput.MouseKey = MouseKey.DoubleClick;
-                    if (ImGui.IsMouseDragging(0) && ImGui.IsMouseDown(0))
-                        mouseInput.MouseKey = MouseKey.Dragging;
-
-                }
-                
-                viewInput.X = scrollX;
-                viewInput.Y = scrollY;
-                viewInput.W = contentRegion.X;
-                viewInput.H = contentRegion.Y;
-                
-                inputAction(keyboardInput, mouseInput, viewInput);
-
-                //ImGui.Text($"keyboardInput: {keyboardInput.HotKeys} {string.Join(',', keyboardInput.Chars)}");
-                //ImGui.Text($"mouseInput: {mouseInput.X} {mouseInput.Y} {mouseInput.MouseKey}");
-                //ImGui.Text($"viewInput: {viewInput.X} {viewInput.Y} {viewInput.W} {viewInput.H}");
-                //ImGui.Text($"IsWindowFocused: {ImGui.IsWindowFocused()}");
-                foreach (LineRender lineRender in lineRenders)
-                {
-                    float width = 0.0f;
-                    foreach (TextBlockRender textBlockRender in lineRender.TextBlockRenders)
-                    {
-                        var color = new Vector4(0.4f, 0.8f, 0.2f, 1.0f);
-                        if (textBlockRender.FontStyle == FontStyle.BlockCommentFontStyle)
-                        {
-                            //ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.3f, 0.4f, 0.8f, 1.0f));
-                            color = new Vector4(0.3f, 0.4f, 0.8f, 1.0f);
-                        }
-                        else if (textBlockRender.FontStyle == FontStyle.LineCommentFontStyle)
-                        {
-                            //ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.9f, 0.1f, 0.1f, 1.0f));
-                            color = new Vector4(0.9f, 0.1f, 0.1f, 1.0f);
-                        }
-                        //else
-                        //{
-                        //    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.4f, 0.8f, 0.2f, 1.0f));
-                        //}
-
-                        //ImGui.Text(textRender.Text);
-                        drawList.AddText(new Vector2(cursor.X + lineRender.PosX + width,
-                                cursor.Y +lineRender.PosY), 
-                            ImGui.ColorConvertFloat4ToU32(color),
-                            textBlockRender.Text);
-                        
-                        width += textBlockRender.Width;
-                        
-                        //ImGui.SameLine();
-                        //ImGui.PopStyleColor();
-                    }
-
-                    //ImGui.Text(" "); //Next line
-                }
-
-                //ImGui.Text("----- textEditor end -----");
-                ImGui.EndChild();
-                
-                ImGui.PopStyleColor();
-            }
-
-
-            ImGui.End();
-            ImGui.PopStyleVar();
-            ImGui.PopStyleVar();
-            ImGui.PopStyleVar();
-            ImGui.PopStyleVar();
-            ImGui.PopStyleVar();
-        }
+    public override void EndTextBox()
+    {
+        ImGui.End();
+        ImGui.PopStyleVar(5);
         ImGui.EndChild();
     }
 
-    RectSize ITextBoxBackend.GetRenderSize(char c)
+    public override void StartPage()
     {
-        Vector2 fontSize = ImGui.CalcTextSize(c.ToString());
-        return new RectSize { Width = fontSize.X, Height = fontSize.Y };
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.2f, 0.1f, 0.1f, 1.0f));
+        ImGui.BeginChild("##Page", new Vector2(PageRender.Size.Width, PageRender.Size.Height), false,
+            ImGuiWindowFlags.NoScrollbar);
+
+        _screenPos = ImGui.GetCursorScreenPos();
+    }
+
+    public override void EndPage()
+    {
+        ImGui.EndChild();
+        ImGui.PopStyleColor();
+    }
+
+    public override void RenderText(Vector2 pos, string text, FontStyle fontStyle)
+    {
+        var color = new Vector4(fontStyle.R, fontStyle.G, fontStyle.B, fontStyle.A);
+        _drawList.AddText(new Vector2(_screenPos.X + pos.X, _screenPos.Y + pos.Y),
+            ImGui.ColorConvertFloat4ToU32(color), text);
     }
 }

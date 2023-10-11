@@ -25,6 +25,7 @@ public class Text
     public void SetText(string text)
     {
         _textString = text;
+        
         _linesCache.SetDirty();
         _lineViewCache.SetDirty();
     }

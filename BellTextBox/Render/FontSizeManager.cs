@@ -21,7 +21,7 @@ public class FontSizeManager
 
     public void UpdateReferenceSize()
     {
-        _referenceSize = _textBox.TextBoxBackend.GetRenderSize('#');
+        _referenceSize = _textBox.TextBoxBackend.GetCharRenderSize('#');
         _sizeCacheDictionary.TryAdd(_referenceSize, new Dictionary<char, float>());
         _sizeWidthCache = _sizeCacheDictionary[_referenceSize];
 
@@ -37,7 +37,7 @@ public class FontSizeManager
     {
         if (false == _sizeWidthCache.TryGetValue(c, out float fontWidth))
         {
-            var rectSize = _textBox.TextBoxBackend.GetRenderSize(c);
+            var rectSize = _textBox.TextBoxBackend.GetCharRenderSize(c);
 
             fontWidth = rectSize.Width;
             _sizeWidthCache[c] = fontWidth;
