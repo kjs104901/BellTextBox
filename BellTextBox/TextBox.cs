@@ -7,16 +7,16 @@ using Bell.Render;
 
 namespace Bell;
 
-public partial class TextBox
+public partial class TextBox : IDisposable
 {
     // Data
-    public Page Page { get; }
-    public Text Text { get; }
+    public Page? Page { get; private set; }
+    public Text? Text { get; private set; }
     
     
     public readonly List<string> AutoCompleteList = new();
     public readonly StringBuilder StringBuilder = new();
-    public FontSizeManager FontSizeManager { get; set; }
+    public FontSizeManager? FontSizeManager { get; set; }
 
     // Action
     internal readonly CommandSetHistory CommandSetHistory = new();
@@ -57,12 +57,18 @@ public partial class TextBox
 
     public void SetText(string text)
     {
+        if (null == Page || null == Text)
+            return;
+        
         Text.SetText(text);
         Page.RenderCache.SetDirty();
     }
 
     public void Render()
     {
+        if (null == Page || null == Text || null == FontSizeManager)
+            return;
+        
         FontSizeManager.UpdateReferenceSize();
 
         TextBoxBackend.StartTextBox();
@@ -102,5 +108,17 @@ public partial class TextBox
     {
         commandSet.Do(this);
         CommandSetHistory.AddHistory(commandSet);
+    }
+
+    public void Dispose()
+    {
+        Page?.Dispose();
+        Page = null;
+        
+        Text?.Dispose();
+        Text = null;
+        
+        FontSizeManager?.Dispose();
+        FontSizeManager = null;
     }
 }

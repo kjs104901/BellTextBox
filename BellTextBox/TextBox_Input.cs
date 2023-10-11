@@ -222,6 +222,9 @@ public partial class TextBox
 
     private void ProcessMouseInput(HotKeys hk, MouseInput mouseInput)
     {
+        if (null == Page)
+            return;
+        
         if (false == Page.ToPageCoordinates(new(mouseInput.X, mouseInput.Y),
                 out PageCoordinates pageCoordinates,
                 out bool isLine, out bool isMarker))
@@ -284,6 +287,9 @@ public partial class TextBox
 
     private void ProcessViewInput(ViewInput viewInput)
     {
+        if (null == Page)
+            return;
+        
         ViewCoordinates start = new(viewInput.X, viewInput.Y);
         ViewCoordinates end = new(viewInput.X + viewInput.W, viewInput.Y + viewInput.H);
         Page.UpdateView(start, end);

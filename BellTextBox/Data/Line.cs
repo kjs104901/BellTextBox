@@ -1,5 +1,4 @@
 ﻿using System.Runtime.InteropServices;
-using System.Text;
 using Bell.Languages;
 using Bell.Render;
 
@@ -14,9 +13,9 @@ public enum Marker
     Unfold = 1 << 1
 }
 
-public class Line
+public class Line : IDisposable
 {
-    private readonly TextBox _textBox;
+    private TextBox? _textBox;
 
     public int Index = 0;
 
@@ -59,7 +58,7 @@ public class Line
         }
     }
 
-    public Line(TextBox textBox)
+    public Line(TextBox? textBox)
     {
         _textBox = textBox;
 
@@ -101,6 +100,9 @@ public class Line
 
     private HashSet<int> UpdateCutoff(HashSet<int> cutoffs)
     {
+        if (null == _textBox || null == _textBox.FontSizeManager)
+            return cutoffs;
+        
         cutoffs.Clear();
         float widthAccumulated = 0.0f;
         for (int i = 0; i < _chars.Count; i++)
@@ -112,24 +114,28 @@ public class Line
                 widthAccumulated = 0;
             }
         }
-
         return cutoffs;
     }
 
     private bool UpdateFoldable(bool _)
     {
+        if (null == _textBox)
+            return _;
+        
         var trimmedString = String.TrimStart();
         foreach (ValueTuple<string, string> folding in _textBox.Language.Foldings)
         {
             if (trimmedString.StartsWith(folding.Item1))
                 return true;
         }
-
         return false;
     }
 
     private string UpdateString(string _)
     {
+        if (null == _textBox)
+            return _;
+        
         _textBox.StringBuilder.Clear();
         _textBox.StringBuilder.Append(CollectionsMarshal.AsSpan(_chars));
         return _textBox.StringBuilder.ToString();
@@ -142,6 +148,9 @@ public class Line
 
     private List<LineRender> UpdateLineRenders(List<LineRender> lineRenders)
     {
+        if (null == _textBox || null == _textBox.FontSizeManager)
+            return lineRenders;
+        
         lineRenders.Clear();
 
         LineRender lineRender = LineRender.Create();
@@ -208,5 +217,10 @@ public class Line
             lineRenders.Add(lineRender);
 
         return lineRenders;
+    }
+
+    public void Dispose()
+    {
+        _textBox = null;
     }
 }

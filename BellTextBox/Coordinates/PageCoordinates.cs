@@ -13,7 +13,7 @@ public struct PageCoordinates
         Y = y;
     }
     
-    public bool ToTextCoordinates(Text text, out TextCoordinates coordinates)
+    public bool ToTextCoordinates(Text? text, out TextCoordinates coordinates)
     {
         //TODO
         // calculate line and column

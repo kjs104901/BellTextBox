@@ -2,9 +2,9 @@
 
 namespace Bell.Data;
 
-public class Text
+public class Text : IDisposable
 {
-    private readonly TextBox _textBox;
+    private TextBox? _textBox;
 
     private string _textString = "";
     
@@ -14,7 +14,7 @@ public class Text
     public List<LineView> LineViews => LineViewCache.Get();
     public readonly Cache<List<LineView>> LineViewCache;
     
-    public Text(TextBox textBox)
+    public Text(TextBox? textBox)
     {
         _textBox = textBox;
 
@@ -60,5 +60,16 @@ public class Text
     public override string ToString()
     {
         return string.Empty;
+    }
+
+    public void Dispose()
+    {
+        foreach (Line line in Lines)
+        {
+            line.Dispose();
+        }
+        Lines.Clear();
+        
+        _textBox = null;
     }
 }
