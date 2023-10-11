@@ -3,6 +3,7 @@ using System.Text;
 using Bell.Commands;
 using Bell.Coordinates;
 using Bell.Data;
+using Bell.Languages;
 using Bell.Render;
 
 namespace Bell;
@@ -88,12 +89,13 @@ public partial class TextBox : IDisposable
             foreach (TextBlockRender textBlockRender in lineRender.TextBlockRenders)
             {
                 TextBoxBackend.RenderText(
-                    new Vector2(lineRender.PosX + width, lineRender.PosY),
+                    new Vector2(LineNumberWidth + MarkerWidth + lineRender.PosX + width, lineRender.PosY),
                     textBlockRender.Text,
                     textBlockRender.FontStyle);
                 width += textBlockRender.Width;
             }
         }
+        TextBoxBackend.RenderText(new Vector2(150, 0), $"{_debugTextCoordinates.Row} {_debugTextCoordinates.Column}", FontStyle.DefaultFontStyle);
         
         TextBoxBackend.End();
     }

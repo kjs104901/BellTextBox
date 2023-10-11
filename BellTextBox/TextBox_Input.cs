@@ -8,6 +8,8 @@ public partial class TextBox
 {
     public string ClipboardText = "";
 
+    private TextCoordinates _debugTextCoordinates;
+    
     private void ProcessKeyboardHotKeys(HotKeys hk)
     {
         if (hk.HasFlag(HotKeys.Ctrl | HotKeys.Z)) // Undo
@@ -251,6 +253,8 @@ public partial class TextBox
                 commandSet.Add(new MoveCursorOriginCommand(textCoordinates));
                 DoActionSet(commandSet);
             }
+
+            _debugTextCoordinates = textCoordinates;
         }
         else if (MouseKey.DoubleClick == mouseInput.MouseKey)
         {
