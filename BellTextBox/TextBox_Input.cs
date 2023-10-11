@@ -236,9 +236,7 @@ public partial class TextBox
             return;
         }
 
-        if (false == pageCoordinates.ToTextCoordinates(
-                Page.Text,
-                out TextCoordinates textCoordinates))
+        if (false == pageCoordinates.ToTextCoordinates(Text, out TextCoordinates textCoordinates))
         {
             return;
         }

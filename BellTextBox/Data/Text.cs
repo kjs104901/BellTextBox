@@ -8,26 +8,26 @@ public class Text
 
     private string _textString = "";
     
-    public List<Line> Lines => _linesCache.Get();
-    private readonly Cache<List<Line>> _linesCache;
+    public List<Line> Lines => LinesCache.Get();
+    public readonly Cache<List<Line>> LinesCache;
     
-    public List<LineView> LineViews => _lineViewCache.Get();
-    private readonly Cache<List<LineView>> _lineViewCache;
+    public List<LineView> LineViews => LineViewCache.Get();
+    public readonly Cache<List<LineView>> LineViewCache;
     
     public Text(TextBox textBox)
     {
         _textBox = textBox;
 
-        _linesCache = new Cache<List<Line>>(new List<Line>(), UpdateLines);
-        _lineViewCache = new Cache<List<LineView>>(new List<LineView>(), UpdateLineViews);
+        LinesCache = new Cache<List<Line>>(new List<Line>(), UpdateLines);
+        LineViewCache = new Cache<List<LineView>>(new List<LineView>(), UpdateLineViews);
     }
     
     public void SetText(string text)
     {
         _textString = text;
         
-        _linesCache.SetDirty();
-        _lineViewCache.SetDirty();
+        LinesCache.SetDirty();
+        LineViewCache.SetDirty();
     }
 
     private List<Line> UpdateLines(List<Line> lines)

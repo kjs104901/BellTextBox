@@ -6,14 +6,12 @@ namespace Bell.Data;
 public class Page
 {
     private readonly TextBox _textBox;
-    
-    public readonly Text Text;
 
-    public PageRender Render => _renderCache.Get();
-    private readonly Cache<PageRender> _renderCache;
+    public PageRender Render => RenderCache.Get();
+    public readonly Cache<PageRender> RenderCache;
     
-    public List<LineRender> LineRenders => _lineRendersCache.Get();
-    private readonly Cache<List<LineRender>> _lineRendersCache;
+    public List<LineRender> LineRenders => LineRendersCache.Get();
+    public readonly Cache<List<LineRender>> LineRendersCache;
     
     // View
     private ViewCoordinates _viewStart;
@@ -22,16 +20,9 @@ public class Page
     public Page(TextBox textBox)
     {
         _textBox = textBox;
-        Text = new Text(_textBox);
         
-        _renderCache = new Cache<PageRender>(new PageRender(), UpdateRender);
-        _lineRendersCache = new Cache<List<LineRender>>(new List<LineRender>(), UpdateLineRenders);
-    }
-
-    public void SetText(string text)
-    {
-        Text.SetText(text);
-        _renderCache.SetDirty();
+        RenderCache = new Cache<PageRender>(new PageRender(), UpdateRender);
+        LineRendersCache = new Cache<List<LineRender>>(new List<LineRender>(), UpdateLineRenders);
     }
 
     public bool ToPageCoordinates(ViewCoordinates viewCoordinates, out PageCoordinates coordinates, out bool isLine, out bool isMarker)
@@ -50,8 +41,8 @@ public class Page
         int index = (int)(viewCoordinates.Y / _textBox.FontSizeManager.GetFontHeight()) + offset;
         if (index < 0)
             index = 0;
-        if (index >= Text.LineViews.Count)
-            index = Text.LineViews.Count - 1;
+        if (index >= _textBox.Text.LineViews.Count)
+            index = _textBox.Text.LineViews.Count - 1;
         return index;
     }
     
@@ -60,7 +51,7 @@ public class Page
         _viewStart = start;
         _viewEnd = end;
         
-        _lineRendersCache.SetDirty();
+        LineRendersCache.SetDirty();
     }
     
     private List<LineRender> UpdateLineRenders(List<LineRender> lineRenders)
@@ -72,8 +63,8 @@ public class Page
 
         for (int i = lineStart; i <= lineEnd; i++)
         {
-            LineView lineView = Text.LineViews[i];
-            var lineRender = Text.Lines[lineView.LineIndex].GetLineRender(lineView.RenderIndex);
+            LineView lineView = _textBox.Text.LineViews[i];
+            var lineRender = _textBox.Text.Lines[lineView.LineIndex].GetLineRender(lineView.RenderIndex);
 
             lineRender.PosX = 0;
             lineRender.PosY = i * _textBox.FontSizeManager.GetFontHeight();
@@ -87,7 +78,7 @@ public class Page
     private PageRender UpdateRender(PageRender render)
     {
         render.Size.Width = 500; //TODO find width from render
-        render.Size.Height = Text.LineViews.Count * _textBox.FontSizeManager.GetFontHeight();
+        render.Size.Height = _textBox.Text.LineViews.Count * _textBox.FontSizeManager.GetFontHeight();
         return render;
     }
 }

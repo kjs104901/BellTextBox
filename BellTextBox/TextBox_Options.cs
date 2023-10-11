@@ -16,6 +16,12 @@ public enum EolMode
     CR
 }
 
+public enum TabMode
+{
+    Space,
+    Tab
+}
+
 public partial class TextBox
 {
     public bool AutoIndent { get; set; } = true;
@@ -24,6 +30,8 @@ public partial class TextBox
     public bool ReadOnly { get; set; } = false;
     public WrapMode WrapMode { get; set; } = WrapMode.Word;
     public EolMode EolMode = EolMode.LF;
+    public TabMode TabMode = TabMode.Space;
+    public int TabSize = 4;
     public bool SyntaxHighlighting { get; set; } = true;
     public bool SyntaxFolding { get; set; } = true;
     public Language Language { get; set; } = Language.PlainText();

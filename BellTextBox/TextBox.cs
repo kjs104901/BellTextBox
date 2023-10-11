@@ -10,7 +10,10 @@ namespace Bell;
 public partial class TextBox
 {
     // Data
-    public Page Page { get; set; }
+    public Page Page { get; }
+    public Text Text { get; }
+    
+    
     public readonly List<string> AutoCompleteList = new();
     public readonly StringBuilder StringBuilder = new();
     public FontSizeManager FontSizeManager { get; set; }
@@ -24,7 +27,10 @@ public partial class TextBox
     public TextBox(TextBoxBackend textBoxBackend)
     {
         TextBoxBackend = textBoxBackend;
+
         Page = new Page(this);
+        Text = new Text(this);
+        
         FontSizeManager = new FontSizeManager(this);
     }
 
@@ -51,7 +57,8 @@ public partial class TextBox
 
     public void SetText(string text)
     {
-        Page.SetText(text);
+        Text.SetText(text);
+        Page.RenderCache.SetDirty();
     }
 
     public void Render()

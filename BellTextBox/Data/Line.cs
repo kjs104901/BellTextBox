@@ -23,20 +23,20 @@ public class Line
     private List<char> _chars = new();
     private List<char> _buffers = new();
 
-    public string String => _stringCache.Get();
-    private readonly Cache<string> _stringCache;
+    public string String => StringCache.Get();
+    public readonly Cache<string> StringCache;
 
-    public Dictionary<int, FontStyle> Styles => _stylesCache.Get();
-    private readonly Cache<Dictionary<int, FontStyle>> _stylesCache;
+    public Dictionary<int, FontStyle> Styles => StylesCache.Get();
+    public readonly Cache<Dictionary<int, FontStyle>> StylesCache;
 
-    public bool Foldable => _foldableCache.Get();
-    private readonly Cache<bool> _foldableCache;
+    public bool Foldable => FoldableCache.Get();
+    public readonly Cache<bool> FoldableCache;
 
-    public HashSet<int> Cutoffs => _cutoffsCache.Get();
-    private readonly Cache<HashSet<int>> _cutoffsCache;
+    public HashSet<int> Cutoffs => CutoffsCache.Get();
+    public readonly Cache<HashSet<int>> CutoffsCache;
 
-    public List<LineRender> LineRenders => _lineRendersCache.Get();
-    private readonly Cache<List<LineRender>> _lineRendersCache;
+    public List<LineRender> LineRenders => LineRendersCache.Get();
+    public readonly Cache<List<LineRender>> LineRendersCache;
 
     public bool Visible = true;
     public bool Folded = false;
@@ -63,11 +63,11 @@ public class Line
     {
         _textBox = textBox;
 
-        _stylesCache = new(new(), UpdateStyles);
-        _cutoffsCache = new(new(), UpdateCutoff);
-        _foldableCache = new(false, UpdateFoldable);
-        _stringCache = new(string.Empty, UpdateString);
-        _lineRendersCache = new(new List<LineRender>(), UpdateLineRenders);
+        StylesCache = new(new(), UpdateStyles);
+        CutoffsCache = new(new(), UpdateCutoff);
+        FoldableCache = new(false, UpdateFoldable);
+        StringCache = new(string.Empty, UpdateString);
+        LineRendersCache = new(new List<LineRender>(), UpdateLineRenders);
     }
 
     public void SetString(string line)
@@ -75,11 +75,11 @@ public class Line
         _chars.Clear();
         _chars.AddRange(line);
 
-        _stylesCache.SetDirty();
-        _cutoffsCache.SetDirty();
-        _foldableCache.SetDirty();
-        _stringCache.SetDirty();
-        _lineRendersCache.SetDirty();
+        StylesCache.SetDirty();
+        CutoffsCache.SetDirty();
+        FoldableCache.SetDirty();
+        StringCache.SetDirty();
+        LineRendersCache.SetDirty();
     }
 
     private Dictionary<int, FontStyle> UpdateStyles(Dictionary<int, FontStyle> styles)
@@ -119,9 +119,9 @@ public class Line
     private bool UpdateFoldable(bool _)
     {
         var trimmedString = String.TrimStart();
-        foreach (Block folding in _textBox.Language.Foldings)
+        foreach (ValueTuple<string, string> folding in _textBox.Language.Foldings)
         {
-            if (trimmedString.StartsWith(folding.Start))
+            if (trimmedString.StartsWith(folding.Item1))
                 return true;
         }
 
