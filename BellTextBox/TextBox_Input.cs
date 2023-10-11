@@ -222,25 +222,16 @@ public partial class TextBox
 
     private void ProcessMouseInput(HotKeys hk, MouseInput mouseInput)
     {
-        if (null == Page)
+        if (null == Page || null == CoordinatesManager)
             return;
-        
-        if (false == Page.ToPageCoordinates(new(mouseInput.X, mouseInput.Y),
-                out PageCoordinates pageCoordinates,
-                out bool isLine, out bool isMarker))
-        {
-            return;
-        }
 
-        if (isMarker)
+        var viewCoordinates = new ViewCoordinates() { X = mouseInput.X, Y = mouseInput.Y };
+        var pageCoordinates = CoordinatesManager.Convert(viewCoordinates);
+        var textCoordinates = CoordinatesManager.Convert(pageCoordinates);
+
+        if (textCoordinates.IsMarker)
         {
             //TODO find line and fold unfold
-
-            return;
-        }
-
-        if (false == pageCoordinates.ToTextCoordinates(Text, out TextCoordinates textCoordinates))
-        {
             return;
         }
 
@@ -289,9 +280,17 @@ public partial class TextBox
     {
         if (null == Page)
             return;
-        
-        ViewCoordinates start = new(viewInput.X, viewInput.Y);
-        ViewCoordinates end = new(viewInput.X + viewInput.W, viewInput.Y + viewInput.H);
+
+        var start = new ViewCoordinates()
+        {
+            X = viewInput.X,
+            Y = viewInput.Y
+        };
+        var end = new ViewCoordinates()
+        {
+            X = viewInput.X + viewInput.W,
+            Y = viewInput.Y + viewInput.H
+        };
         Page.UpdateView(start, end);
     }
 }

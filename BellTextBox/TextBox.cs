@@ -1,8 +1,8 @@
 ﻿using System.Numerics;
 using System.Text;
 using Bell.Commands;
+using Bell.Coordinates;
 using Bell.Data;
-using Bell.Languages;
 using Bell.Render;
 
 namespace Bell;
@@ -16,7 +16,8 @@ public partial class TextBox : IDisposable
     
     public readonly List<string> AutoCompleteList = new();
     public readonly StringBuilder StringBuilder = new();
-    public FontSizeManager? FontSizeManager { get; set; }
+    public FontSizeManager? FontSizeManager { get; private set; }
+    public CoordinatesManager? CoordinatesManager { get; private set; }
 
     // Action
     internal readonly CommandSetHistory CommandSetHistory = new();
@@ -32,6 +33,7 @@ public partial class TextBox : IDisposable
         Text = new Text(this);
         
         FontSizeManager = new FontSizeManager(this);
+        CoordinatesManager = new CoordinatesManager(this);
     }
 
     // Method
@@ -120,5 +122,8 @@ public partial class TextBox : IDisposable
         
         FontSizeManager?.Dispose();
         FontSizeManager = null;
+        
+        CoordinatesManager?.Dispose();
+        CoordinatesManager = null;
     }
 }
