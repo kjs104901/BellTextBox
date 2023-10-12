@@ -9,7 +9,8 @@ namespace Bell;
 
 public abstract partial class TextBox
 {
-    public abstract Vector2 GetCharRenderSize(char c);
+    public abstract float GetCharWidth(char c);
+    public abstract float GetCharHeight(char c);
 
     protected abstract void RenderText(Vector2 pos, string text, FontStyle fontStyle);
 
@@ -57,6 +58,15 @@ public abstract partial class TextBox
         foreach (var testChar in testString)
         {
             RenderText(new Vector2(150 + FontSizeManager.GetFontWidth(testChar) * i, 140), testChar.ToString(), FontStyle.DefaultFontStyle);
+            i++;
+        }
+        
+        testString = "||||||||||";
+        RenderText(new Vector2(150, 170), testString, FontStyle.DefaultFontStyle);
+        i = 0;
+        foreach (var testChar in testString)
+        {
+            RenderText(new Vector2(150 + FontSizeManager.GetFontWidth(testChar) * i, 200), testChar.ToString(), FontStyle.DefaultFontStyle);
             i++;
         }
         

@@ -138,13 +138,14 @@ public class ImGuiBellTextBox : TextBox
         throw new NotImplementedException();
     }
 
-    public override Vector2 GetCharRenderSize(char c)
+    public override float GetCharWidth(char c)
     {
-        var emptySize = ImGui.CalcTextSize("<>");
-        var charSize = ImGui.CalcTextSize($"<{c}>");
+        return ImGui.GetFont().GetCharAdvance(c);
+    }
 
-        return new Vector2(charSize.X - emptySize.X, charSize.Y);
-        //return ImGui.CalcTextSize(c.ToString());
+    public override float GetCharHeight(char c)
+    {
+        return ImGui.CalcTextSize(c.ToString()).Y;
     }
 
     protected override void RenderText(Vector2 pos, string text, FontStyle fontStyle)

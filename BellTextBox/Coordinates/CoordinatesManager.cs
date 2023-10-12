@@ -104,18 +104,6 @@ public class CoordinatesManager
                 
                 int column = textCoordinates.Column;
                 float pageX = 0.0f;
-
-                foreach (char c in line.Chars)
-                {
-                    if (column < 1)
-                        break;
-                    
-                    column -= 1;
-                    pageX += _textBox.FontSizeManager.GetFontWidth(c);
-                }
-                
-                
-                /*
                 foreach (var textBlockRender in lineRender.TextBlockRenders)
                 {
                     if (column < textBlockRender.Text.Length)
@@ -133,8 +121,6 @@ public class CoordinatesManager
                     column -= textBlockRender.Text.Length;
                     pageX += textBlockRender.Width;
                 }
-                */
-
                 pageCoordinates.X = pageX;
             }
         }
