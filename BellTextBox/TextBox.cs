@@ -32,6 +32,8 @@ public partial class TextBox
         
         FontSizeManager = new FontSizeManager(this);
         CoordinatesManager = new CoordinatesManager(this);
+
+        KeyboardInput.Chars = new List<char>();
     }
 
     // Method

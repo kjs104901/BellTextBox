@@ -23,52 +23,33 @@ class ImGuiDemo
     {
         Vector3 clearColor = new(0.45f, 0.55f, 0.6f);
         string textInput = @"--- START ---
+namespace Bell.Languages;
 
-hello world
-헬로우 월드
-abc 123s
-윷?? 
+public class FontStyle : IComparable<FontStyle>
+{
+    private readonly string _id;
 
-hello world
-헬로우 월드
-abc 123s
-윷?? 
+    public float R;
+    public float G;
+    public float B;
+    public float A;
+    
+    public FontStyle(string id)
+    {
+        _id = id;
+    }
 
-hello world
-헬로우 월드
-abc 123s
-윷?? 
+    public static readonly FontStyle DefaultFontStyle = new(""Default"") { R = 0.4f, G = 0.8f, B = 0.2f, A = 1.0f };
+    public static readonly FontStyle LineCommentFontStyle = new(""LineComment"") { R = 0.3f, G = 0.4f, B = 0.8f, A = 1.0f };
+    public static readonly FontStyle BlockCommentFontStyle = new(""BlockComment"") { R = 0.9f, G = 0.1f, B = 0.1f, A = 1.0f };
 
-hello world
-헬로우 월드
-abc 123s
-윷?? 
-
-hello world
-헬로우 월드
-abc 123s
-윷?? 
-
-hello world
-헬로우 월드
-abc 123s
-윷?? 
-
-hello world
-헬로우 월드
-abc 123s
-윷?? 
-
-hello world
-헬로우 월드
-abc 123s
-윷?? 
-
-hello world
-헬로우 월드
-abc 123s
-윷??
-
+    public int CompareTo(FontStyle? other)
+    {
+        if (ReferenceEquals(this, other)) return 0;
+        if (ReferenceEquals(null, other)) return 1;
+        return string.Compare(_id, other._id, StringComparison.Ordinal);
+    }
+}
 --- END ---";
     
         VeldridStartup.CreateWindowAndGraphicsDevice(
@@ -93,7 +74,7 @@ abc 123s
             .AddFontFromFileTTF(@"gulim.ttc", 13.0f, null, ImGui.GetIO().Fonts.GetGlyphRangesKorean());
         imGuiRenderer.RecreateFontDeviceTexture(graphicsDevice);
 
-        var imGuiBellTextBox = new ImGuiBellTextBox(new Vector2(-1, -1));
+        var imGuiBellTextBox = new ImGuiBellTextBox();
         
         while (sdl2Window.Exists)
         {
@@ -117,7 +98,7 @@ abc 123s
             ImGui.InputTextMultiline("Test", ref textInput, 1024, new Vector2(-1, 300));
 
             imGuiBellTextBox.SetText(textInput);
-            imGuiBellTextBox.Update();
+            imGuiBellTextBox.Update(new Vector2(-1, -1));
 
             //ImGui.SameLine();
             ImGui.InputText("Test2", ref textInput, 1024);

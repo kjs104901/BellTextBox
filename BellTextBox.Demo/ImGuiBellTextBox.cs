@@ -13,12 +13,7 @@ namespace BellTextBox.Demo;
 
 public class ImGuiBellTextBox : TextBox
 {
-    public Vector2 Size;
-
-    private Vector2 _contentSize;
-    private Vector2 _scroll;
     private ImDrawListPtr _drawList;
-
     private Vector2 _screenPos;
     
     private readonly List<ValueTuple<ImGuiKey, HotKeys>> _keyboardMapping = new()
@@ -47,15 +42,7 @@ public class ImGuiBellTextBox : TextBox
         (ImGuiKey.Tab, HotKeys.Tab),
     };
     
-    public ImGuiBellTextBox(Vector2 size)
-    {
-        Size = size;
-        
-        KeyboardInput.Chars = new(); // TODO MOVE
-    }
-
-
-    public void Update()
+    public void Update(Vector2 size)
     {
         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, new Vector2(0, 0));
         ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, new Vector2(0, 0));
@@ -63,24 +50,26 @@ public class ImGuiBellTextBox : TextBox
         ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, new Vector2(0, 0));
         ImGui.PushStyleVar(ImGuiStyleVar.WindowMinSize, new Vector2(0, 0));
 
-        ImGui.BeginChild("##TextBox", Size, true, ImGuiWindowFlags.HorizontalScrollbar);
-        _contentSize = ImGui.GetWindowContentRegionMax();
+        ImGui.BeginChild("##TextBox", size, true, ImGuiWindowFlags.HorizontalScrollbar);
+        Vector2 contentSize = ImGui.GetWindowContentRegionMax();
 
-        ImGui.SetNextWindowSize(new Vector2(_contentSize.X, _contentSize.Y));
+        ImGui.SetNextWindowSize(new Vector2(contentSize.X, contentSize.Y));
         ImGui.Begin("##TextBoxWindow",
             ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove |
             ImGuiWindowFlags.HorizontalScrollbar | ImGuiWindowFlags.NoNavFocus | ImGuiWindowFlags.NoNavInputs |
             ImGuiWindowFlags.ChildWindow);
 
-        _scroll.X = ImGui.GetScrollX();
-        _scroll.Y = ImGui.GetScrollY();
+        Vector2 scroll = new Vector2()
+        {
+            X = ImGui.GetScrollX(),
+            Y = ImGui.GetScrollY(),
+        };
 
-        _drawList = ImGui.GetWindowDrawList();
-        
         ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.2f, 0.1f, 0.1f, 1.0f));
         ImGui.BeginChild("##Page", new Vector2(Page.Render.Size.Width, Page.Render.Size.Height), false,
             ImGuiWindowFlags.NoScrollbar);
 
+        _drawList = ImGui.GetWindowDrawList();
         _screenPos = ImGui.GetCursorScreenPos();
         
         InputStart();
@@ -123,10 +112,10 @@ public class ImGuiBellTextBox : TextBox
                 MouseInput.MouseKey = MouseKey.Dragging;
         }
 
-        ViewInput.X = _scroll.X;
-        ViewInput.Y = _scroll.Y;
-        ViewInput.W = _contentSize.X;
-        ViewInput.H = _contentSize.Y;
+        ViewInput.X = scroll.X;
+        ViewInput.Y = scroll.Y;
+        ViewInput.W = contentSize.X;
+        ViewInput.H = contentSize.Y;
         InputEnd();
         
         Render();
