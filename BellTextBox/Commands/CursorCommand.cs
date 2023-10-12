@@ -2,7 +2,7 @@
 
 namespace Bell.Commands;
 
-internal enum CursorMove
+internal enum CaretMove
 {
     None,
     
@@ -21,21 +21,21 @@ internal enum CursorMove
     PageUp,
     PageDown,
     
-    Origin,
+    Position,
     Selection
 }
 
-internal class MoveCursorSelectionCommand : Command
+internal class MoveCaretSelectionCommand : Command
 {
-    private CursorMove _cursorMove = CursorMove.None;
+    private CaretMove _caretMove = CaretMove.None;
     private TextCoordinates _textCoordinates;
     
-    public MoveCursorSelectionCommand(CursorMove cursorMove)
+    public MoveCaretSelectionCommand(CaretMove caretMove)
     {
-        _cursorMove = cursorMove;
+        _caretMove = caretMove;
     }
     
-    public MoveCursorSelectionCommand(TextCoordinates textCoordinates)
+    public MoveCaretSelectionCommand(TextCoordinates textCoordinates)
     {
         _textCoordinates = textCoordinates;
     }
@@ -45,17 +45,17 @@ internal class MoveCursorSelectionCommand : Command
     }
 }
 
-internal class MoveCursorOriginCommand : Command
+internal class MoveCaretPositionCommand : Command
 {
-    private CursorMove _cursorMove = CursorMove.None;
+    private CaretMove _caretMove = CaretMove.None;
     private TextCoordinates _textCoordinates;
     
-    public MoveCursorOriginCommand(CursorMove cursorMove)
+    public MoveCaretPositionCommand(CaretMove caretMove)
     {
-        _cursorMove = cursorMove;
+        _caretMove = caretMove;
     }
     
-    public MoveCursorOriginCommand(TextCoordinates textCoordinates)
+    public MoveCaretPositionCommand(TextCoordinates textCoordinates)
     {
         _textCoordinates = textCoordinates;
     }

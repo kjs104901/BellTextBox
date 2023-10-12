@@ -8,17 +8,14 @@ public struct LineRender
     //선택 여부, 자동완성 리스트, wrapped)
     // 커서, 선택 영역, find 결과 영역
     // 그릴 w, h 정보도 포함
+    // -> 라인과 관련 없는 데이터는 포함하지 않도록 주의
 
-    public int Index; // 실제 줄
-    public int LineIndex; // 텍스트 라인 줄
-    public int RenderIndex; // 텍스트 라인 wrap 된 줄
+    // 텍스트 라인 줄
+    public int LineIndex; 
 
     // 위치
     public float PosX;
     public float PosY;
-
-    // 마커
-    public Marker Marker;
 
     public List<TextBlockRender> TextBlockRenders;
 
@@ -29,7 +26,6 @@ public struct LineRender
     {
         return new LineRender()
         {
-            Marker = Marker.None,
             TextBlockRenders = new()
         };
     }

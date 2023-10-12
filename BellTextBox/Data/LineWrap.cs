@@ -1,6 +1,6 @@
-﻿namespace Bell.Render;
+﻿namespace Bell.Data;
 
-public struct LineView
+public struct LineWrap
 {
     public int LineIndex;
     public int RenderIndex;

@@ -25,7 +25,7 @@ public abstract partial class TextBox
             foreach (TextBlockRender textBlockRender in lineRender.TextBlockRenders)
             {
                 RenderText(
-                    new Vector2(LineNumberWidth + MarkerWidth + lineRender.PosX + width, lineRender.PosY),
+                    new Vector2(LineNumberWidth + FoldWidth + lineRender.PosX + width, lineRender.PosY),
                     textBlockRender.Text,
                     textBlockRender.FontStyle);
                 width += textBlockRender.Width;

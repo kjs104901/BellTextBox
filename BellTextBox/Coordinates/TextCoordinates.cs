@@ -6,7 +6,7 @@ public struct TextCoordinates : IEquatable<TextCoordinates>
     public int Column;
 
     public bool IsLineNumber;
-    public bool IsMarker;
+    public bool IsFold;
 
     public bool Equals(TextCoordinates other) => Row == other.Row && Column == other.Column;
     public override bool Equals(object? obj) => obj is TextCoordinates other && Equals(other);

@@ -11,15 +11,15 @@ public class Text
     public List<Line> Lines => LinesCache.Get();
     public readonly Cache<List<Line>> LinesCache;
     
-    public List<LineView> LineViews => LineViewCache.Get();
-    public readonly Cache<List<LineView>> LineViewCache;
+    public List<LineWrap> LineWraps => LineWrapsCache.Get();
+    public readonly Cache<List<LineWrap>> LineWrapsCache;
     
     public Text(TextBox textBox)
     {
         _textBox = textBox;
 
         LinesCache = new Cache<List<Line>>(new List<Line>(), UpdateLines);
-        LineViewCache = new Cache<List<LineView>>(new List<LineView>(), UpdateLineViews);
+        LineWrapsCache = new Cache<List<LineWrap>>(new List<LineWrap>(), UpdateLineWraps);
     }
     
     public void SetText(string text)
@@ -27,7 +27,7 @@ public class Text
         _textString = text;
         
         LinesCache.SetDirty();
-        LineViewCache.SetDirty();
+        LineWrapsCache.SetDirty();
     }
 
     private List<Line> UpdateLines(List<Line> lines)
@@ -42,7 +42,7 @@ public class Text
         return lines;
     }
     
-    private List<LineView> UpdateLineViews(List<LineView> lineViews)
+    private List<LineWrap> UpdateLineWraps(List<LineWrap> lineViews)
     {
         lineViews.Clear();
         int i = 0;
@@ -50,7 +50,7 @@ public class Text
         {
             for (int j = 0; j < line.RenderCount; j++)
             {
-                lineViews.Add(new LineView { LineIndex = i, RenderIndex = j });
+                lineViews.Add(new LineWrap { LineIndex = i, RenderIndex = j });
             }
             i++;
         }

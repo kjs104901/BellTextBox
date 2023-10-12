@@ -75,7 +75,7 @@ public class FontStyle : IComparable<FontStyle>
         var stopwatch = Stopwatch.StartNew();
 
         var imFontPtr = ImGui.GetIO().Fonts
-            .AddFontFromFileTTF(@"Fonts\MaruBuri.ttf", 26.0f, null, ImGui.GetIO().Fonts.GetGlyphRangesKorean());
+            .AddFontFromFileTTF(@"Fonts\MaruBuri.ttf", 18.0f, null, ImGui.GetIO().Fonts.GetGlyphRangesKorean());
         imGuiRenderer.RecreateFontDeviceTexture(graphicsDevice);
 
         var imGuiBellTextBox = new ImGuiBellTextBox();

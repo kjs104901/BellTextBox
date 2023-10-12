@@ -23,7 +23,7 @@ public partial class TextBox
 
     // Action
     internal readonly CommandSetHistory CommandSetHistory = new();
-    internal readonly Cursor Cursor = new();
+    internal readonly Caret Caret = new();
 
     public TextBox()
     {

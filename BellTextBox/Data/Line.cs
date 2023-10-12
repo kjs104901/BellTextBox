@@ -4,15 +4,6 @@ using Bell.Render;
 
 namespace Bell.Data;
 
-[Flags]
-public enum Marker
-{
-    None = 0,
-
-    Fold = 1 << 0,
-    Unfold = 1 << 1
-}
-
 public class Line
 {
     private TextBox _textBox;
@@ -41,22 +32,6 @@ public class Line
     public bool Folded = false;
 
     public int RenderCount => Visible ? LineRenders.Count : 0;
-
-    private Marker Marker
-    {
-        get
-        {
-            if (Visible)
-            {
-                if (Folded)
-                    return Marker.Unfold;
-                if (Foldable)
-                    return Marker.Fold;
-            }
-
-            return Marker.None;
-        }
-    }
 
     public Line(TextBox textBox)
     {
@@ -95,22 +70,40 @@ public class Line
                 styles[i] = FontStyle.LineCommentFontStyle;
             }
         }
+
         return styles;
     }
 
     private HashSet<int> UpdateCutoff(HashSet<int> cutoffs)
     {
         cutoffs.Clear();
-        float widthAccumulated = 0.0f;
-        for (int i = 0; i < _chars.Count; i++)
+        if (_textBox.WrapMode == WrapMode.Word || _textBox.WrapMode == WrapMode.BreakWord)
         {
-            widthAccumulated += _textBox.FontSizeManager.GetFontWidth(_chars[i]);
-            if (widthAccumulated + _textBox.FontSizeManager.GetFontReferenceWidth() > 100)
+            float widthAccumulated = 0.0f;
+            for (int i = 0; i < _chars.Count; i++)
             {
-                cutoffs.Add(i);
-                widthAccumulated = 0;
+                widthAccumulated += _textBox.FontSizeManager.GetFontWidth(_chars[i]);
+                if (widthAccumulated + _textBox.FontSizeManager.GetFontReferenceWidth() >
+                    500 - _textBox.LineNumberWidth - _textBox.FoldWidth) // TODO handle width
+                {
+                    if (_textBox.WrapMode == WrapMode.BreakWord)
+                    {
+                        cutoffs.Add(i);
+                        widthAccumulated = 0;
+                    }
+                    else if (_textBox.WrapMode == WrapMode.Word)
+                    {
+                        // go back to the start of word
+                        while (i > 0 && false == char.IsWhiteSpace(_chars[i]))
+                            i--;
+                        
+                        cutoffs.Add(i);
+                        widthAccumulated = 0;
+                    }
+                }
             }
         }
+
         return cutoffs;
     }
 
@@ -122,6 +115,7 @@ public class Line
             if (trimmedString.StartsWith(folding.Item1))
                 return true;
         }
+
         return false;
     }
 
@@ -142,14 +136,14 @@ public class Line
         lineRenders.Clear();
 
         LineRender lineRender = LineRender.Create();
-        
+
         bool isFirstCharInLine = true;
         FontStyle groupStyle = FontStyle.DefaultFontStyle;
 
         _buffers.Clear();
         float bufferWidth = 0.0f;
         int wrapIndex = 0;
-        
+
         for (int i = 0; i < _chars.Count; i++)
         {
             if (isFirstCharInLine)
@@ -158,13 +152,14 @@ public class Line
                 {
                     groupStyle = firstStyle;
                 }
+
                 _buffers.Add(_chars[i]);
                 bufferWidth += _textBox.FontSizeManager.GetFontWidth(_chars[i]);
 
                 isFirstCharInLine = false;
                 continue;
             }
-            
+
             if (false == Styles.TryGetValue(i, out var charStyle))
             {
                 charStyle = FontStyle.DefaultFontStyle;
@@ -172,19 +167,21 @@ public class Line
 
             if (groupStyle != charStyle) // need new group
             {
-                lineRender.TextBlockRenders.Add(new() { Text = String.Concat(_buffers), FontStyle = groupStyle, Width = bufferWidth});
-                
+                lineRender.TextBlockRenders.Add(new()
+                    { Text = String.Concat(_buffers), FontStyle = groupStyle, Width = bufferWidth });
+
                 groupStyle = charStyle;
                 _buffers.Clear();
                 bufferWidth = 0.0f;
             }
-            
+
             _buffers.Add(_chars[i]);
             bufferWidth += _textBox.FontSizeManager.GetFontWidth(_chars[i]);
-            
+
             if (Cutoffs.Contains(i)) // need new line
             {
-                lineRender.TextBlockRenders.Add(new() { Text = String.Concat(_buffers), FontStyle = groupStyle, Width = bufferWidth });
+                lineRender.TextBlockRenders.Add(new()
+                    { Text = String.Concat(_buffers), FontStyle = groupStyle, Width = bufferWidth });
                 lineRenders.Add(lineRender);
                 wrapIndex++;
 
@@ -196,11 +193,12 @@ public class Line
                 bufferWidth = 0.0f;
             }
         }
-        
+
         // Add remains
         if (_buffers.Count > 0 || wrapIndex == 0)
-            lineRender.TextBlockRenders.Add(new() { Text = String.Concat(_buffers), FontStyle = groupStyle, Width = bufferWidth });
-        
+            lineRender.TextBlockRenders.Add(new()
+                { Text = String.Concat(_buffers), FontStyle = groupStyle, Width = bufferWidth });
+
         if (lineRender.TextBlockRenders.Count > 0)
             lineRenders.Add(lineRender);
 

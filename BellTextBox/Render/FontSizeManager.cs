@@ -35,6 +35,8 @@ public class FontSizeManager
 
     public float GetFontWidth(char c)
     {
+        // TODO handle \t width?
+        
         if (false == _sizeWidthCache.TryGetValue(c, out float fontWidth))
         {
             var rectSize = _textBox.GetCharRenderSize(c);

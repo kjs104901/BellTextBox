@@ -45,8 +45,8 @@ public class Page
 
         for (int i = textStart.Row; i <= textEnd.Row; i++)
         {
-            LineView lineView = _textBox.Text.LineViews[i];
-            var lineRender = _textBox.Text.Lines[lineView.LineIndex].GetLineRender(lineView.RenderIndex);
+            LineWrap lineWrap = _textBox.Text.LineWraps[i];
+            var lineRender = _textBox.Text.Lines[lineWrap.LineIndex].GetLineRender(lineWrap.RenderIndex);
 
             lineRender.PosX = 0;
             lineRender.PosY = i * _textBox.FontSizeManager.GetFontHeight();
@@ -60,7 +60,7 @@ public class Page
     private PageRender UpdateRender(PageRender render)
     {
         render.Size.Width = 500; //TODO find width from render
-        render.Size.Height = _textBox.Text.LineViews.Count * _textBox.FontSizeManager.GetFontHeight();
+        render.Size.Height = _textBox.Text.LineWraps.Count * _textBox.FontSizeManager.GetFontHeight();
         return render;
     }
 }

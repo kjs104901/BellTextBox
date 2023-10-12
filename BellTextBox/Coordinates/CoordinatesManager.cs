@@ -16,7 +16,7 @@ public class CoordinatesManager
     {
         PageCoordinates pageCoordinates = new()
         {
-            X = viewCoordinates.X - _textBox.LineNumberWidth - _textBox.MarkerWidth,
+            X = viewCoordinates.X - _textBox.LineNumberWidth - _textBox.FoldWidth,
             Y = viewCoordinates.Y
         };
         return pageCoordinates;
@@ -29,8 +29,8 @@ public class CoordinatesManager
         int row = (int)(pageCoordinates.Y / _textBox.FontSizeManager.GetFontHeight()) + offset;
         if (row < 0)
             row = 0;
-        if (row >= _textBox.Text.LineViews.Count)
-            row = _textBox.Text.LineViews.Count - 1;
+        if (row >= _textBox.Text.LineWraps.Count)
+            row = _textBox.Text.LineWraps.Count - 1;
         
         if (pageCoordinates.X < -_textBox.LineNumberWidth)
         {
@@ -39,14 +39,14 @@ public class CoordinatesManager
         }
         else if (pageCoordinates.X < 0.0f)
         {
-            textCoordinates.IsMarker = true;
+            textCoordinates.IsFold = true;
             textCoordinates.Column = -1;
         }
         else
         {
-            LineView lineView = _textBox.Text.LineViews[row];
-            Line line = _textBox.Text.Lines[lineView.LineIndex];
-            LineRender lineRender = line.LineRenders[lineView.RenderIndex];
+            LineWrap lineWrap = _textBox.Text.LineWraps[row];
+            Line line = _textBox.Text.Lines[lineWrap.LineIndex];
+            LineRender lineRender = line.LineRenders[lineWrap.RenderIndex];
 
             int column = 0;
             float pageX = pageCoordinates.X;

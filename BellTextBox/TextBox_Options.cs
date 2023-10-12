@@ -37,5 +37,5 @@ public partial class TextBox
     public Language Language { get; set; } = Language.PlainText();
     
     public float LineNumberWidth { get; set; } = 20.0f;
-    public float MarkerWidth { get; set; } = 10.0f;
+    public float FoldWidth { get; set; } = 10.0f;
 }

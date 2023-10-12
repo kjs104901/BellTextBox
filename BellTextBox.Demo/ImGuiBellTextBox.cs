@@ -14,7 +14,7 @@ namespace BellTextBox.Demo;
 public class ImGuiBellTextBox : TextBox
 {
     private ImDrawListPtr _drawList;
-    private Vector2 _screenPos;
+    private Vector2 _drawPos;
     
     private readonly List<ValueTuple<ImGuiKey, HotKeys>> _keyboardMapping = new()
     {
@@ -70,10 +70,10 @@ public class ImGuiBellTextBox : TextBox
             ImGuiWindowFlags.NoScrollbar);
 
         _drawList = ImGui.GetWindowDrawList();
-        _screenPos = ImGui.GetCursorScreenPos();
+        _drawPos = ImGui.GetCursorScreenPos();
         
         InputStart();
-        _drawList.AddText(_screenPos, ImGui.ColorConvertFloat4ToU32(new Vector4(0.2f, 0.1f, 0.1f, 1.0f)),
+        _drawList.AddText(_drawPos, ImGui.ColorConvertFloat4ToU32(new Vector4(0.2f, 0.1f, 0.1f, 1.0f)),
             ImGui.IsWindowFocused().ToString());
 
         ImGui.Text(ImGui.IsWindowFocused().ToString());
@@ -99,8 +99,8 @@ public class ImGuiBellTextBox : TextBox
             KeyboardInput.ImeComposition = ImeHandler.GetCompositionString();
 
             var mouse = ImGui.GetMousePos();
-            MouseInput.X = mouse.X - _screenPos.X;
-            MouseInput.Y = mouse.Y - _screenPos.Y;
+            MouseInput.X = mouse.X - _drawPos.X;
+            MouseInput.Y = mouse.Y - _drawPos.Y;
 
             ImGui.SetMouseCursor(ImGuiMouseCursor.TextInput);
 
@@ -147,7 +147,7 @@ public class ImGuiBellTextBox : TextBox
     protected override void RenderText(Vector2 pos, string text, FontStyle fontStyle)
     {
         var color = new Vector4(fontStyle.R, fontStyle.G, fontStyle.B, fontStyle.A);
-        _drawList.AddText(new Vector2(_screenPos.X + pos.X, _screenPos.Y + pos.Y),
+        _drawList.AddText(new Vector2(_drawPos.X + pos.X, _drawPos.Y + pos.Y),
             ImGui.ColorConvertFloat4ToU32(color), text);
     }
 }
