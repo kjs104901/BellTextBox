@@ -28,6 +28,8 @@ namespace Bell.Languages;
 public class FontStyle : IComparable<FontStyle>
 {
     private readonly string _id;
+    
+    // 한글 주석 테스트
 
     public float R;
     public float G;
@@ -38,6 +40,8 @@ public class FontStyle : IComparable<FontStyle>
     {
         _id = id;
     }
+    
+    // 한글 주석 테스트
 
     public static readonly FontStyle DefaultFontStyle = new(""Default"") { R = 0.4f, G = 0.8f, B = 0.2f, A = 1.0f };
     public static readonly FontStyle LineCommentFontStyle = new(""LineComment"") { R = 0.3f, G = 0.4f, B = 0.8f, A = 1.0f };
@@ -71,7 +75,7 @@ public class FontStyle : IComparable<FontStyle>
         var stopwatch = Stopwatch.StartNew();
 
         var imFontPtr = ImGui.GetIO().Fonts
-            .AddFontFromFileTTF(@"gulim.ttc", 13.0f, null, ImGui.GetIO().Fonts.GetGlyphRangesKorean());
+            .AddFontFromFileTTF(@"Fonts\MaruBuri.ttf", 26.0f, null, ImGui.GetIO().Fonts.GetGlyphRangesKorean());
         imGuiRenderer.RecreateFontDeviceTexture(graphicsDevice);
 
         var imGuiBellTextBox = new ImGuiBellTextBox();
