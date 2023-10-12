@@ -37,4 +37,5 @@ public struct KeyboardInput
 {
     public HotKeys HotKeys;
     public List<char> Chars;
+    public string ImeComposition;
 }

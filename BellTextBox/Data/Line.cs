@@ -13,9 +13,9 @@ public enum Marker
     Unfold = 1 << 1
 }
 
-public class Line : IDisposable
+public class Line
 {
-    private TextBox? _textBox;
+    private TextBox _textBox;
 
     public int Index = 0;
 
@@ -58,7 +58,7 @@ public class Line : IDisposable
         }
     }
 
-    public Line(TextBox? textBox)
+    public Line(TextBox textBox)
     {
         _textBox = textBox;
 
@@ -100,9 +100,6 @@ public class Line : IDisposable
 
     private HashSet<int> UpdateCutoff(HashSet<int> cutoffs)
     {
-        if (null == _textBox || null == _textBox.FontSizeManager)
-            return cutoffs;
-        
         cutoffs.Clear();
         float widthAccumulated = 0.0f;
         for (int i = 0; i < _chars.Count; i++)
@@ -119,9 +116,6 @@ public class Line : IDisposable
 
     private bool UpdateFoldable(bool _)
     {
-        if (null == _textBox)
-            return _;
-        
         var trimmedString = String.TrimStart();
         foreach (ValueTuple<string, string> folding in _textBox.Language.Foldings)
         {
@@ -133,9 +127,6 @@ public class Line : IDisposable
 
     private string UpdateString(string _)
     {
-        if (null == _textBox)
-            return _;
-        
         _textBox.StringBuilder.Clear();
         _textBox.StringBuilder.Append(CollectionsMarshal.AsSpan(_chars));
         return _textBox.StringBuilder.ToString();
@@ -148,9 +139,6 @@ public class Line : IDisposable
 
     private List<LineRender> UpdateLineRenders(List<LineRender> lineRenders)
     {
-        if (null == _textBox || null == _textBox.FontSizeManager)
-            return lineRenders;
-        
         lineRenders.Clear();
 
         LineRender lineRender = LineRender.Create();
@@ -217,10 +205,5 @@ public class Line : IDisposable
             lineRenders.Add(lineRender);
 
         return lineRenders;
-    }
-
-    public void Dispose()
-    {
-        _textBox = null;
     }
 }

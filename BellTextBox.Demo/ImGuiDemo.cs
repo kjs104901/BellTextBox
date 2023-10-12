@@ -93,12 +93,7 @@ abc 123s
             .AddFontFromFileTTF(@"gulim.ttc", 13.0f, null, ImGui.GetIO().Fonts.GetGlyphRangesKorean());
         imGuiRenderer.RecreateFontDeviceTexture(graphicsDevice);
 
-        var backend = new ImGuiBackend
-        {
-            Size = new Vector2(-1, -1)
-        };
-
-        var editor = new TextBox(backend);
+        var imGuiBellTextBox = new ImGuiBellTextBox(new Vector2(-1, -1));
         
         while (sdl2Window.Exists)
         {
@@ -121,8 +116,8 @@ abc 123s
             
             ImGui.InputTextMultiline("Test", ref textInput, 1024, new Vector2(-1, 300));
 
-            editor.SetText(textInput);
-            editor.Render();
+            imGuiBellTextBox.SetText(textInput);
+            imGuiBellTextBox.Update();
 
             //ImGui.SameLine();
             ImGui.InputText("Test2", ref textInput, 1024);

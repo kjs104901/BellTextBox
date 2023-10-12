@@ -3,9 +3,9 @@ using Bell.Render;
 
 namespace Bell.Data;
 
-public class Page : IDisposable
+public class Page
 {
-    private TextBox? _textBox;
+    private TextBox _textBox;
 
     public PageRender Render => RenderCache.Get();
     public readonly Cache<PageRender> RenderCache;
@@ -17,7 +17,7 @@ public class Page : IDisposable
     private ViewCoordinates _viewStart;
     private ViewCoordinates _viewEnd;
 
-    public Page(TextBox? textBox)
+    public Page(TextBox textBox)
     {
         _textBox = textBox;
 
@@ -35,11 +35,6 @@ public class Page : IDisposable
 
     private List<LineRender> UpdateLineRenders(List<LineRender> lineRenders)
     {
-        if (null == _textBox || null == _textBox.Text ||
-            null == _textBox.FontSizeManager ||
-            null == _textBox.CoordinatesManager)
-            return lineRenders;
-
         lineRenders.Clear();
 
         var pageStart = _textBox.CoordinatesManager.Convert(_viewStart);
@@ -64,16 +59,8 @@ public class Page : IDisposable
 
     private PageRender UpdateRender(PageRender render)
     {
-        if (null == _textBox || null == _textBox.Text || null == _textBox.FontSizeManager)
-            return render;
-
         render.Size.Width = 500; //TODO find width from render
         render.Size.Height = _textBox.Text.LineViews.Count * _textBox.FontSizeManager.GetFontHeight();
         return render;
-    }
-
-    public void Dispose()
-    {
-        _textBox = null;
     }
 }

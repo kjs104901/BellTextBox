@@ -2,9 +2,9 @@
 
 namespace Bell.Render;
 
-public class FontSizeManager : IDisposable
+public class FontSizeManager
 {
-    private TextBox? _textBox;
+    private readonly TextBox _textBox;
     private readonly Dictionary<RectSize, Dictionary<char, float>> _sizeCacheDictionary = new();
 
     private RectSize _referenceSize;
@@ -12,7 +12,7 @@ public class FontSizeManager : IDisposable
     private Dictionary<char, float> _sizeWidthCache;
     private float _sizeHeight;
     
-    public FontSizeManager(TextBox? textBox)
+    public FontSizeManager(TextBox textBox)
     {
         _textBox = textBox;
         _sizeWidthCache = new();
@@ -21,10 +21,7 @@ public class FontSizeManager : IDisposable
 
     public void UpdateReferenceSize()
     {
-        if (null == _textBox)
-            return;
-        
-        _referenceSize = _textBox.TextBoxBackend.GetCharRenderSize('#');
+        _referenceSize = _textBox.GetCharRenderSize('#');
         _sizeCacheDictionary.TryAdd(_referenceSize, new Dictionary<char, float>());
         _sizeWidthCache = _sizeCacheDictionary[_referenceSize];
 
@@ -38,12 +35,9 @@ public class FontSizeManager : IDisposable
 
     public float GetFontWidth(char c)
     {
-        if (null == _textBox)
-            return 1.0f;
-        
         if (false == _sizeWidthCache.TryGetValue(c, out float fontWidth))
         {
-            var rectSize = _textBox.TextBoxBackend.GetCharRenderSize(c);
+            var rectSize = _textBox.GetCharRenderSize(c);
 
             fontWidth = rectSize.Width;
             _sizeWidthCache[c] = fontWidth;
@@ -55,10 +49,5 @@ public class FontSizeManager : IDisposable
     public float GetFontHeight()
     {
         return _sizeHeight;
-    }
-
-    public void Dispose()
-    {
-        _textBox = null;
     }
 }

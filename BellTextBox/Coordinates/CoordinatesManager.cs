@@ -3,32 +3,28 @@ using Bell.Render;
 
 namespace Bell.Coordinates;
 
-public class CoordinatesManager : IDisposable
+public class CoordinatesManager
 {
-    private TextBox? _textBox;
+    private readonly TextBox _textBox;
 
-    public CoordinatesManager(TextBox? textBox)
+    public CoordinatesManager(TextBox textBox)
     {
         _textBox = textBox;
     }
 
     public PageCoordinates Convert(ViewCoordinates viewCoordinates)
     {
-        PageCoordinates pageCoordinates = new();
-        if (null == _textBox || null == _textBox.Text || null == _textBox.FontSizeManager)
-            return pageCoordinates;
-
-        pageCoordinates.X = viewCoordinates.X - _textBox.LineNumberWidth - _textBox.MarkerWidth;
-        pageCoordinates.Y = viewCoordinates.Y;
-
+        PageCoordinates pageCoordinates = new()
+        {
+            X = viewCoordinates.X - _textBox.LineNumberWidth - _textBox.MarkerWidth,
+            Y = viewCoordinates.Y
+        };
         return pageCoordinates;
     }
 
     public TextCoordinates Convert(PageCoordinates pageCoordinates, int offset = 0)
     {
         TextCoordinates textCoordinates = new();
-        if (null == _textBox || null == _textBox.Text || null == _textBox.FontSizeManager)
-            return textCoordinates;
         
         int row = (int)(pageCoordinates.Y / _textBox.FontSizeManager.GetFontHeight()) + offset;
         if (row < 0)
@@ -81,10 +77,5 @@ public class CoordinatesManager : IDisposable
         textCoordinates.Row = row;
         
         return textCoordinates;
-    }
-    
-    public void Dispose()
-    {
-        _textBox = null;
     }
 }

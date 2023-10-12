@@ -2,13 +2,16 @@
 using Bell;
 using ImGuiNET;
 using System.Numerics;
+using System.Runtime.InteropServices;
+using System.Text;
 using Bell.Data;
 using Bell.Inputs;
 using Bell.Languages;
 
 namespace BellTextBox.Demo;
 
-public class ImGuiBackend : TextBoxBackend
+
+public class ImGuiBellTextBox : TextBox
 {
     public Vector2 Size;
 
@@ -17,17 +20,7 @@ public class ImGuiBackend : TextBoxBackend
     private ImDrawListPtr _drawList;
 
     private Vector2 _screenPos;
-
-    public override void SetClipboard(string text)
-    {
-        throw new NotImplementedException();
-    }
-
-    public override string GetClipboard()
-    {
-        throw new NotImplementedException();
-    }
-
+    
     private readonly List<ValueTuple<ImGuiKey, HotKeys>> _keyboardMapping = new()
     {
         (ImGuiKey.A, HotKeys.A),
@@ -53,13 +46,16 @@ public class ImGuiBackend : TextBoxBackend
         (ImGuiKey.Enter, HotKeys.Enter),
         (ImGuiKey.Tab, HotKeys.Tab),
     };
-
-    public ImGuiBackend()
+    
+    public ImGuiBellTextBox(Vector2 size)
     {
-        KeyboardInput.Chars = new();
+        Size = size;
+        
+        KeyboardInput.Chars = new(); // TODO MOVE
     }
 
-    public override void Begin()
+
+    public void Update()
     {
         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, new Vector2(0, 0));
         ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, new Vector2(0, 0));
@@ -82,32 +78,12 @@ public class ImGuiBackend : TextBoxBackend
         _drawList = ImGui.GetWindowDrawList();
         
         ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.2f, 0.1f, 0.1f, 1.0f));
-        ImGui.BeginChild("##Page", new Vector2(PageRender.Size.Width, PageRender.Size.Height), false,
+        ImGui.BeginChild("##Page", new Vector2(Page.Render.Size.Width, Page.Render.Size.Height), false,
             ImGuiWindowFlags.NoScrollbar);
 
         _screenPos = ImGui.GetCursorScreenPos();
-    }
-
-    public override void End()
-    {
-        ImGui.EndChild();
-        ImGui.PopStyleColor();
         
-        ImGui.End();
-        ImGui.EndChild();
-        ImGui.PopStyleVar(5);
-    }
-    
-    public override void Input()
-    {
-        // TODO make reset func
-        KeyboardInput.HotKeys = HotKeys.None;
-        KeyboardInput.Chars.Clear();
-
-        MouseInput.X = 0.0f;
-        MouseInput.Y = 0.0f;
-        MouseInput.MouseKey = MouseKey.None;
-
+        InputStart();
         _drawList.AddText(_screenPos, ImGui.ColorConvertFloat4ToU32(new Vector4(0.2f, 0.1f, 0.1f, 1.0f)),
             ImGui.IsWindowFocused().ToString());
 
@@ -131,6 +107,7 @@ public class ImGuiBackend : TextBoxBackend
             {
                 KeyboardInput.Chars.Add((char)io.InputQueueCharacters[i]);
             }
+            KeyboardInput.ImeComposition = ImeHandler.GetCompositionString();
 
             var mouse = ImGui.GetMousePos();
             MouseInput.X = mouse.X - _screenPos.X;
@@ -150,6 +127,26 @@ public class ImGuiBackend : TextBoxBackend
         ViewInput.Y = _scroll.Y;
         ViewInput.W = _contentSize.X;
         ViewInput.H = _contentSize.Y;
+        InputEnd();
+        
+        Render();
+        
+        ImGui.EndChild();
+        ImGui.PopStyleColor();
+        
+        ImGui.End();
+        ImGui.EndChild();
+        ImGui.PopStyleVar(5);
+    }
+
+    public override void SetClipboard(string text)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override string GetClipboard()
+    {
+        throw new NotImplementedException();
     }
 
     public override RectSize GetCharRenderSize(char c)
@@ -158,10 +155,49 @@ public class ImGuiBackend : TextBoxBackend
         return new RectSize { Width = fontSize.X, Height = fontSize.Y };
     }
 
-    public override void RenderText(Vector2 pos, string text, FontStyle fontStyle)
+    protected override void RenderText(Vector2 pos, string text, FontStyle fontStyle)
     {
         var color = new Vector4(fontStyle.R, fontStyle.G, fontStyle.B, fontStyle.A);
         _drawList.AddText(new Vector2(_screenPos.X + pos.X, _screenPos.Y + pos.Y),
             ImGui.ColorConvertFloat4ToU32(color), text);
+    }
+}
+
+
+public static class ImeHandler
+{
+    [DllImport("imm32.dll", CharSet = CharSet.Unicode)]
+    private static extern IntPtr ImmGetContext(IntPtr hWnd);
+
+    [DllImport("imm32.dll", CharSet = CharSet.Unicode)]
+    private static extern bool ImmReleaseContext(IntPtr hWnd, IntPtr hIMC);
+
+    [DllImport("imm32.dll", CharSet = CharSet.Unicode)]
+    private static extern int ImmGetCompositionString(IntPtr hIMC, uint dwIndex, byte[]? lpBuf, int dwBufLen);
+    
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetFocus();
+
+    private const uint GCS_COMPSTR = 0x0008;
+    
+    public static string GetCompositionString()
+    {
+        IntPtr hWnd = GetFocus(); // Get the handle to the active window
+        IntPtr hIMC = ImmGetContext(hWnd); // Get the Input Context
+        try
+        {
+            int strLen = ImmGetCompositionString(hIMC, GCS_COMPSTR, null, 0);
+            if (strLen > 0)
+            {
+                byte[]? buffer = new byte[strLen];
+                ImmGetCompositionString(hIMC, GCS_COMPSTR, buffer, strLen);
+                return Encoding.Unicode.GetString(buffer);
+            }
+            return string.Empty;
+        }
+        finally
+        {
+            ImmReleaseContext(hWnd, hIMC);
+        }
     }
 }

@@ -6,12 +6,37 @@ namespace Bell;
 
 public partial class TextBox
 {
+    protected KeyboardInput KeyboardInput;
+    protected MouseInput MouseInput;
+    protected ViewInput ViewInput;
+
     public string ClipboardText = "";
 
     private TextCoordinates _debugTextCoordinates;
     
-    private void ProcessKeyboardHotKeys(HotKeys hk)
+    protected void InputStart()
     {
+        KeyboardInput.HotKeys = HotKeys.None;
+        KeyboardInput.Chars.Clear();
+        KeyboardInput.ImeComposition = string.Empty;
+
+        MouseInput.X = 0.0f;
+        MouseInput.Y = 0.0f;
+        MouseInput.MouseKey = MouseKey.None;
+    }
+
+    protected void InputEnd()
+    {
+        ProcessKeyboardHotKeys();
+        ProcessKeyboardChars();
+        ProcessMouseInput();
+        ProcessViewInput();
+    }
+
+    private void ProcessKeyboardHotKeys()
+    {
+        var hk = KeyboardInput.HotKeys;
+        
         if (hk.HasFlag(HotKeys.Ctrl | HotKeys.Z)) // Undo
             CommandSetHistory.Undo();
         else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.Y)) // Redo
@@ -185,10 +210,10 @@ public partial class TextBox
         }
     }
 
-    private void ProcessKeyboardChars(List<char> keyboardInputChars)
+    private void ProcessKeyboardChars()
     {
         CommandSet commandSet = new();
-        foreach (char keyboardInputChar in keyboardInputChars)
+        foreach (char keyboardInputChar in KeyboardInput.Chars)
         {
             if (keyboardInputChar == 0)
                 continue;
@@ -222,25 +247,24 @@ public partial class TextBox
         // ...
     }
 
-    private void ProcessMouseInput(HotKeys hk, MouseInput mouseInput)
+    private void ProcessMouseInput()
     {
-        if (null == Page || null == CoordinatesManager)
-            return;
-
-        var viewCoordinates = new ViewCoordinates() { X = mouseInput.X, Y = mouseInput.Y };
+        var hk = KeyboardInput.HotKeys;
+        
+        var viewCoordinates = new ViewCoordinates() { X = MouseInput.X, Y = MouseInput.Y };
         var pageCoordinates = CoordinatesManager.Convert(viewCoordinates);
         var textCoordinates = CoordinatesManager.Convert(pageCoordinates);
 
         if (textCoordinates.IsMarker)
         {
-            if (MouseKey.Click == mouseInput.MouseKey)
+            if (MouseKey.Click == MouseInput.MouseKey)
             {
                 //TODO fold unfold
             }
             return;
         }
 
-        if (MouseKey.Click == mouseInput.MouseKey)
+        if (MouseKey.Click == MouseInput.MouseKey)
         {
             if (hk.HasFlag(HotKeys.Shift))
             {
@@ -256,7 +280,7 @@ public partial class TextBox
 
             _debugTextCoordinates = textCoordinates;
         }
-        else if (MouseKey.DoubleClick == mouseInput.MouseKey)
+        else if (MouseKey.DoubleClick == MouseInput.MouseKey)
         {
             if (hk.HasFlag(HotKeys.Shift)) // Select Line
             {
@@ -277,26 +301,23 @@ public partial class TextBox
                 DoActionSet(commandSet);
             }
         }
-        else if (MouseKey.Dragging == mouseInput.MouseKey)
+        else if (MouseKey.Dragging == MouseInput.MouseKey)
         {
             DoAction(new MoveCursorSelectionCommand(textCoordinates));
         }
     }
 
-    private void ProcessViewInput(ViewInput viewInput)
+    private void ProcessViewInput()
     {
-        if (null == Page)
-            return;
-
         var start = new ViewCoordinates()
         {
-            X = viewInput.X,
-            Y = viewInput.Y
+            X = ViewInput.X,
+            Y = ViewInput.Y
         };
         var end = new ViewCoordinates()
         {
-            X = viewInput.X + viewInput.W,
-            Y = viewInput.Y + viewInput.H
+            X = ViewInput.X + ViewInput.W,
+            Y = ViewInput.Y + ViewInput.H
         };
         Page.UpdateView(start, end);
     }

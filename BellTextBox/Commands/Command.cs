@@ -9,8 +9,5 @@ internal abstract class Command
 
 internal abstract class EditCommand : Command
 {
-    private Cursor? _beforeCursor = null;
-    private Cursor? _afterCursor = null;
-    
     public abstract void Undo(TextBox textBox);
 }
