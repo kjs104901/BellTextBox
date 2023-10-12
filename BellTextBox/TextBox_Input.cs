@@ -1,6 +1,7 @@
 ﻿using Bell.Commands;
 using Bell.Coordinates;
 using Bell.Inputs;
+using Action = Bell.Commands.Action;
 
 namespace Bell;
 
@@ -12,7 +13,7 @@ public partial class TextBox
 
     public string ClipboardText = "";
 
-    private TextCoordinates _debugTextCoordinates;
+    private TextCoordinates _debugTextCoordinates; // TODO Delete
     
     protected void InputStart()
     {
@@ -38,171 +39,171 @@ public partial class TextBox
         var hk = KeyboardInput.HotKeys;
         
         if (hk.HasFlag(HotKeys.Ctrl | HotKeys.Z)) // Undo
-            CommandSetHistory.Undo();
+            ActionHistory.Undo();
         else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.Y)) // Redo
-            CommandSetHistory.Redo();
+            ActionHistory.Redo();
         else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.C)) // copy
             DoAction(new CopyCommand());
         else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.V)) // Paste
             DoAction(new PasteCommand());
         else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.X)) // Cut
         {
-            CommandSet commandSet = new();
-            commandSet.Add(new CopyCommand());
+            Action action = new();
+            action.Add(new CopyCommand());
             //TODO Delete select
-            //commandSet.Add(new DeleteSelectionCommand());
-            //commandSet.Add(new MoveCaretSelectionCommand(Caret.Position));
-            DoActionSet(commandSet);
+            //action.Add(new DeleteSelectionCommand());
+            //action.Add(new MoveCaretSelectionCommand(Caret.Position));
+            DoActionSet(action);
         }
         else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.A)) // Select All
         {
-            CommandSet commandSet = new();
-            commandSet.Add(new MoveCaretSelectionCommand(CaretMove.StartOfFile));
-            commandSet.Add(new MoveCaretPositionCommand(CaretMove.EndOfFile));
-            DoActionSet(commandSet);
+            Action action = new();
+            action.Add(new MoveCaretSelectionCommand(CaretMove.StartOfFile));
+            action.Add(new MoveCaretPositionCommand(CaretMove.EndOfFile));
+            DoActionSet(action);
         }
         else if (hk.HasFlag(HotKeys.Delete)) // Delete
         {
-            CommandSet commandSet = new();
-            if (Caret.HasSelection)
+            Action action = new();
+            if (CaretManager.HasSelection())
             {
                 //TODO Delete select
-                //commandSet.Add(new DeleteSelectionCommand());
-                //commandSet.Add(new MoveCaretSelectionCommand(Caret.Position));
+                //action.Add(new DeleteSelectionCommand());
+                //action.Add(new MoveCaretSelectionCommand(Caret.Position));
             }
             else
             {
                 if (hk.HasFlag(HotKeys.Shift))
                 {
-                    //commandSet.Add(new DeleteLineCommand());
+                    //action.Add(new DeleteLineCommand());
                 }
                 else
                 {
-                    commandSet.Add(new DeleteCommand(EditDirection.Forward, 1));
+                    action.Add(new DeleteCommand(EditDirection.Forward, 1));
                 }
             }
 
-            DoActionSet(commandSet);
+            DoActionSet(action);
         }
         else if (hk.HasFlag(HotKeys.Backspace)) // Backspace
         {
-            CommandSet commandSet = new();
-            if (Caret.HasSelection)
+            Action action = new();
+            if (CaretManager.HasSelection())
             {
                 //TODO Delete select
-                //commandSet.Add(new DeleteSelectionCommand());
-                //commandSet.Add(new MoveCaretSelectionCommand(Caret.Position));
+                //action.Add(new DeleteSelectionCommand());
+                //action.Add(new MoveCaretSelectionCommand(Caret.Position));
             }
             else
             {
                 //TODO 시작이었다면 위로 머지
-                commandSet.Add(new DeleteCommand(EditDirection.Backward, 1));
+                action.Add(new DeleteCommand(EditDirection.Backward, 1));
             }
 
-            DoActionSet(commandSet);
+            DoActionSet(action);
         }
         else if (hk.HasFlag(HotKeys.Enter)) // Enter
         {
-            CommandSet commandSet = new();
-            if (Caret.HasSelection)
+            Action action = new();
+            if (CaretManager.HasSelection())
             {
                 //TODO Delete select
-                //commandSet.Add(new DeleteSelectionCommand());
-                //commandSet.Add(new MoveCaretSelectionCommand(Caret.Position));
+                //action.Add(new DeleteSelectionCommand());
+                //action.Add(new MoveCaretSelectionCommand(Caret.Position));
             }
 
             //TODO SplitLine
             //actionSet.Add(new InputChar('\n'));
-            DoActionSet(commandSet);
+            DoActionSet(action);
         }
         else if (hk.HasFlag(HotKeys.Tab)) // Tab
         {
-            CommandSet commandSet = new();
-            if (Caret.HasSelection)
+            Action action = new();
+            if (CaretManager.HasSelection())
             {
                 if (hk.HasFlag(HotKeys.Shift))
-                    commandSet.Add(new UnindentSelection());
+                    action.Add(new UnindentSelection());
                 else
-                    commandSet.Add(new IndentSelection());
+                    action.Add(new IndentSelection());
             }
             else
             {
-                commandSet.Add(new InputChar(EditDirection.Forward, new[] { '\t' }));
+                action.Add(new InputChar(EditDirection.Forward, new[] { '\t' }));
             }
 
-            DoActionSet(commandSet);
+            DoActionSet(action);
         }
         else if (hk.HasFlag(HotKeys.UpArrow)) // Move Up
         {
-            CommandSet commandSet = new();
-            commandSet.Add(new MoveCaretPositionCommand(CaretMove.Up));
+            Action action = new();
+            action.Add(new MoveCaretPositionCommand(CaretMove.Up));
             if (false == hk.HasFlag(HotKeys.Shift))
-                commandSet.Add(new MoveCaretSelectionCommand(CaretMove.Position));
-            DoActionSet(commandSet);
+                action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
+            DoActionSet(action);
         }
         else if (hk.HasFlag(HotKeys.DownArrow)) // Move Down
         {
-            CommandSet commandSet = new();
-            commandSet.Add(new MoveCaretPositionCommand(CaretMove.Down));
+            Action action = new();
+            action.Add(new MoveCaretPositionCommand(CaretMove.Down));
             if (false == hk.HasFlag(HotKeys.Shift))
-                commandSet.Add(new MoveCaretSelectionCommand(CaretMove.Position));
-            DoActionSet(commandSet);
+                action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
+            DoActionSet(action);
         }
         else if (hk.HasFlag(HotKeys.LeftArrow)) // Move Left
         {
-            CommandSet commandSet = new();
-            commandSet.Add(new MoveCaretPositionCommand(CaretMove.Left));
+            Action action = new();
+            action.Add(new MoveCaretPositionCommand(CaretMove.Left));
             if (false == hk.HasFlag(HotKeys.Shift))
-                commandSet.Add(new MoveCaretSelectionCommand(CaretMove.Position));
-            DoActionSet(commandSet);
+                action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
+            DoActionSet(action);
         }
         else if (hk.HasFlag(HotKeys.RightArrow)) // Move Right
         {
-            CommandSet commandSet = new();
-            commandSet.Add(new MoveCaretPositionCommand(CaretMove.Right));
+            Action action = new();
+            action.Add(new MoveCaretPositionCommand(CaretMove.Right));
             if (false == hk.HasFlag(HotKeys.Shift))
-                commandSet.Add(new MoveCaretSelectionCommand(CaretMove.Position));
-            DoActionSet(commandSet);
+                action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
+            DoActionSet(action);
         }
         else if (hk.HasFlag(HotKeys.PageUp)) // Move PageUp
         {
-            CommandSet commandSet = new();
-            commandSet.Add(new MoveCaretPositionCommand(CaretMove.PageUp));
+            Action action = new();
+            action.Add(new MoveCaretPositionCommand(CaretMove.PageUp));
             if (false == hk.HasFlag(HotKeys.Shift))
-                commandSet.Add(new MoveCaretSelectionCommand(CaretMove.Position));
-            DoActionSet(commandSet);
+                action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
+            DoActionSet(action);
         }
         else if (hk.HasFlag(HotKeys.PageDown)) // Move PageDown
         {
-            CommandSet commandSet = new();
-            commandSet.Add(new MoveCaretPositionCommand(CaretMove.PageDown));
+            Action action = new();
+            action.Add(new MoveCaretPositionCommand(CaretMove.PageDown));
             if (false == hk.HasFlag(HotKeys.Shift))
-                commandSet.Add(new MoveCaretSelectionCommand(CaretMove.Position));
-            DoActionSet(commandSet);
+                action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
+            DoActionSet(action);
         }
         else if (hk.HasFlag(HotKeys.Home))
         {
-            CommandSet commandSet = new();
+            Action action = new();
 
-            commandSet.Add(hk.HasFlag(HotKeys.Ctrl)
+            action.Add(hk.HasFlag(HotKeys.Ctrl)
                 ? new MoveCaretPositionCommand(CaretMove.EndOfFile)
                 : new MoveCaretPositionCommand(CaretMove.EndOfLine));
 
             if (false == hk.HasFlag(HotKeys.Shift))
-                commandSet.Add(new MoveCaretSelectionCommand(CaretMove.Position));
-            DoActionSet(commandSet);
+                action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
+            DoActionSet(action);
         }
         else if (hk.HasFlag(HotKeys.End))
         {
-            CommandSet commandSet = new();
+            Action action = new();
 
-            commandSet.Add(hk.HasFlag(HotKeys.Ctrl)
+            action.Add(hk.HasFlag(HotKeys.Ctrl)
                 ? new MoveCaretPositionCommand(CaretMove.StartOfFile)
                 : new MoveCaretPositionCommand(CaretMove.StartOfLine));
 
             if (false == hk.HasFlag(HotKeys.Shift))
-                commandSet.Add(new MoveCaretSelectionCommand(CaretMove.Position));
-            DoActionSet(commandSet);
+                action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
+            DoActionSet(action);
         }
         else if (hk.HasFlag(HotKeys.Insert))
         {
@@ -212,7 +213,7 @@ public partial class TextBox
 
     private void ProcessKeyboardChars()
     {
-        CommandSet commandSet = new();
+        Action action = new();
         foreach (char keyboardInputChar in KeyboardInput.Chars)
         {
             if (keyboardInputChar == 0)
@@ -233,10 +234,10 @@ public partial class TextBox
             if (keyboardInputChar < 32)
                 continue;
 
-            commandSet.Add(new InputChar(EditDirection.Forward, new[] { keyboardInputChar }));
+            action.Add(new InputChar(EditDirection.Forward, new[] { keyboardInputChar }));
         }
 
-        DoActionSet(commandSet);
+        DoActionSet(action);
     }
 
     private void DeleteSelection()
@@ -252,8 +253,8 @@ public partial class TextBox
         var hk = KeyboardInput.HotKeys;
         
         var viewCoordinates = new ViewCoordinates() { X = MouseInput.X, Y = MouseInput.Y };
-        var pageCoordinates = CoordinatesManager.Convert(viewCoordinates);
-        var textCoordinates = CoordinatesManager.Convert(pageCoordinates);
+        var pageCoordinates = CoordinatesManager.ViewToPage(viewCoordinates);
+        var textCoordinates = CoordinatesManager.PageToText(pageCoordinates);
 
         if (textCoordinates.IsFold)
         {
@@ -272,33 +273,34 @@ public partial class TextBox
             }
             else
             {
-                CommandSet commandSet = new();
-                commandSet.Add(new MoveCaretSelectionCommand(textCoordinates));
-                commandSet.Add(new MoveCaretPositionCommand(textCoordinates));
-                DoActionSet(commandSet);
+                Action action = new();
+                action.Add(new MoveCaretSelectionCommand(textCoordinates));
+                action.Add(new MoveCaretPositionCommand(textCoordinates));
+                DoActionSet(action);
             }
 
             _debugTextCoordinates = textCoordinates;
+            CaretManager.SetCaret(textCoordinates);
         }
         else if (MouseKey.DoubleClick == MouseInput.MouseKey)
         {
             if (hk.HasFlag(HotKeys.Shift)) // Select Line
             {
-                CommandSet commandSet = new();
-                commandSet.Add(new MoveCaretPositionCommand(textCoordinates));
+                Action action = new();
+                action.Add(new MoveCaretPositionCommand(textCoordinates));
 
-                commandSet.Add(new MoveCaretSelectionCommand(CaretMove.StartOfLine));
-                commandSet.Add(new MoveCaretPositionCommand(CaretMove.EndOfLine));
-                DoActionSet(commandSet);
+                action.Add(new MoveCaretSelectionCommand(CaretMove.StartOfLine));
+                action.Add(new MoveCaretPositionCommand(CaretMove.EndOfLine));
+                DoActionSet(action);
             }
             else // Select word
             {
-                CommandSet commandSet = new();
-                commandSet.Add(new MoveCaretPositionCommand(textCoordinates));
+                Action action = new();
+                action.Add(new MoveCaretPositionCommand(textCoordinates));
 
-                commandSet.Add(new MoveCaretSelectionCommand(CaretMove.StartOfWord));
-                commandSet.Add(new MoveCaretPositionCommand(CaretMove.EndOfWord));
-                DoActionSet(commandSet);
+                action.Add(new MoveCaretSelectionCommand(CaretMove.StartOfWord));
+                action.Add(new MoveCaretPositionCommand(CaretMove.EndOfWord));
+                DoActionSet(action);
             }
         }
         else if (MouseKey.Dragging == MouseInput.MouseKey)

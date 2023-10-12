@@ -1,13 +1,14 @@
-﻿using Bell.Data;
+﻿using System.Numerics;
+using Bell.Data;
 
 namespace Bell.Render;
 
 public class FontSizeManager
 {
     private readonly TextBox _textBox;
-    private readonly Dictionary<RectSize, Dictionary<char, float>> _sizeCacheDictionary = new();
+    private readonly Dictionary<Vector2, Dictionary<char, float>> _sizeCacheDictionary = new();
 
-    private RectSize _referenceSize;
+    private Vector2 _referenceSize;
     
     private Dictionary<char, float> _sizeWidthCache;
     private float _sizeHeight;
@@ -25,12 +26,12 @@ public class FontSizeManager
         _sizeCacheDictionary.TryAdd(_referenceSize, new Dictionary<char, float>());
         _sizeWidthCache = _sizeCacheDictionary[_referenceSize];
 
-        _sizeHeight = _referenceSize.Height;
+        _sizeHeight = _referenceSize.Y;
     }
 
     public float GetFontReferenceWidth()
     {
-        return _referenceSize.Width;
+        return _referenceSize.X;
     }
 
     public float GetFontWidth(char c)
@@ -39,11 +40,11 @@ public class FontSizeManager
         
         if (false == _sizeWidthCache.TryGetValue(c, out float fontWidth))
         {
-            var rectSize = _textBox.GetCharRenderSize(c);
+            var renderSize = _textBox.GetCharRenderSize(c);
 
-            fontWidth = rectSize.Width;
+            fontWidth = renderSize.X;
             _sizeWidthCache[c] = fontWidth;
-            _sizeHeight = Math.Max(_sizeHeight, rectSize.Height);
+            _sizeHeight = Math.Max(_sizeHeight, renderSize.Y);
         }
         return fontWidth;
     }

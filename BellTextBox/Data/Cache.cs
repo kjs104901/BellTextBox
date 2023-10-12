@@ -23,7 +23,7 @@ public class Cache<T>
         return _value;
     }
 
-    public void SetDirty()
+    public void SetDirty() // TODO add time threshold
     {
         _isDirty = true;
     }

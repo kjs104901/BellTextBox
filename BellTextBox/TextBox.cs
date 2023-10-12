@@ -1,11 +1,13 @@
 ﻿using System.Numerics;
 using System.Text;
+using Bell.Carets;
 using Bell.Commands;
 using Bell.Coordinates;
 using Bell.Data;
 using Bell.Inputs;
 using Bell.Languages;
 using Bell.Render;
+using Action = Bell.Commands.Action;
 
 namespace Bell;
 
@@ -18,12 +20,12 @@ public partial class TextBox
     
     public readonly List<string> AutoCompleteList = new();
     public readonly StringBuilder StringBuilder = new();
-    public FontSizeManager FontSizeManager { get; private set; }
-    public CoordinatesManager CoordinatesManager { get; private set; }
+    public FontSizeManager FontSizeManager { get; }
+    public CoordinatesManager CoordinatesManager { get; }
+    internal CaretManager CaretManager { get; }
 
     // Action
-    internal readonly CommandSetHistory CommandSetHistory = new();
-    internal readonly Caret Caret = new();
+    internal readonly ActionHistory ActionHistory = new();
 
     public TextBox()
     {
@@ -32,6 +34,7 @@ public partial class TextBox
         
         FontSizeManager = new FontSizeManager(this);
         CoordinatesManager = new CoordinatesManager(this);
+        CaretManager = new CaretManager(this);
 
         KeyboardInput.Chars = new List<char>();
     }
@@ -65,14 +68,14 @@ public partial class TextBox
 
     private void DoAction(Command command)
     {
-        CommandSet commandSet = new CommandSet();
-        commandSet.Add(command);
-        DoActionSet(commandSet);
+        Action action = new Action();
+        action.Add(command);
+        DoActionSet(action);
     }
 
-    private void DoActionSet(CommandSet commandSet)
+    private void DoActionSet(Action action)
     {
-        commandSet.Do(this);
-        CommandSetHistory.AddHistory(commandSet);
+        action.Do(this);
+        ActionHistory.AddHistory(action);
     }
 }

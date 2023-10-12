@@ -37,11 +37,11 @@ public class Page
     {
         lineRenders.Clear();
 
-        var pageStart = _textBox.CoordinatesManager.Convert(_viewStart);
-        var pageEnd = _textBox.CoordinatesManager.Convert(_viewEnd);
+        var pageStart = _textBox.CoordinatesManager.ViewToPage(_viewStart);
+        var pageEnd = _textBox.CoordinatesManager.ViewToPage(_viewEnd);
 
-        var textStart = _textBox.CoordinatesManager.Convert(pageStart, -3);
-        var textEnd = _textBox.CoordinatesManager.Convert(pageEnd, 3);
+        var textStart = _textBox.CoordinatesManager.PageToText(pageStart, -3);
+        var textEnd = _textBox.CoordinatesManager.PageToText(pageEnd, 3);
 
         for (int i = textStart.Row; i <= textEnd.Row; i++)
         {
@@ -59,8 +59,8 @@ public class Page
 
     private PageRender UpdateRender(PageRender render)
     {
-        render.Size.Width = 500; //TODO find width from render
-        render.Size.Height = _textBox.Text.LineWraps.Count * _textBox.FontSizeManager.GetFontHeight();
+        render.Size.X = 500; //TODO find width from render
+        render.Size.Y = _textBox.Text.LineWraps.Count * _textBox.FontSizeManager.GetFontHeight();
         return render;
     }
 }

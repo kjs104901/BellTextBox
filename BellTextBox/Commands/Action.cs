@@ -1,10 +1,10 @@
 ﻿namespace Bell.Commands;
 
-internal struct CommandSet
+internal struct Action
 {
     private readonly List<Command> _actions = new();
 
-    public CommandSet()
+    public Action()
     {
     }
 

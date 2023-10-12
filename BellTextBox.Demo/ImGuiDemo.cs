@@ -23,6 +23,25 @@ class ImGuiDemo
     {
         Vector3 clearColor = new(0.45f, 0.55f, 0.6f);
         string textInput = @"--- START ---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}}}}}}}}}
+||||||||
+aaaaaaaa
+
 namespace Bell.Languages;
 
 public class FontStyle : IComparable<FontStyle>
@@ -75,7 +94,7 @@ public class FontStyle : IComparable<FontStyle>
         var stopwatch = Stopwatch.StartNew();
 
         var imFontPtr = ImGui.GetIO().Fonts
-            .AddFontFromFileTTF(@"Fonts\MaruBuri.ttf", 18.0f, null, ImGui.GetIO().Fonts.GetGlyphRangesKorean());
+            .AddFontFromFileTTF(@"Fonts\MaruBuri.ttf", 26.0f, null, ImGui.GetIO().Fonts.GetGlyphRangesKorean());
         imGuiRenderer.RecreateFontDeviceTexture(graphicsDevice);
 
         var imGuiBellTextBox = new ImGuiBellTextBox();
@@ -93,7 +112,7 @@ public class FontStyle : IComparable<FontStyle>
             ImGui.SetNextWindowPos(new Vector2(0, 0));
             ImGui.SetNextWindowSize(new Vector2(sdl2Window.Width, sdl2Window.Height));
             ImGui.Begin("Demo");
-            ImGui.PushFont(imFontPtr);
+            //ImGui.PushFont(imFontPtr);
 
             if (ImGui.Button("Reset"))
             {
@@ -107,7 +126,7 @@ public class FontStyle : IComparable<FontStyle>
             //ImGui.SameLine();
             ImGui.InputText("Test2", ref textInput, 1024);
 
-            ImGui.PopFont();
+            //ImGui.PopFont();
             ImGui.End();
 
             commandList.Begin();

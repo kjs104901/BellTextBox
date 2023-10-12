@@ -10,7 +10,7 @@ public class Line
 
     public int Index = 0;
 
-    private List<char> _chars = new();
+    public List<char> Chars = new();
     private List<char> _buffers = new();
 
     public string String => StringCache.Get();
@@ -46,8 +46,8 @@ public class Line
 
     public void SetString(string line)
     {
-        _chars.Clear();
-        _chars.AddRange(line);
+        Chars.Clear();
+        Chars.AddRange(line);
 
         StylesCache.SetDirty();
         CutoffsCache.SetDirty();
@@ -59,13 +59,13 @@ public class Line
     private Dictionary<int, FontStyle> UpdateStyles(Dictionary<int, FontStyle> styles)
     {
         styles.Clear();
-        for (int i = 0; i < _chars.Count; i++)
+        for (int i = 0; i < Chars.Count; i++)
         {
-            if (char.IsLower(_chars[i]))
+            if (char.IsLower(Chars[i]))
             {
                 styles[i] = FontStyle.BlockCommentFontStyle;
             }
-            else if (false == char.IsAscii(_chars[i]))
+            else if (false == char.IsAscii(Chars[i]))
             {
                 styles[i] = FontStyle.LineCommentFontStyle;
             }
@@ -80,9 +80,9 @@ public class Line
         if (_textBox.WrapMode == WrapMode.Word || _textBox.WrapMode == WrapMode.BreakWord)
         {
             float widthAccumulated = 0.0f;
-            for (int i = 0; i < _chars.Count; i++)
+            for (int i = 0; i < Chars.Count; i++)
             {
-                widthAccumulated += _textBox.FontSizeManager.GetFontWidth(_chars[i]);
+                widthAccumulated += _textBox.FontSizeManager.GetFontWidth(Chars[i]);
                 if (widthAccumulated + _textBox.FontSizeManager.GetFontReferenceWidth() >
                     500 - _textBox.LineNumberWidth - _textBox.FoldWidth) // TODO handle width
                 {
@@ -94,7 +94,7 @@ public class Line
                     else if (_textBox.WrapMode == WrapMode.Word)
                     {
                         // go back to the start of word
-                        while (i > 0 && false == char.IsWhiteSpace(_chars[i]))
+                        while (i > 0 && false == char.IsWhiteSpace(Chars[i]))
                             i--;
                         
                         cutoffs.Add(i);
@@ -122,7 +122,7 @@ public class Line
     private string UpdateString(string _)
     {
         _textBox.StringBuilder.Clear();
-        _textBox.StringBuilder.Append(CollectionsMarshal.AsSpan(_chars));
+        _textBox.StringBuilder.Append(CollectionsMarshal.AsSpan(Chars));
         return _textBox.StringBuilder.ToString();
     }
 
@@ -144,7 +144,7 @@ public class Line
         float bufferWidth = 0.0f;
         int wrapIndex = 0;
 
-        for (int i = 0; i < _chars.Count; i++)
+        for (int i = 0; i < Chars.Count; i++)
         {
             if (isFirstCharInLine)
             {
@@ -153,8 +153,8 @@ public class Line
                     groupStyle = firstStyle;
                 }
 
-                _buffers.Add(_chars[i]);
-                bufferWidth += _textBox.FontSizeManager.GetFontWidth(_chars[i]);
+                _buffers.Add(Chars[i]);
+                bufferWidth += _textBox.FontSizeManager.GetFontWidth(Chars[i]);
 
                 isFirstCharInLine = false;
                 continue;
@@ -175,8 +175,8 @@ public class Line
                 bufferWidth = 0.0f;
             }
 
-            _buffers.Add(_chars[i]);
-            bufferWidth += _textBox.FontSizeManager.GetFontWidth(_chars[i]);
+            _buffers.Add(Chars[i]);
+            bufferWidth += _textBox.FontSizeManager.GetFontWidth(Chars[i]);
 
             if (Cutoffs.Contains(i)) // need new line
             {

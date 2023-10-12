@@ -2,7 +2,7 @@
 
 namespace Bell.Coordinates;
 
-public struct ViewCoordinates
+public struct ViewCoordinates // TODO change to vector2?
 {
     public float X;
     public float Y;

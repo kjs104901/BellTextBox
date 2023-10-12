@@ -1,8 +1,8 @@
-﻿using Bell.Data;
+﻿using System.Numerics;
 
 namespace Bell.Render;
 
 public struct PageRender // TODO Delete
 {
-    public RectSize Size;
+    public Vector2 Size;
 }

@@ -66,7 +66,7 @@ public class ImGuiBellTextBox : TextBox
         };
 
         ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.2f, 0.1f, 0.1f, 1.0f));
-        ImGui.BeginChild("##Page", new Vector2(Page.Render.Size.Width, Page.Render.Size.Height), false,
+        ImGui.BeginChild("##Page", Page.Render.Size, false,
             ImGuiWindowFlags.NoScrollbar);
 
         _drawList = ImGui.GetWindowDrawList();
@@ -138,10 +138,13 @@ public class ImGuiBellTextBox : TextBox
         throw new NotImplementedException();
     }
 
-    public override RectSize GetCharRenderSize(char c)
+    public override Vector2 GetCharRenderSize(char c)
     {
-        Vector2 fontSize = ImGui.CalcTextSize(c.ToString());
-        return new RectSize { Width = fontSize.X, Height = fontSize.Y };
+        var emptySize = ImGui.CalcTextSize("<>");
+        var charSize = ImGui.CalcTextSize($"<{c}>");
+
+        return new Vector2(charSize.X - emptySize.X, charSize.Y);
+        //return ImGui.CalcTextSize(c.ToString());
     }
 
     protected override void RenderText(Vector2 pos, string text, FontStyle fontStyle)

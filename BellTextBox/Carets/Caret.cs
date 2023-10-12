@@ -1,8 +1,8 @@
 ﻿using Bell.Coordinates;
 
-namespace Bell.Data;
+namespace Bell.Carets;
 
-public class Caret
+public struct Caret
 {
     public TextCoordinates Selection;
     public TextCoordinates Position;

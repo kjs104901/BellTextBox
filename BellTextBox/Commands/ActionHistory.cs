@@ -2,17 +2,17 @@
 
 namespace Bell.Commands;
 
-internal class CommandSetHistory
+internal class ActionHistory
 {
     private const int Capacity = 1000;
-    private readonly LinkedList<CommandSet> _history = new();
-    private readonly LinkedList<CommandSet> _redoHistory = new();
+    private readonly LinkedList<Action> _history = new();
+    private readonly LinkedList<Action> _redoHistory = new();
 
-    public void AddHistory(CommandSet commandSet)
+    public void AddHistory(Action action)
     {
-        if (commandSet.HasEditAction)
+        if (action.HasEditAction)
         {
-            _history.AddLast(commandSet);
+            _history.AddLast(action);
             if (_history.Count > Capacity)
             {
                 _history.RemoveFirst();
@@ -45,7 +45,7 @@ internal class CommandSetHistory
     {
         StringBuilder sb = new();
         sb.AppendLine("History");
-        foreach (CommandSet actionSet in _history)
+        foreach (Action actionSet in _history)
         {
             sb.Append("[");
             sb.Append(actionSet.GetDebugString());
@@ -53,7 +53,7 @@ internal class CommandSetHistory
             sb.AppendLine();
         }
         sb.AppendLine("Redo History");
-        foreach (CommandSet actionSet in _redoHistory)
+        foreach (Action actionSet in _redoHistory)
         {
             sb.Append("[");
             sb.Append(actionSet.GetDebugString());
