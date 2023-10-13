@@ -18,6 +18,7 @@ public abstract partial class TextBox
     public abstract void SetClipboard(string text);
     public abstract string GetClipboard();
 
+    public abstract void SetMouseCursor(MouseCursor mouseCursor);
     
     protected void Render()
     {

@@ -261,10 +261,28 @@ public partial class TextBox
             if (MouseKey.Click == MouseInput.MouseKey)
             {
                 //TODO fold unfold
+                return;
             }
-            return;
         }
 
+        var vx = MouseInput.X - ViewInput.X;
+        var vy = MouseInput.Y - ViewInput.Y;
+
+        if (vx > 0 && vx < ViewInput.W && vy > 0 && vy < ViewInput.H)
+        {
+            if (textCoordinates.IsFold)
+            {
+                SetMouseCursor(MouseCursor.Hand);
+            }
+            else if (textCoordinates.IsLineNumber)
+            {
+            }
+            else
+            {
+                SetMouseCursor(MouseCursor.Beam);
+            }
+        }
+            
         if (MouseKey.Click == MouseInput.MouseKey)
         {
             if (hk.HasFlag(HotKeys.Shift))

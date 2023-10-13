@@ -77,7 +77,8 @@ public class ImGuiBellTextBox : TextBox
             ImGui.IsWindowFocused().ToString());
 
         ImGui.Text(ImGui.IsWindowFocused().ToString());
-        if (ImGui.IsWindowFocused())
+        if (ImGui.IsWindowFocused() ||
+            (ImGui.IsWindowHovered() && ImGui.IsMouseClicked(0)))
         {
             var io = ImGui.GetIO();
             if (io.KeyShift)
@@ -98,12 +99,6 @@ public class ImGuiBellTextBox : TextBox
             }
             KeyboardInput.ImeComposition = ImeHandler.GetCompositionString();
 
-            var mouse = ImGui.GetMousePos();
-            MouseInput.X = mouse.X - _drawPos.X;
-            MouseInput.Y = mouse.Y - _drawPos.Y;
-
-            ImGui.SetMouseCursor(ImGuiMouseCursor.TextInput);
-
             if (ImGui.IsMouseClicked(0))
                 MouseInput.MouseKey = MouseKey.Click;
             if (ImGui.IsMouseDoubleClicked(0))
@@ -111,7 +106,11 @@ public class ImGuiBellTextBox : TextBox
             if (ImGui.IsMouseDragging(0) && ImGui.IsMouseDown(0))
                 MouseInput.MouseKey = MouseKey.Dragging;
         }
-
+        
+        var mouse = ImGui.GetMousePos();
+        MouseInput.X = mouse.X - _drawPos.X;
+        MouseInput.Y = mouse.Y - _drawPos.Y;
+        
         ViewInput.X = scroll.X;
         ViewInput.Y = scroll.Y;
         ViewInput.W = contentSize.X;
@@ -126,16 +125,6 @@ public class ImGuiBellTextBox : TextBox
         ImGui.End();
         ImGui.EndChild();
         ImGui.PopStyleVar(5);
-    }
-    
-    public override void SetClipboard(string text)
-    {
-        throw new NotImplementedException();
-    }
-
-    public override string GetClipboard()
-    {
-        throw new NotImplementedException();
     }
 
     public override float GetCharWidth(char c)
@@ -160,6 +149,35 @@ public class ImGuiBellTextBox : TextBox
         var endPos = new Vector2(_drawPos.X + end.X, _drawPos.Y + end.Y);
             
         _drawList.AddLine(startPos, endPos, ImGui.ColorConvertFloat4ToU32(color), thickness);
+    }
+    
+    public override void SetClipboard(string text)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override string GetClipboard()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void SetMouseCursor(MouseCursor mouseCursor)
+    {
+        switch (mouseCursor)
+        {
+            case MouseCursor.Arrow:
+                ImGui.SetMouseCursor(ImGuiMouseCursor.Arrow);
+                CursorHandler.SetCursor(CursorHandler.ArrowCursor);
+                break;
+            case MouseCursor.Beam:
+                ImGui.SetMouseCursor(ImGuiMouseCursor.TextInput);
+                CursorHandler.SetCursor(CursorHandler.BeamCursor);
+                break;
+            case MouseCursor.Hand:
+                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+                CursorHandler.SetCursor(CursorHandler.HandCursor);
+                break;
+        }
     }
 }
 
@@ -200,4 +218,21 @@ public static class ImeHandler
             ImmReleaseContext(hWnd, hIMC);
         }
     }
+}
+
+public static class CursorHandler
+{
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern IntPtr SetCursor(IntPtr hCursor);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern IntPtr LoadCursor(IntPtr hInstance, int lpCursorName);
+    
+    private static int IDC_ARROW = 32512;
+    private static int IDC_IBEAM = 32513;
+    private static int IDC_HAND = 32649;
+    
+    public static IntPtr ArrowCursor = LoadCursor(IntPtr.Zero, IDC_ARROW);
+    public static IntPtr BeamCursor = LoadCursor(IntPtr.Zero, IDC_IBEAM);
+    public static IntPtr HandCursor = LoadCursor(IntPtr.Zero, IDC_HAND);
 }

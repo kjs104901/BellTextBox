@@ -9,6 +9,13 @@ public enum MouseKey
     Dragging
 }
 
+public enum MouseCursor
+{
+    Arrow,
+    Beam,
+    Hand
+}
+
 public struct MouseInput
 {
     public MouseKey MouseKey;
