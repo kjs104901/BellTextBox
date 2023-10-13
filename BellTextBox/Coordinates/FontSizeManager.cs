@@ -1,7 +1,4 @@
-﻿using System.Numerics;
-using Bell.Data;
-
-namespace Bell.Render;
+﻿namespace Bell.Coordinates;
 
 public class FontSizeManager
 {

@@ -1,6 +1,4 @@
-﻿using Bell.Render;
-
-namespace Bell.Data;
+﻿namespace Bell.Data;
 
 public class Text
 {

@@ -2,11 +2,11 @@
 using System.Text;
 using Bell.Actions;
 using Bell.Carets;
+using Bell.Colors;
 using Bell.Coordinates;
 using Bell.Data;
 using Bell.Inputs;
 using Bell.Languages;
-using Bell.Render;
 using Action = Bell.Actions.Action;
 
 namespace Bell;
@@ -67,7 +67,7 @@ public partial class TextBox
     public void SetText(string text)
     {
         Text.SetText(text);
-        Page.RenderCache.SetDirty();
+        Page.SizeCache.SetDirty();
     }
 
     private void DoAction(Command command)

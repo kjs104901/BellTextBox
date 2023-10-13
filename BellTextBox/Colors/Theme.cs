@@ -1,4 +1,4 @@
-﻿namespace Bell.Render;
+﻿namespace Bell.Colors;
 
 public class Theme
 {

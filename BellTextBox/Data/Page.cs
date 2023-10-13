@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 using Bell.Coordinates;
-using Bell.Render;
 
 namespace Bell.Data;
 
@@ -8,8 +7,8 @@ public class Page
 {
     private TextBox _textBox;
 
-    public PageRender Render => RenderCache.Get();
-    public readonly Cache<PageRender> RenderCache;
+    public Vector2 Size => SizeCache.Get();
+    public readonly Cache<Vector2> SizeCache;
 
     public List<LineRender> LineRenders => LineRendersCache.Get();
     public readonly Cache<List<LineRender>> LineRendersCache;
@@ -18,10 +17,9 @@ public class Page
     {
         _textBox = textBox;
 
-        RenderCache = new Cache<PageRender>(new PageRender(), UpdateRender);
+        SizeCache = new Cache<Vector2>(new Vector2(), UpdateSize);
         LineRendersCache = new Cache<List<LineRender>>(new List<LineRender>(), UpdateLineRenders);
     }
-
 
     private List<LineRender> UpdateLineRenders(List<LineRender> lineRenders)
     {
@@ -42,18 +40,18 @@ public class Page
         return lineRenders;
     }
 
-    private PageRender UpdateRender(PageRender render)
+    private Vector2 UpdateSize(Vector2 size)
     {
         if (WrapMode.None == _textBox.WrapMode)
         {
-            render.Size.X = 500; // TODO find max render width
+            size.X = 500; // TODO find max render width
         }
         else
         {
-            render.Size.X = _textBox.PageWidth;
+            size.X = _textBox.PageWidth;
         }
         
-        render.Size.Y = _textBox.Text.LineRenders.Count * _textBox.FontSizeManager.GetFontSize();
-        return render;
+        size.Y = _textBox.Text.LineRenders.Count * _textBox.FontSizeManager.GetFontSize();
+        return size;
     }
 }

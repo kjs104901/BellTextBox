@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 using Bell.Data;
-using Bell.Render;
 
 namespace Bell.Coordinates;
 

@@ -1,7 +1,6 @@
-﻿using Bell.Data;
-using Bell.Languages;
+﻿using Bell.Colors;
 
-namespace Bell.Render;
+namespace Bell.Data;
 
 public class LineRender
 {
