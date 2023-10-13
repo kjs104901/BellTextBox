@@ -23,15 +23,15 @@ public class CoordinatesManager
         return pageCoordinates;
     }
 
-    public TextCoordinates PageToText(Vector2 pageCoordinates, int offset = 0)
+    public TextCoordinates PageToText(Vector2 pageCoordinates, int yOffset = 0)
     {
         TextCoordinates textCoordinates = new();
         
-        int row = (int)(pageCoordinates.Y / _textBox.FontSizeManager.GetFontSize()) + offset;
+        int row = (int)(pageCoordinates.Y / _textBox.FontSizeManager.GetFontSize()) + yOffset;
         if (row < 0)
             row = 0;
-        if (row >= _textBox.Text.LineWraps.Count)
-            row = _textBox.Text.LineWraps.Count - 1;
+        if (row >= _textBox.Text.LineRenders.Count)
+            row = _textBox.Text.LineRenders.Count - 1;
         
         if (pageCoordinates.X < -_textBox.LineNumberWidth)
         {
@@ -43,11 +43,9 @@ public class CoordinatesManager
             textCoordinates.IsFold = true;
             textCoordinates.Column = 0;
         }
-        else
+        else if (_textBox.Text.LineRenders.Count > row)
         {
-            LineWrap lineWrap = _textBox.Text.LineWraps[row];
-            Line line = _textBox.Text.Lines[lineWrap.LineIndex];
-            LineRender lineRender = line.LineRenders[lineWrap.RenderIndex];
+            LineRender lineRender = _textBox.Text.LineRenders[row];
 
             int column = 0;
             float pageX = pageCoordinates.X;
@@ -86,12 +84,9 @@ public class CoordinatesManager
 
         pageCoordinates.X = 0;
 
-        if (_textBox.Text.LineWraps.Count > textCoordinates.Row)
+        if (_textBox.Text.LineRenders.Count > textCoordinates.Row)
         {
-            LineWrap lineWrap = _textBox.Text.LineWraps[textCoordinates.Row];
-            Line line = _textBox.Text.Lines[lineWrap.LineIndex];
-            LineRender lineRender = line.LineRenders[lineWrap.RenderIndex];
-
+            LineRender lineRender = _textBox.Text.LineRenders[textCoordinates.Row];
             
             int column = textCoordinates.Column;
             float pageX = 0.0f;

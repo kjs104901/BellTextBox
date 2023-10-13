@@ -31,11 +31,10 @@ public class Line
     public bool Visible = true;
     public bool Folded = false;
 
-    public int RenderCount => Visible ? LineRenders.Count : 0;
-
-    public Line(TextBox textBox)
+    public Line(TextBox textBox, int index)
     {
         _textBox = textBox;
+        Index = index;
 
         ColorsCache = new(new(), UpdateColors);
         CutoffsCache = new(new(), UpdateCutoff);
@@ -83,7 +82,7 @@ public class Line
         var lineWidth = _textBox.PageWidth - _textBox.LineNumberWidth - _textBox.FoldWidth;
         if (lineWidth < 1.0f)
             return cutoffs;
-        
+
         float widthAccumulated = 0.0f;
 
         for (int i = 0; i < Chars.Count; i++)
@@ -108,15 +107,16 @@ public class Line
                         backWidth += _textBox.FontSizeManager.GetFontWidth(Chars[i]);
                         if (backWidth + _textBox.FontSizeManager.GetFontReferenceWidth() * 10 > lineWidth)
                             break; // Give up on word wrap. break word.
-                        
+
                         i--;
                     }
-                        
+
                     cutoffs.Add(i);
                     widthAccumulated = 0;
                 }
             }
         }
+
         return cutoffs;
     }
 
@@ -138,24 +138,19 @@ public class Line
         _textBox.StringBuilder.Append(CollectionsMarshal.AsSpan(Chars));
         return _textBox.StringBuilder.ToString();
     }
-
-    public LineRender GetLineRender(int renderIndex)
-    {
-        return LineRenders.Count <= renderIndex ? LineRender.NullLineRender : LineRenders[renderIndex];
-    }
-
+    
     private List<LineRender> UpdateLineRenders(List<LineRender> lineRenders)
     {
         lineRenders.Clear();
 
-        LineRender lineRender = LineRender.Create();
+        int wrapIndex = 0;
+        LineRender lineRender = new LineRender(Index, wrapIndex);
 
         bool isFirstCharInLine = true;
         ColorStyle groupColor = _textBox.Theme.DefaultFontColor;
 
         _buffers.Clear();
         float bufferWidth = 0.0f;
-        int wrapIndex = 0;
 
         for (int i = 0; i < Chars.Count; i++)
         {
@@ -198,7 +193,7 @@ public class Line
                 lineRenders.Add(lineRender);
                 wrapIndex++;
 
-                lineRender = LineRender.Create();
+                lineRender = new LineRender(Index, wrapIndex);
 
                 isFirstCharInLine = true;
                 groupColor = _textBox.Theme.DefaultFontColor;

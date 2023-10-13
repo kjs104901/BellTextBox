@@ -35,13 +35,8 @@ public class Page
 
         for (int i = textStart.Row; i <= textEnd.Row; i++)
         {
-            LineWrap lineWrap = _textBox.Text.LineWraps[i];
-            var lineRender = _textBox.Text.Lines[lineWrap.LineIndex].GetLineRender(lineWrap.RenderIndex);
-
-            lineRender.PosX = 0;
-            lineRender.PosY = i * _textBox.FontSizeManager.GetFontSize();
-
-            lineRenders.Add(lineRender);
+            if (_textBox.Text.LineRenders.Count > i)
+                lineRenders.Add(_textBox.Text.LineRenders[i]);
         }
 
         return lineRenders;
@@ -58,7 +53,7 @@ public class Page
             render.Size.X = _textBox.PageWidth;
         }
         
-        render.Size.Y = _textBox.Text.LineWraps.Count * _textBox.FontSizeManager.GetFontSize();
+        render.Size.Y = _textBox.Text.LineRenders.Count * _textBox.FontSizeManager.GetFontSize();
         return render;
     }
 }

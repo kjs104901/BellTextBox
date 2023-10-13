@@ -20,18 +20,27 @@ public abstract partial class TextBox
     public abstract string GetClipboard();
 
     public abstract void SetMouseCursor(MouseCursor mouseCursor);
-    
+
     protected void Render()
     {
         FontSizeManager.UpdateReferenceSize();
 
         foreach (LineRender lineRender in Page.LineRenders)
         {
+            foreach (Caret caret in CaretManager.Carets)
+            {
+                if (caret.HasSelection)
+                {
+                    //caret.Position
+                }
+            }
+
             float width = 0.0f;
             foreach (TextBlockRender textBlockRender in lineRender.TextBlockRenders)
             {
                 RenderText(
-                    new Vector2(LineNumberWidth + FoldWidth + lineRender.PosX + width, lineRender.PosY),
+                    new Vector2(LineNumberWidth + FoldWidth + width,
+                        lineRender.RenderIndex * FontSizeManager.GetFontSize()),
                     textBlockRender.Text,
                     textBlockRender.ColorStyle.ToVector());
                 width += textBlockRender.Width;
@@ -47,15 +56,15 @@ public abstract partial class TextBox
                 new Vector2(caretInView.X - 1, caretInView.Y + FontSizeManager.GetFontSize()),
                 Theme.DefaultFontColor.ToVector(),
                 2.0f);
-            
+
             Vector2 selectionInPage = CoordinatesManager.TextToPage(caret.Selection);
             Vector2 selectionInView = CoordinatesManager.PageToView(selectionInPage);
-            
+
             RenderLine(new Vector2(selectionInView.X - 1, selectionInView.Y),
                 new Vector2(selectionInView.X - 1, selectionInView.Y + FontSizeManager.GetFontSize()),
                 Theme.LineCommentFontColor.ToVector(),
                 2.0f);
-            
+
             RenderText(caretInView, KeyboardInput.ImeComposition, Theme.DefaultFontColor.ToVector());
         }
     }

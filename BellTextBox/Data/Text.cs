@@ -11,15 +11,15 @@ public class Text
     public List<Line> Lines => LinesCache.Get();
     public readonly Cache<List<Line>> LinesCache;
     
-    public List<LineWrap> LineWraps => LineWrapsCache.Get();
-    public readonly Cache<List<LineWrap>> LineWrapsCache;
+    public List<LineRender> LineRenders => LineRendersCache.Get();
+    public readonly Cache<List<LineRender>> LineRendersCache;
     
     public Text(TextBox textBox)
     {
         _textBox = textBox;
 
         LinesCache = new Cache<List<Line>>(new List<Line>(), UpdateLines);
-        LineWrapsCache = new Cache<List<LineWrap>>(new List<LineWrap>(), UpdateLineWraps);
+        LineRendersCache = new Cache<List<LineRender>>(new List<LineRender>(), UpdateLineRenders);
     }
     
     public void SetText(string text)
@@ -27,34 +27,40 @@ public class Text
         _textString = text;
         
         LinesCache.SetDirty();
-        LineWrapsCache.SetDirty();
+        LineRendersCache.SetDirty();
     }
 
     private List<Line> UpdateLines(List<Line> lines)
     {
         lines.Clear();
+
+        int i = 0;
         foreach (string lineText in _textString.Split("\n"))
         {
-            Line line = new Line(_textBox);
+            Line line = new Line(_textBox, i++);
             line.SetString(lineText.Trim('\r'));
             lines.Add(line);
         }
         return lines;
     }
     
-    private List<LineWrap> UpdateLineWraps(List<LineWrap> lineViews)
+    private List<LineRender> UpdateLineRenders(List<LineRender> lineRenders)
     {
-        lineViews.Clear();
-        int i = 0;
+        lineRenders.Clear();
+
+        int renderIndex = 0;
         foreach (Line line in Lines)
         {
-            for (int j = 0; j < line.RenderCount; j++)
+            if (line.Visible)
             {
-                lineViews.Add(new LineWrap { LineIndex = i, RenderIndex = j });
+                foreach (LineRender lineRender in line.LineRenders)
+                {
+                    lineRender.RenderIndex = renderIndex++;
+                    lineRenders.Add(lineRender);
+                }
             }
-            i++;
         }
-        return lineViews;
+        return lineRenders;
     }
 
     public override string ToString()
