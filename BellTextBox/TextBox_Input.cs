@@ -356,7 +356,7 @@ public partial class TextBox
             Y = ViewInput.Y + ViewInput.H
         };
 
-        if (Math.Abs(PageWidth - (ViewInput.W - LineNumberWidth - FoldWidth)) > 1.0f)
+        if (Math.Abs(PageWidth - (ViewInput.W - LineNumberWidthMax - FoldWidth)) > 1.0f)
         {
             PageWidth = ViewInput.W;
             Page.LineRendersCache.SetDirty();

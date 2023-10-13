@@ -170,7 +170,7 @@ public class ImGuiBellTextBox : TextBox
         throw new NotImplementedException();
     }
 
-    public override void SetMouseCursor(MouseCursor mouseCursor)
+    protected override void SetMouseCursor(MouseCursor mouseCursor)
     {
         switch (mouseCursor)
         {

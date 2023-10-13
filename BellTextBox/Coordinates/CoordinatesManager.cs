@@ -17,7 +17,7 @@ public class CoordinatesManager
     {
         Vector2 pageCoordinates = new()
         {
-            X = viewCoordinates.X - _textBox.LineNumberWidth - _textBox.FoldWidth,
+            X = viewCoordinates.X - _textBox.LineNumberWidthMax - _textBox.FoldWidth,
             Y = viewCoordinates.Y
         };
         return pageCoordinates;
@@ -33,7 +33,7 @@ public class CoordinatesManager
         if (row >= _textBox.Text.LineRenders.Count)
             row = _textBox.Text.LineRenders.Count - 1;
         
-        if (pageCoordinates.X < -_textBox.LineNumberWidth)
+        if (pageCoordinates.X < -_textBox.FoldWidth)
         {
             textCoordinates.IsLineNumber = true;
             textCoordinates.Column = 0;
@@ -119,7 +119,7 @@ public class CoordinatesManager
     {
         Vector2 viewCoordinates = new()
         {
-            X = pageCoordinates.X + _textBox.LineNumberWidth + _textBox.FoldWidth,
+            X = pageCoordinates.X + _textBox.LineNumberWidthMax + _textBox.FoldWidth,
             Y = pageCoordinates.Y
         };
         return viewCoordinates;

@@ -12,7 +12,8 @@ public class LineRender
 
     public int LineIndex;
     public int WrapIndex;
-    public int RenderIndex;
+    
+    public int Row;
 
     public readonly List<TextBlockRender> TextBlockRenders = new();
     

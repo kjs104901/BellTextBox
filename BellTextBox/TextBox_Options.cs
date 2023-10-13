@@ -35,7 +35,4 @@ public partial class TextBox
     public bool SyntaxHighlighting { get; set; } = true;
     public bool SyntaxFolding { get; set; } = true;
     public Language Language { get; set; } = Language.PlainText();
-    
-    public float LineNumberWidth { get; set; } = 20.0f;
-    public float FoldWidth { get; set; } = 10.0f;
 }

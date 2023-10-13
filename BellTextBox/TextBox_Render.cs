@@ -19,33 +19,58 @@ public abstract partial class TextBox
     public abstract void SetClipboard(string text);
     public abstract string GetClipboard();
 
-    public abstract void SetMouseCursor(MouseCursor mouseCursor);
+    protected abstract void SetMouseCursor(MouseCursor mouseCursor);
+    
+    public float LineNumberWidthMax = 10.0f;
+    public float FoldWidth = 10.0f;
 
     protected void Render()
     {
         FontSizeManager.UpdateReferenceSize();
+        FoldWidth = FontSizeManager.GetFontReferenceWidth() * 2;
 
+        float lineNumberWidthMax = 0.0f;
         foreach (LineRender lineRender in Page.LineRenders)
         {
             foreach (Caret caret in CaretManager.Carets)
             {
                 if (caret.HasSelection)
                 {
-                    //caret.Position
+                    //TODO draw selection 
                 }
             }
+
+            var lineY = lineRender.Row * FontSizeManager.GetFontSize();
 
             float width = 0.0f;
             foreach (TextBlockRender textBlockRender in lineRender.TextBlockRenders)
             {
                 RenderText(
-                    new Vector2(LineNumberWidth + FoldWidth + width,
-                        lineRender.RenderIndex * FontSizeManager.GetFontSize()),
+                    new Vector2(LineNumberWidthMax + FoldWidth + width, lineY),
                     textBlockRender.Text,
                     textBlockRender.ColorStyle.ToVector());
                 width += textBlockRender.Width;
             }
+
+            if (lineRender.WrapIndex == 0)
+            {
+                float lineNumberWidth = 0.0f;
+                foreach (char c in lineRender.LineIndex.ToString())
+                {
+                    lineNumberWidth += FontSizeManager.GetFontWidth(c);
+                }
+                lineNumberWidthMax = Math.Max(lineNumberWidthMax, lineNumberWidth);
+                
+                RenderText(new Vector2(LineNumberWidthMax - lineNumberWidth, lineY),
+                    lineRender.LineIndex.ToString(),
+                    Theme.DefaultFontColor.ToVector());
+            }
+            
+            RenderText(new Vector2(LineNumberWidthMax, lineY),
+                "#",
+                Theme.DefaultFontColor.ToVector());
         }
+        LineNumberWidthMax = lineNumberWidthMax + 30.0f; // TODO setting padding option
 
         foreach (Caret caret in CaretManager.Carets)
         {

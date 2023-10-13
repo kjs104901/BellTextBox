@@ -48,14 +48,14 @@ public class Text
     {
         lineRenders.Clear();
 
-        int renderIndex = 0;
+        int row = 0;
         foreach (Line line in Lines)
         {
             if (line.Visible)
             {
                 foreach (LineRender lineRender in line.LineRenders)
                 {
-                    lineRender.RenderIndex = renderIndex++;
+                    lineRender.Row = row++;
                     lineRenders.Add(lineRender);
                 }
             }
