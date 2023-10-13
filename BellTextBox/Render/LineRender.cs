@@ -34,6 +34,6 @@ public struct LineRender
 public struct TextBlockRender
 {
     public string Text;
-    public FontStyle FontStyle;
+    public ColorStyle ColorStyle;
     public float Width;
 }

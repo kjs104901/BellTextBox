@@ -127,7 +127,7 @@ public class ImGuiBellTextBox : TextBox
         ImGui.EndChild();
         ImGui.PopStyleVar(5);
     }
-
+    
     public override void SetClipboard(string text)
     {
         throw new NotImplementedException();
@@ -143,16 +143,23 @@ public class ImGuiBellTextBox : TextBox
         return ImGui.GetFont().GetCharAdvance(c);
     }
 
-    public override float GetCharHeight(char c)
+    public override float GetFontSize()
     {
-        return ImGui.CalcTextSize(c.ToString()).Y;
+        return ImGui.GetFont().FontSize;
     }
 
-    protected override void RenderText(Vector2 pos, string text, FontStyle fontStyle)
+    protected override void RenderText(Vector2 pos, string text, Vector4 color)
     {
-        var color = new Vector4(fontStyle.R, fontStyle.G, fontStyle.B, fontStyle.A);
         _drawList.AddText(new Vector2(_drawPos.X + pos.X, _drawPos.Y + pos.Y),
             ImGui.ColorConvertFloat4ToU32(color), text);
+    }
+
+    protected override void RenderLine(Vector2 start, Vector2 end, Vector4 color, float thickness)
+    {
+        var startPos = new Vector2(_drawPos.X + start.X, _drawPos.Y + start.Y);
+        var endPos = new Vector2(_drawPos.X + end.X, _drawPos.Y + end.Y);
+            
+        _drawList.AddLine(startPos, endPos, ImGui.ColorConvertFloat4ToU32(color), thickness);
     }
 }
 

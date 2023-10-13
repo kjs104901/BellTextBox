@@ -27,6 +27,8 @@ public partial class TextBox
     // Action
     internal readonly ActionHistory ActionHistory = new();
 
+    public readonly Theme Theme;
+
     public TextBox()
     {
         Page = new Page(this);
@@ -37,6 +39,8 @@ public partial class TextBox
         CaretManager = new CaretManager(this);
 
         KeyboardInput.Chars = new List<char>();
+
+        Theme = new DarkTheme();
     }
 
     // Method

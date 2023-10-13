@@ -20,10 +20,10 @@ public class FontSizeManager
 
     public void UpdateReferenceSize()
     {
-        var charHeight = _textBox.GetCharHeight('#');
-        _sizeCacheDictionary.TryAdd(charHeight, new Dictionary<char, float>());
-        _sizeWidthCache = _sizeCacheDictionary[charHeight];
-        _sizeHeight = charHeight;
+        var fontSize = _textBox.GetFontSize();
+        _sizeCacheDictionary.TryAdd(fontSize, new Dictionary<char, float>());
+        _sizeWidthCache = _sizeCacheDictionary[fontSize];
+        _sizeHeight = fontSize;
     }
 
     public float GetFontReferenceWidth()
@@ -43,7 +43,7 @@ public class FontSizeManager
         return fontWidth;
     }
 
-    public float GetFontHeight()
+    public float GetFontSize()
     {
         return _sizeHeight;
     }

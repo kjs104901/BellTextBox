@@ -49,7 +49,7 @@ public class Page
             var lineRender = _textBox.Text.Lines[lineWrap.LineIndex].GetLineRender(lineWrap.RenderIndex);
 
             lineRender.PosX = 0;
-            lineRender.PosY = i * _textBox.FontSizeManager.GetFontHeight();
+            lineRender.PosY = i * _textBox.FontSizeManager.GetFontSize();
 
             lineRenders.Add(lineRender);
         }
@@ -60,7 +60,7 @@ public class Page
     private PageRender UpdateRender(PageRender render)
     {
         render.Size.X = 500; //TODO find width from render
-        render.Size.Y = _textBox.Text.LineWraps.Count * _textBox.FontSizeManager.GetFontHeight();
+        render.Size.Y = _textBox.Text.LineWraps.Count * _textBox.FontSizeManager.GetFontSize();
         return render;
     }
 }

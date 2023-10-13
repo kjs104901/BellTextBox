@@ -26,7 +26,7 @@ public class CoordinatesManager
     {
         TextCoordinates textCoordinates = new();
         
-        int row = (int)(pageCoordinates.Y / _textBox.FontSizeManager.GetFontHeight()) + offset;
+        int row = (int)(pageCoordinates.Y / _textBox.FontSizeManager.GetFontSize()) + offset;
         if (row < 0)
             row = 0;
         if (row >= _textBox.Text.LineWraps.Count)
@@ -58,7 +58,7 @@ public class CoordinatesManager
                     {
                         var fontWidth = _textBox.FontSizeManager.GetFontWidth(c);
                         
-                        if (pageX < fontWidth)
+                        if (pageX < fontWidth * 0.5)
                             break;
 
                         column += 1;
@@ -110,11 +110,11 @@ public class CoordinatesManager
                     {
                         foreach (char c in textBlockRender.Text)
                         {
+                            if (column < 1)
+                                break;
+                            
                             column -= 1;
                             pageX += _textBox.FontSizeManager.GetFontWidth(c);
-                
-                            if (column <= 0)
-                                break;
                         }
                         break;
                     }
@@ -125,7 +125,7 @@ public class CoordinatesManager
             }
         }
         
-        pageCoordinates.Y = textCoordinates.Row * _textBox.FontSizeManager.GetFontHeight();
+        pageCoordinates.Y = textCoordinates.Row * _textBox.FontSizeManager.GetFontSize();
 
         return pageCoordinates;
     }

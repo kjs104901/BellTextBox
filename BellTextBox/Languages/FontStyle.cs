@@ -1,4 +1,5 @@
-﻿namespace Bell.Languages;
+﻿/*
+namespace Bell.Languages;
 
 public class FontStyle : IComparable<FontStyle>
 {
@@ -25,3 +26,4 @@ public class FontStyle : IComparable<FontStyle>
         return string.Compare(_id, other._id, StringComparison.Ordinal);
     }
 }
+*/

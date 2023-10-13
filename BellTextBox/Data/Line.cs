@@ -16,8 +16,8 @@ public class Line
     public string String => StringCache.Get();
     public readonly Cache<string> StringCache;
 
-    public Dictionary<int, FontStyle> Styles => StylesCache.Get();
-    public readonly Cache<Dictionary<int, FontStyle>> StylesCache;
+    public Dictionary<int, ColorStyle> Colors => ColorsCache.Get();
+    public readonly Cache<Dictionary<int, ColorStyle>> ColorsCache;
 
     public bool Foldable => FoldableCache.Get();
     public readonly Cache<bool> FoldableCache;
@@ -37,7 +37,7 @@ public class Line
     {
         _textBox = textBox;
 
-        StylesCache = new(new(), UpdateStyles);
+        ColorsCache = new(new(), UpdateColors);
         CutoffsCache = new(new(), UpdateCutoff);
         FoldableCache = new(false, UpdateFoldable);
         StringCache = new(string.Empty, UpdateString);
@@ -49,29 +49,29 @@ public class Line
         Chars.Clear();
         Chars.AddRange(line);
 
-        StylesCache.SetDirty();
+        ColorsCache.SetDirty();
         CutoffsCache.SetDirty();
         FoldableCache.SetDirty();
         StringCache.SetDirty();
         LineRendersCache.SetDirty();
     }
 
-    private Dictionary<int, FontStyle> UpdateStyles(Dictionary<int, FontStyle> styles)
+    private Dictionary<int, ColorStyle> UpdateColors(Dictionary<int, ColorStyle> colors)
     {
-        styles.Clear();
+        colors.Clear();
         for (int i = 0; i < Chars.Count; i++)
         {
             if (char.IsLower(Chars[i]))
             {
-                styles[i] = FontStyle.BlockCommentFontStyle;
+                colors[i] = _textBox.Theme.BlockCommentFontColor;
             }
             else if (false == char.IsAscii(Chars[i]))
             {
-                styles[i] = FontStyle.LineCommentFontStyle;
+                colors[i] = _textBox.Theme.LineCommentFontColor;
             }
         }
 
-        return styles;
+        return colors;
     }
 
     private HashSet<int> UpdateCutoff(HashSet<int> cutoffs)
@@ -138,7 +138,7 @@ public class Line
         LineRender lineRender = LineRender.Create();
 
         bool isFirstCharInLine = true;
-        FontStyle groupStyle = FontStyle.DefaultFontStyle;
+        ColorStyle groupColor = _textBox.Theme.DefaultFontColor;
 
         _buffers.Clear();
         float bufferWidth = 0.0f;
@@ -148,9 +148,9 @@ public class Line
         {
             if (isFirstCharInLine)
             {
-                if (Styles.TryGetValue(i, out var firstStyle))
+                if (Colors.TryGetValue(i, out var firstColor))
                 {
-                    groupStyle = firstStyle;
+                    groupColor = firstColor;
                 }
 
                 _buffers.Add(Chars[i]);
@@ -160,17 +160,17 @@ public class Line
                 continue;
             }
 
-            if (false == Styles.TryGetValue(i, out var charStyle))
+            if (false == Colors.TryGetValue(i, out ColorStyle color))
             {
-                charStyle = FontStyle.DefaultFontStyle;
+                color = _textBox.Theme.DefaultFontColor;
             }
 
-            if (groupStyle != charStyle) // need new group
+            if (groupColor != color) // need new group
             {
                 lineRender.TextBlockRenders.Add(new()
-                    { Text = String.Concat(_buffers), FontStyle = groupStyle, Width = bufferWidth });
+                    { Text = String.Concat(_buffers), ColorStyle = groupColor, Width = bufferWidth });
 
-                groupStyle = charStyle;
+                groupColor = color;
                 _buffers.Clear();
                 bufferWidth = 0.0f;
             }
@@ -181,14 +181,14 @@ public class Line
             if (Cutoffs.Contains(i)) // need new line
             {
                 lineRender.TextBlockRenders.Add(new()
-                    { Text = String.Concat(_buffers), FontStyle = groupStyle, Width = bufferWidth });
+                    { Text = String.Concat(_buffers), ColorStyle = groupColor, Width = bufferWidth });
                 lineRenders.Add(lineRender);
                 wrapIndex++;
 
                 lineRender = LineRender.Create();
 
                 isFirstCharInLine = true;
-                groupStyle = FontStyle.DefaultFontStyle;
+                groupColor = _textBox.Theme.DefaultFontColor;
                 _buffers.Clear();
                 bufferWidth = 0.0f;
             }
@@ -197,7 +197,7 @@ public class Line
         // Add remains
         if (_buffers.Count > 0 || wrapIndex == 0)
             lineRender.TextBlockRenders.Add(new()
-                { Text = String.Concat(_buffers), FontStyle = groupStyle, Width = bufferWidth });
+                { Text = String.Concat(_buffers), ColorStyle = groupColor, Width = bufferWidth });
 
         if (lineRender.TextBlockRenders.Count > 0)
             lineRenders.Add(lineRender);
