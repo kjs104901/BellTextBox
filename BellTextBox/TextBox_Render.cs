@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using Bell.Carets;
 using Bell.Coordinates;
 using Bell.Data;
 using Bell.Inputs;
@@ -37,7 +38,7 @@ public abstract partial class TextBox
             }
         }
 
-        if (CaretManager.GetCaretForDebug(out var caret))
+        foreach (Caret caret in CaretManager.Carets)
         {
             PageCoordinates caretInPage = CoordinatesManager.TextToPage(caret.Position);
             ViewCoordinates caretInView = CoordinatesManager.PageToView(caretInPage);
@@ -46,41 +47,8 @@ public abstract partial class TextBox
                 new Vector2(caretInView.X - 1, caretInView.Y + FontSizeManager.GetFontSize()),
                 Theme.DefaultFontColor.ToVector(),
                 2.0f);
+            
+            RenderText(new Vector2(caretInView.X, caretInView.Y), KeyboardInput.ImeComposition, Theme.DefaultFontColor.ToVector());
         }
-
-
-        var testString = "}}}}}}}}}}";
-        RenderText(new Vector2(150, 50), testString, Theme.DefaultFontColor.ToVector());
-        int i = 0;
-        foreach (var testChar in testString)
-        {
-            RenderText(new Vector2(150 + FontSizeManager.GetFontWidth(testChar) * i, 80), testChar.ToString(),
-                Theme.DefaultFontColor.ToVector());
-            i++;
-        }
-
-        testString = "AAAAAAAAAA";
-        RenderText(new Vector2(150, 110), testString, Theme.DefaultFontColor.ToVector());
-        i = 0;
-        foreach (var testChar in testString)
-        {
-            RenderText(new Vector2(150 + FontSizeManager.GetFontWidth(testChar) * i, 140), testChar.ToString(),
-                Theme.DefaultFontColor.ToVector());
-            i++;
-        }
-
-        testString = "||||||||||";
-        RenderText(new Vector2(150, 170), testString, Theme.DefaultFontColor.ToVector());
-        i = 0;
-        foreach (var testChar in testString)
-        {
-            RenderText(new Vector2(150 + FontSizeManager.GetFontWidth(testChar) * i, 200), testChar.ToString(),
-                Theme.DefaultFontColor.ToVector());
-            i++;
-        }
-
-        RenderText(new Vector2(150, 0), $"{_debugTextCoordinates.Row} {_debugTextCoordinates.Column}",
-            Theme.DefaultFontColor.ToVector());
-        RenderText(new Vector2(150, 20), KeyboardInput.ImeComposition, Theme.DefaultFontColor.ToVector());
     }
 }

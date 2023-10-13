@@ -10,15 +10,12 @@ internal class ActionHistory
 
     public void AddHistory(Action action)
     {
-        if (action.HasEditAction)
+        _history.AddLast(action);
+        if (_history.Count > Capacity)
         {
-            _history.AddLast(action);
-            if (_history.Count > Capacity)
-            {
-                _history.RemoveFirst();
-            }
-            _redoHistory.Clear();
+            _history.RemoveFirst();
         }
+        _redoHistory.Clear();
     }
     
     public void Undo()

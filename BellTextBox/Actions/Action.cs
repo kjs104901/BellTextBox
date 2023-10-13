@@ -25,15 +25,10 @@ internal struct Action
     {
         foreach (Command action in _actions)
         {
-            if (action is EditCommand editAction)
-            {
-                editAction.Undo(textBox);
-            }
+            action.Undo(textBox);
         }
     }
-
-    public bool HasEditAction => _actions.Any(a => a is EditCommand);
-
+    
     public string GetDebugString()
     {
         return string.Join(",", _actions.Select(a => a.GetType().ToString()));

@@ -2,36 +2,56 @@
 
 namespace Bell.Carets;
 
+public enum CaretMove
+{
+    None,
+    
+    Up,
+    Down,
+    Left,
+    Right,
+    
+    StartOfFile,
+    EndOfFile,
+    StartOfLine,
+    EndOfLine,
+    StartOfWord,
+    EndOfWord,
+    
+    PageUp,
+    PageDown,
+    
+    Position,
+    Selection
+}
+
 public class CaretManager
 {
     private readonly TextBox _textBox;
 
-    private readonly List<Caret> _carets = new();
+    public readonly List<Caret> Carets = new();
 
     public CaretManager(TextBox textBox)
     {
         _textBox = textBox;
     }
 
-    public bool HasSelection() // TODO move this to each caret
-    {
-        return false;
-    }
-
     public void SetCaret(TextCoordinates textCoordinates)
     {
-        _carets.Clear();
-        _carets.Add(new Caret() { Position = textCoordinates, Selection = textCoordinates });
+        Carets.Clear();
+        Carets.Add(new Caret() { Position = textCoordinates, Selection = textCoordinates });
     }
 
-    public bool GetCaretForDebug(out Caret caret)
+    public void AddCaret(TextCoordinates textCoordinates)
     {
-        if (_carets.Count > 0)
+        Carets.Add(new Caret() { Position = textCoordinates, Selection = textCoordinates });
+    }
+
+    public void MoveCarets(CaretMove caretMove)
+    {
+        foreach (Caret caret in Carets)
         {
-            caret = _carets[0];
-            return true;
+            // TODO caret move
         }
-        caret = new Caret();
-        return false;
     }
 }

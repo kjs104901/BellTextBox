@@ -1,12 +1,14 @@
 ﻿namespace Bell.Inputs;
 
-public enum MouseKey
+public enum MouseAction
 {
     None,
     
     Click,
     DoubleClick,
-    Dragging
+    Dragging,
+    
+    MiddleDragging
 }
 
 public enum MouseCursor
@@ -18,7 +20,8 @@ public enum MouseCursor
 
 public struct MouseInput
 {
-    public MouseKey MouseKey;
+    public MouseAction LeftAction;
+    public MouseAction MiddleAction;
 
     public float X;
     public float Y;

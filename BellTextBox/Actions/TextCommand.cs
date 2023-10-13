@@ -6,7 +6,7 @@ internal enum EditDirection
     Backward
 }
 
-internal class InputChar : EditCommand
+internal class InputChar : Command
 {
     private EditDirection _direction;
     private char[] _chars;
@@ -26,7 +26,7 @@ internal class InputChar : EditCommand
     }
 }
 
-internal class DeleteCommand : EditCommand
+internal class DeleteCommand : Command
 {
     private EditDirection _direction;
     private int _count;
@@ -46,7 +46,7 @@ internal class DeleteCommand : EditCommand
     }
 }
 
-internal class SplitLine : EditCommand
+internal class SplitLine : Command
 {
     private EditDirection _direction;
     
@@ -64,7 +64,7 @@ internal class SplitLine : EditCommand
     }
 }
 
-internal class MergeLine : EditCommand
+internal class MergeLine : Command
 {
     private EditDirection _direction;
     
@@ -82,7 +82,7 @@ internal class MergeLine : EditCommand
     }
 }
 
-internal class IndentSelection : EditCommand
+internal class IndentSelection : Command
 {
     public override void Do(TextBox textBox)
     {
@@ -93,7 +93,7 @@ internal class IndentSelection : EditCommand
     }
 }
 
-internal class UnindentSelection : EditCommand
+internal class UnindentSelection : Command
 {
     public override void Do(TextBox textBox)
     {
@@ -101,20 +101,5 @@ internal class UnindentSelection : EditCommand
 
     public override void Undo(TextBox textBox)
     {
-    }
-}
-
-internal class CopyCommand : Command
-{
-    public override void Do(TextBox textBox)
-    {
-    }
-}
-
-internal class PasteCommand : Command
-{
-    public override void Do(TextBox textBox)
-    {
-        //ClipboardText
     }
 }

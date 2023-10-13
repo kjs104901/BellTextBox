@@ -2,7 +2,7 @@
 
 namespace Bell.Carets;
 
-public struct Caret
+public class Caret
 {
     public TextCoordinates Selection;
     public TextCoordinates Position;

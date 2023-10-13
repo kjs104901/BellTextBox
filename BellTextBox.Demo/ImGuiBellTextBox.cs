@@ -10,12 +10,11 @@ using Bell.Languages;
 
 namespace BellTextBox.Demo;
 
-
 public class ImGuiBellTextBox : TextBox
 {
     private ImDrawListPtr _drawList;
     private Vector2 _drawPos;
-    
+
     private readonly List<ValueTuple<ImGuiKey, HotKeys>> _keyboardMapping = new()
     {
         (ImGuiKey.A, HotKeys.A),
@@ -41,7 +40,7 @@ public class ImGuiBellTextBox : TextBox
         (ImGuiKey.Enter, HotKeys.Enter),
         (ImGuiKey.Tab, HotKeys.Tab),
     };
-    
+
     public void Update(Vector2 size)
     {
         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, new Vector2(0, 0));
@@ -71,7 +70,7 @@ public class ImGuiBellTextBox : TextBox
 
         _drawList = ImGui.GetWindowDrawList();
         _drawPos = ImGui.GetCursorScreenPos();
-        
+
         InputStart();
         _drawList.AddText(_drawPos, ImGui.ColorConvertFloat4ToU32(new Vector4(0.2f, 0.1f, 0.1f, 1.0f)),
             ImGui.IsWindowFocused().ToString());
@@ -97,31 +96,39 @@ public class ImGuiBellTextBox : TextBox
             {
                 KeyboardInput.Chars.Add((char)io.InputQueueCharacters[i]);
             }
+
             KeyboardInput.ImeComposition = ImeHandler.GetCompositionString();
 
-            if (ImGui.IsMouseClicked(0))
-                MouseInput.MouseKey = MouseKey.Click;
-            if (ImGui.IsMouseDoubleClicked(0))
-                MouseInput.MouseKey = MouseKey.DoubleClick;
-            if (ImGui.IsMouseDragging(0) && ImGui.IsMouseDown(0))
-                MouseInput.MouseKey = MouseKey.Dragging;
+            if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+                MouseInput.LeftAction = MouseAction.Click;
+            if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+                MouseInput.LeftAction = MouseAction.DoubleClick;
+            if (ImGui.IsMouseDragging(ImGuiMouseButton.Left) && ImGui.IsMouseDown(ImGuiMouseButton.Left))
+                MouseInput.LeftAction = MouseAction.Dragging;
+
+            if (ImGui.IsMouseClicked(ImGuiMouseButton.Middle))
+                MouseInput.MiddleAction = MouseAction.Click;
+            if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Middle))
+                MouseInput.MiddleAction = MouseAction.DoubleClick;
+            if (ImGui.IsMouseDragging(ImGuiMouseButton.Middle) && ImGui.IsMouseDown(ImGuiMouseButton.Middle))
+                MouseInput.MiddleAction = MouseAction.Dragging;
         }
-        
+
         var mouse = ImGui.GetMousePos();
         MouseInput.X = mouse.X - _drawPos.X;
         MouseInput.Y = mouse.Y - _drawPos.Y;
-        
+
         ViewInput.X = scroll.X;
         ViewInput.Y = scroll.Y;
         ViewInput.W = contentSize.X;
         ViewInput.H = contentSize.Y;
         InputEnd();
-        
+
         Render();
-        
+
         ImGui.EndChild();
         ImGui.PopStyleColor();
-        
+
         ImGui.End();
         ImGui.EndChild();
         ImGui.PopStyleVar(5);
@@ -147,10 +154,10 @@ public class ImGuiBellTextBox : TextBox
     {
         var startPos = new Vector2(_drawPos.X + start.X, _drawPos.Y + start.Y);
         var endPos = new Vector2(_drawPos.X + end.X, _drawPos.Y + end.Y);
-            
+
         _drawList.AddLine(startPos, endPos, ImGui.ColorConvertFloat4ToU32(color), thickness);
     }
-    
+
     public override void SetClipboard(string text)
     {
         throw new NotImplementedException();
@@ -181,7 +188,6 @@ public class ImGuiBellTextBox : TextBox
     }
 }
 
-
 public static class ImeHandler
 {
     [DllImport("imm32.dll", CharSet = CharSet.Unicode)]
@@ -192,12 +198,12 @@ public static class ImeHandler
 
     [DllImport("imm32.dll", CharSet = CharSet.Unicode)]
     private static extern int ImmGetCompositionString(IntPtr hIMC, uint dwIndex, byte[]? lpBuf, int dwBufLen);
-    
+
     [DllImport("user32.dll")]
     private static extern IntPtr GetFocus();
 
     private const uint GCS_COMPSTR = 0x0008;
-    
+
     public static string GetCompositionString()
     {
         IntPtr hWnd = GetFocus(); // Get the handle to the active window
@@ -211,6 +217,7 @@ public static class ImeHandler
                 ImmGetCompositionString(hIMC, GCS_COMPSTR, buffer, strLen);
                 return Encoding.Unicode.GetString(buffer);
             }
+
             return string.Empty;
         }
         finally
@@ -227,11 +234,11 @@ public static class CursorHandler
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern IntPtr LoadCursor(IntPtr hInstance, int lpCursorName);
-    
+
     private static int IDC_ARROW = 32512;
     private static int IDC_IBEAM = 32513;
     private static int IDC_HAND = 32649;
-    
+
     public static IntPtr ArrowCursor = LoadCursor(IntPtr.Zero, IDC_ARROW);
     public static IntPtr BeamCursor = LoadCursor(IntPtr.Zero, IDC_IBEAM);
     public static IntPtr HandCursor = LoadCursor(IntPtr.Zero, IDC_HAND);
