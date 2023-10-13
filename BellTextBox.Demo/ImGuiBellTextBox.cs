@@ -49,6 +49,7 @@ public class ImGuiBellTextBox : TextBox
         ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, new Vector2(0, 0));
         ImGui.PushStyleVar(ImGuiStyleVar.WindowMinSize, new Vector2(0, 0));
 
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.1f, 0.1f, 0.2f, 1.0f));
         ImGui.BeginChild("##TextBox", size, true, ImGuiWindowFlags.HorizontalScrollbar);
         Vector2 contentSize = ImGui.GetWindowContentRegionMax();
 
@@ -115,12 +116,12 @@ public class ImGuiBellTextBox : TextBox
         }
 
         var mouse = ImGui.GetMousePos();
-        MouseInput.X = mouse.X - _drawPos.X;
-        MouseInput.Y = mouse.Y - _drawPos.Y;
+        MouseInput.Position.X = mouse.X - _drawPos.X;
+        MouseInput.Position.Y = mouse.Y - _drawPos.Y;
 
         ViewInput.X = scroll.X;
         ViewInput.Y = scroll.Y;
-        ViewInput.W = contentSize.X;
+        ViewInput.W = contentSize.X - ImGui.GetStyle().ScrollbarSize;;
         ViewInput.H = contentSize.Y;
         InputEnd();
 
@@ -131,6 +132,7 @@ public class ImGuiBellTextBox : TextBox
 
         ImGui.End();
         ImGui.EndChild();
+        ImGui.PopStyleColor();
         ImGui.PopStyleVar(5);
     }
 

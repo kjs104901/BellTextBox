@@ -77,33 +77,46 @@ public class Line
     private HashSet<int> UpdateCutoff(HashSet<int> cutoffs)
     {
         cutoffs.Clear();
-        if (_textBox.WrapMode == WrapMode.Word || _textBox.WrapMode == WrapMode.BreakWord)
+        if (WrapMode.None == _textBox.WrapMode)
+            return cutoffs;
+
+        var lineWidth = _textBox.PageWidth - _textBox.LineNumberWidth - _textBox.FoldWidth;
+        if (lineWidth < 1.0f)
+            return cutoffs;
+        
+        float widthAccumulated = 0.0f;
+
+        for (int i = 0; i < Chars.Count; i++)
         {
-            float widthAccumulated = 0.0f;
-            for (int i = 0; i < Chars.Count; i++)
+            widthAccumulated += _textBox.FontSizeManager.GetFontWidth(Chars[i]);
+            if (widthAccumulated + _textBox.FontSizeManager.GetFontReferenceWidth() > lineWidth)
             {
-                widthAccumulated += _textBox.FontSizeManager.GetFontWidth(Chars[i]);
-                if (widthAccumulated + _textBox.FontSizeManager.GetFontReferenceWidth() >
-                    500 - _textBox.LineNumberWidth - _textBox.FoldWidth) // TODO handle width
+                if (_textBox.WrapMode == WrapMode.BreakWord)
                 {
-                    if (_textBox.WrapMode == WrapMode.BreakWord)
+                    cutoffs.Add(i);
+                    widthAccumulated = 0;
+                }
+                else if (_textBox.WrapMode == WrapMode.Word)
+                {
+                    // go back to the start of word
+                    float backWidth = 0.0f;
+                    while (i > 0)
                     {
-                        cutoffs.Add(i);
-                        widthAccumulated = 0;
-                    }
-                    else if (_textBox.WrapMode == WrapMode.Word)
-                    {
-                        // go back to the start of word
-                        while (i > 0 && false == char.IsWhiteSpace(Chars[i]))
-                            i--;
+                        if (char.IsWhiteSpace(Chars[i]))
+                            break;
+
+                        backWidth += _textBox.FontSizeManager.GetFontWidth(Chars[i]);
+                        if (backWidth + _textBox.FontSizeManager.GetFontReferenceWidth() * 10 > lineWidth)
+                            break; // Give up on word wrap. break word.
                         
-                        cutoffs.Add(i);
-                        widthAccumulated = 0;
+                        i--;
                     }
+                        
+                    cutoffs.Add(i);
+                    widthAccumulated = 0;
                 }
             }
         }
-
         return cutoffs;
     }
 

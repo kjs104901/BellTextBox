@@ -111,7 +111,7 @@ public class FontStyle : IComparable<FontStyle>
 
             ImGui.SetNextWindowPos(new Vector2(0, 0));
             ImGui.SetNextWindowSize(new Vector2(sdl2Window.Width, sdl2Window.Height));
-            ImGui.Begin("Demo");
+            ImGui.Begin("Demo", ImGuiWindowFlags.NoResize);
             ImGui.PushFont(imFontPtr);
 
             if (ImGui.Button("Reset"))
@@ -122,9 +122,6 @@ public class FontStyle : IComparable<FontStyle>
 
             imGuiBellTextBox.SetText(textInput);
             imGuiBellTextBox.Update(new Vector2(-1, -1));
-
-            //ImGui.SameLine();
-            ImGui.InputText("Test2", ref textInput, 1024);
 
             ImGui.PopFont();
             ImGui.End();

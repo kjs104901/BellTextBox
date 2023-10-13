@@ -1,4 +1,6 @@
-﻿using Bell.Actions;
+﻿using System.Numerics;
+using Bell.Actions;
+using Bell.Carets;
 using Bell.Coordinates;
 using Bell.Inputs;
 using Action = Bell.Actions.Action;
@@ -11,14 +13,21 @@ public partial class TextBox
     protected MouseInput MouseInput;
     protected ViewInput ViewInput;
 
+    public Vector2 ViewStart;
+    public Vector2 ViewEnd;
+    public float PageWidth;
+    
+    private Vector2 _mouseDragStartPage;
+    private TextCoordinates _mouseDragStartText;
+
     protected void InputStart()
     {
         KeyboardInput.HotKeys = HotKeys.None;
         KeyboardInput.Chars.Clear();
         KeyboardInput.ImeComposition = string.Empty;
 
-        MouseInput.X = 0.0f;
-        MouseInput.Y = 0.0f;
+        MouseInput.Position.X = 0.0f;
+        MouseInput.Position.Y = 0.0f;
         MouseInput.LeftAction = MouseAction.None;
         MouseInput.MiddleAction = MouseAction.None;
     }
@@ -34,7 +43,7 @@ public partial class TextBox
     private void ProcessKeyboardHotKeys()
     {
         var hk = KeyboardInput.HotKeys;
-        
+
         if (hk.HasFlag(HotKeys.Ctrl | HotKeys.Z)) // Undo
             ActionHistory.Undo();
         else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.Y)) // Redo
@@ -135,48 +144,48 @@ public partial class TextBox
             Action action = new();
             //action.Add(new MoveCaretPositionCommand(CaretMove.Up));
             if (false == hk.HasFlag(HotKeys.Shift))
-            //    action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
-            DoActionSet(action);
+                //    action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
+                DoActionSet(action);
         }
         else if (hk.HasFlag(HotKeys.DownArrow)) // Move Down
         {
             Action action = new();
             //action.Add(new MoveCaretPositionCommand(CaretMove.Down));
             if (false == hk.HasFlag(HotKeys.Shift))
-            //    action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
-            DoActionSet(action);
+                //    action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
+                DoActionSet(action);
         }
         else if (hk.HasFlag(HotKeys.LeftArrow)) // Move Left
         {
             Action action = new();
             //action.Add(new MoveCaretPositionCommand(CaretMove.Left));
             if (false == hk.HasFlag(HotKeys.Shift))
-            //    action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
-            DoActionSet(action);
+                //    action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
+                DoActionSet(action);
         }
         else if (hk.HasFlag(HotKeys.RightArrow)) // Move Right
         {
             Action action = new();
             //action.Add(new MoveCaretPositionCommand(CaretMove.Right));
             if (false == hk.HasFlag(HotKeys.Shift))
-            //    action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
-            DoActionSet(action);
+                //    action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
+                DoActionSet(action);
         }
         else if (hk.HasFlag(HotKeys.PageUp)) // Move PageUp
         {
             Action action = new();
             //action.Add(new MoveCaretPositionCommand(CaretMove.PageUp));
             if (false == hk.HasFlag(HotKeys.Shift))
-            //    action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
-            DoActionSet(action);
+                //    action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
+                DoActionSet(action);
         }
         else if (hk.HasFlag(HotKeys.PageDown)) // Move PageDown
         {
             Action action = new();
             //action.Add(new MoveCaretPositionCommand(CaretMove.PageDown));
             if (false == hk.HasFlag(HotKeys.Shift))
-            //    action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
-            DoActionSet(action);
+                //    action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
+                DoActionSet(action);
         }
         else if (hk.HasFlag(HotKeys.Home))
         {
@@ -187,8 +196,8 @@ public partial class TextBox
             //    : new MoveCaretPositionCommand(CaretMove.EndOfLine));
 
             if (false == hk.HasFlag(HotKeys.Shift))
-            //    action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
-            DoActionSet(action);
+                //    action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
+                DoActionSet(action);
         }
         else if (hk.HasFlag(HotKeys.End))
         {
@@ -199,8 +208,8 @@ public partial class TextBox
             //    : new MoveCaretPositionCommand(CaretMove.StartOfLine));
 
             if (false == hk.HasFlag(HotKeys.Shift))
-            //    action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
-            DoActionSet(action);
+                //    action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
+                DoActionSet(action);
         }
         else if (hk.HasFlag(HotKeys.Insert))
         {
@@ -248,93 +257,109 @@ public partial class TextBox
     private void ProcessMouseInput()
     {
         var hk = KeyboardInput.HotKeys;
-        
-        var viewCoordinates = new ViewCoordinates() { X = MouseInput.X, Y = MouseInput.Y };
-        var pageCoordinates = CoordinatesManager.ViewToPage(viewCoordinates);
-        var textCoordinates = CoordinatesManager.PageToText(pageCoordinates);
+
+        Vector2 pageCoordinates = CoordinatesManager.ViewToPage(MouseInput.Position);
+        TextCoordinates textCoordinates = CoordinatesManager.PageToText(pageCoordinates);
 
         if (textCoordinates.IsFold)
         {
             if (MouseAction.Click == MouseInput.LeftAction)
             {
                 //TODO fold unfold
-                return;
+                // if hit then return;
             }
         }
 
-        var vx = MouseInput.X - ViewInput.X;
-        var vy = MouseInput.Y - ViewInput.Y;
+        var mouseScreenX = MouseInput.Position.X - ViewInput.X;
+        var mouseScreenY = MouseInput.Position.Y - ViewInput.Y;
 
-        if (vx > 0 && vx < ViewInput.W && vy > 0 && vy < ViewInput.H)
+        if (mouseScreenX > 0 && mouseScreenX < ViewInput.W &&
+            mouseScreenY > 0 && mouseScreenY < ViewInput.H)
         {
             if (textCoordinates.IsFold)
             {
                 SetMouseCursor(MouseCursor.Hand);
             }
-            else if (textCoordinates.IsLineNumber)
-            {
-            }
+            else if (textCoordinates.IsLineNumber) { }
             else
             {
                 SetMouseCursor(MouseCursor.Beam);
             }
         }
-            
+
+        if (MouseAction.Click == MouseInput.LeftAction ||
+            MouseAction.Click == MouseInput.MiddleAction)
+        {
+            _mouseDragStartPage = pageCoordinates;
+            _mouseDragStartText = textCoordinates;
+        }
+
         if (MouseAction.Click == MouseInput.LeftAction)
         {
             if (hk.HasFlag(HotKeys.Shift))
             {
-                //DoAction(new MoveCaretSelectionCommand(textCoordinates));
+                CaretManager.SingleCaret().Selection = textCoordinates;
+            }
+            else if (hk.HasFlag(HotKeys.Alt))
+            {
+                CaretManager.AddCaret(textCoordinates);
             }
             else
             {
-                Action action = new();
-                //action.Add(new MoveCaretSelectionCommand(textCoordinates));
-                //action.Add(new MoveCaretPositionCommand(textCoordinates));
-                DoActionSet(action);
+                CaretManager.SingleCaret(textCoordinates);
             }
-
-            CaretManager.SetCaret(textCoordinates);
         }
         else if (MouseAction.DoubleClick == MouseInput.LeftAction)
         {
-            if (hk.HasFlag(HotKeys.Shift)) // Select Line
-            {
-                Action action = new();
-                //action.Add(new MoveCaretPositionCommand(textCoordinates));
+            CaretManager.SingleCaret(textCoordinates);
 
-                //action.Add(new MoveCaretSelectionCommand(CaretMove.StartOfLine));
-                //action.Add(new MoveCaretPositionCommand(CaretMove.EndOfLine));
-                DoActionSet(action);
+            if (hk.HasFlag(HotKeys.Shift))
+            {
+                // Select Line
+                CaretManager.MoveCaretsPosition(CaretMove.EndOfLine);
+                CaretManager.MoveCaretsSelection(CaretMove.StartOfLine);
             }
-            else // Select word
+            else
             {
-                Action action = new();
-                //action.Add(new MoveCaretPositionCommand(textCoordinates));
-
-                //action.Add(new MoveCaretSelectionCommand(CaretMove.StartOfWord));
-                //action.Add(new MoveCaretPositionCommand(CaretMove.EndOfWord));
-                DoActionSet(action);
+                // Select word
+                CaretManager.MoveCaretsPosition(CaretMove.EndOfWord);
+                CaretManager.MoveCaretsSelection(CaretMove.StartOfWord);
             }
         }
         else if (MouseAction.Dragging == MouseInput.LeftAction)
         {
-            //DoAction(new MoveCaretSelectionCommand(textCoordinates));
+            if (hk.HasFlag(HotKeys.Alt))
+            {
+                CaretManager.SelectRectangle(_mouseDragStartPage, pageCoordinates);
+            }
+            else
+            {
+                CaretManager.SingleCaret(_mouseDragStartText).Position = textCoordinates;
+            }
+        }
+        else if (MouseAction.Dragging == MouseInput.MiddleAction)
+        {
+            CaretManager.SelectRectangle(_mouseDragStartPage, pageCoordinates);
         }
     }
 
     private void ProcessViewInput()
     {
-        var start = new ViewCoordinates()
+        ViewStart = new Vector2()
         {
             X = ViewInput.X,
             Y = ViewInput.Y
         };
-        var end = new ViewCoordinates()
+        ViewEnd = new Vector2()
         {
             X = ViewInput.X + ViewInput.W,
             Y = ViewInput.Y + ViewInput.H
         };
-        Page.UpdateView(start, end);
+
+        if (Math.Abs(PageWidth - (ViewInput.W - LineNumberWidth - FoldWidth)) > 1.0f)
+        {
+            PageWidth = ViewInput.W;
+            Page.LineRendersCache.SetDirty();
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Bell.Coordinates;
+﻿using System.Numerics;
+using Bell.Coordinates;
 
 namespace Bell.Carets;
 
@@ -36,10 +37,22 @@ public class CaretManager
         _textBox = textBox;
     }
 
-    public void SetCaret(TextCoordinates textCoordinates)
+    public Caret SingleCaret(TextCoordinates textCoordinates = new())
     {
-        Carets.Clear();
-        Carets.Add(new Caret() { Position = textCoordinates, Selection = textCoordinates });
+        if (Carets.Count > 1)
+            Carets.RemoveRange(1, Carets.Count - 1);
+
+        if (Carets.Count > 0)
+        {
+            Carets[0].Position = textCoordinates;
+            Carets[0].Selection = textCoordinates;
+        }
+        else
+        {
+            Carets.Add(new Caret() { Position = textCoordinates, Selection = textCoordinates });
+        }
+        
+        return Carets[0];
     }
 
     public void AddCaret(TextCoordinates textCoordinates)
@@ -47,11 +60,25 @@ public class CaretManager
         Carets.Add(new Caret() { Position = textCoordinates, Selection = textCoordinates });
     }
 
-    public void MoveCarets(CaretMove caretMove)
+    public void MoveCaretsPosition(CaretMove caretMove)
     {
         foreach (Caret caret in Carets)
         {
             // TODO caret move
         }
+    }
+    
+    public void MoveCaretsSelection(CaretMove caretMove)
+    {
+        foreach (Caret caret in Carets)
+        {
+            // TODO caret move
+        }
+    }
+
+    public void SelectRectangle(Vector2 startPosition, Vector2 endPosition)
+    {
+        Carets.Clear();
+        // TODO select multiple lines
     }
 }

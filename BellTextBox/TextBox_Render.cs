@@ -40,15 +40,23 @@ public abstract partial class TextBox
 
         foreach (Caret caret in CaretManager.Carets)
         {
-            PageCoordinates caretInPage = CoordinatesManager.TextToPage(caret.Position);
-            ViewCoordinates caretInView = CoordinatesManager.PageToView(caretInPage);
+            Vector2 caretInPage = CoordinatesManager.TextToPage(caret.Position);
+            Vector2 caretInView = CoordinatesManager.PageToView(caretInPage);
 
             RenderLine(new Vector2(caretInView.X - 1, caretInView.Y),
                 new Vector2(caretInView.X - 1, caretInView.Y + FontSizeManager.GetFontSize()),
                 Theme.DefaultFontColor.ToVector(),
                 2.0f);
             
-            RenderText(new Vector2(caretInView.X, caretInView.Y), KeyboardInput.ImeComposition, Theme.DefaultFontColor.ToVector());
+            Vector2 selectionInPage = CoordinatesManager.TextToPage(caret.Selection);
+            Vector2 selectionInView = CoordinatesManager.PageToView(selectionInPage);
+            
+            RenderLine(new Vector2(selectionInView.X - 1, selectionInView.Y),
+                new Vector2(selectionInView.X - 1, selectionInView.Y + FontSizeManager.GetFontSize()),
+                Theme.LineCommentFontColor.ToVector(),
+                2.0f);
+            
+            RenderText(caretInView, KeyboardInput.ImeComposition, Theme.DefaultFontColor.ToVector());
         }
     }
 }

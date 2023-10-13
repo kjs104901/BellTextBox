@@ -1,4 +1,5 @@
-﻿using Bell.Data;
+﻿using System.Numerics;
+using Bell.Data;
 using Bell.Render;
 
 namespace Bell.Coordinates;
@@ -12,9 +13,9 @@ public class CoordinatesManager
         _textBox = textBox;
     }
 
-    public PageCoordinates ViewToPage(ViewCoordinates viewCoordinates)
+    public Vector2 ViewToPage(Vector2 viewCoordinates)
     {
-        PageCoordinates pageCoordinates = new()
+        Vector2 pageCoordinates = new()
         {
             X = viewCoordinates.X - _textBox.LineNumberWidth - _textBox.FoldWidth,
             Y = viewCoordinates.Y
@@ -22,7 +23,7 @@ public class CoordinatesManager
         return pageCoordinates;
     }
 
-    public TextCoordinates PageToText(PageCoordinates pageCoordinates, int offset = 0)
+    public TextCoordinates PageToText(Vector2 pageCoordinates, int offset = 0)
     {
         TextCoordinates textCoordinates = new();
         
@@ -35,12 +36,12 @@ public class CoordinatesManager
         if (pageCoordinates.X < -_textBox.LineNumberWidth)
         {
             textCoordinates.IsLineNumber = true;
-            textCoordinates.Column = -2;
+            textCoordinates.Column = 0;
         }
         else if (pageCoordinates.X < 0.0f)
         {
             textCoordinates.IsFold = true;
-            textCoordinates.Column = -1;
+            textCoordinates.Column = 0;
         }
         else
         {
@@ -79,50 +80,39 @@ public class CoordinatesManager
         return textCoordinates;
     }
 
-    public PageCoordinates TextToPage(TextCoordinates textCoordinates)
+    public Vector2 TextToPage(TextCoordinates textCoordinates)
     {
-        var pageCoordinates = new PageCoordinates();
+        var pageCoordinates = new Vector2();
 
-        if (textCoordinates.IsLineNumber)
-        {
-            pageCoordinates.X = -_textBox.LineNumberWidth;
-        }
-        else if (textCoordinates.IsFold)
-        {
-            pageCoordinates.X = -_textBox.FoldWidth;
-        }
-        else
-        {
-            pageCoordinates.X = 0;
+        pageCoordinates.X = 0;
 
-            if (_textBox.Text.LineWraps.Count > textCoordinates.Row)
+        if (_textBox.Text.LineWraps.Count > textCoordinates.Row)
+        {
+            LineWrap lineWrap = _textBox.Text.LineWraps[textCoordinates.Row];
+            Line line = _textBox.Text.Lines[lineWrap.LineIndex];
+            LineRender lineRender = line.LineRenders[lineWrap.RenderIndex];
+
+            
+            int column = textCoordinates.Column;
+            float pageX = 0.0f;
+            foreach (var textBlockRender in lineRender.TextBlockRenders)
             {
-                LineWrap lineWrap = _textBox.Text.LineWraps[textCoordinates.Row];
-                Line line = _textBox.Text.Lines[lineWrap.LineIndex];
-                LineRender lineRender = line.LineRenders[lineWrap.RenderIndex];
-
-                
-                int column = textCoordinates.Column;
-                float pageX = 0.0f;
-                foreach (var textBlockRender in lineRender.TextBlockRenders)
+                if (column < textBlockRender.Text.Length)
                 {
-                    if (column < textBlockRender.Text.Length)
+                    foreach (char c in textBlockRender.Text)
                     {
-                        foreach (char c in textBlockRender.Text)
-                        {
-                            if (column < 1)
-                                break;
-                            
-                            column -= 1;
-                            pageX += _textBox.FontSizeManager.GetFontWidth(c);
-                        }
-                        break;
+                        if (column < 1)
+                            break;
+                        
+                        column -= 1;
+                        pageX += _textBox.FontSizeManager.GetFontWidth(c);
                     }
-                    column -= textBlockRender.Text.Length;
-                    pageX += textBlockRender.Width;
+                    break;
                 }
-                pageCoordinates.X = pageX;
+                column -= textBlockRender.Text.Length;
+                pageX += textBlockRender.Width;
             }
+            pageCoordinates.X = pageX;
         }
         
         pageCoordinates.Y = textCoordinates.Row * _textBox.FontSizeManager.GetFontSize();
@@ -130,9 +120,9 @@ public class CoordinatesManager
         return pageCoordinates;
     }
 
-    public ViewCoordinates PageToView(PageCoordinates pageCoordinates)
+    public Vector2 PageToView(Vector2 pageCoordinates)
     {
-        ViewCoordinates viewCoordinates = new()
+        Vector2 viewCoordinates = new()
         {
             X = pageCoordinates.X + _textBox.LineNumberWidth + _textBox.FoldWidth,
             Y = pageCoordinates.Y

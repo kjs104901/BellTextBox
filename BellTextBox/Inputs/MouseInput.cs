@@ -1,4 +1,6 @@
-﻿namespace Bell.Inputs;
+﻿using System.Numerics;
+
+namespace Bell.Inputs;
 
 public enum MouseAction
 {
@@ -23,6 +25,5 @@ public struct MouseInput
     public MouseAction LeftAction;
     public MouseAction MiddleAction;
 
-    public float X;
-    public float Y;
+    public Vector2 Position;
 }
