@@ -1,4 +1,4 @@
-﻿namespace Bell.Commands;
+﻿namespace Bell.Actions;
 
 internal enum EditDirection
 {

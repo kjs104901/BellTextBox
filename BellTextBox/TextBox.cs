@@ -1,13 +1,13 @@
 ﻿using System.Numerics;
 using System.Text;
+using Bell.Actions;
 using Bell.Carets;
-using Bell.Commands;
 using Bell.Coordinates;
 using Bell.Data;
 using Bell.Inputs;
 using Bell.Languages;
 using Bell.Render;
-using Action = Bell.Commands.Action;
+using Action = Bell.Actions.Action;
 
 namespace Bell;
 

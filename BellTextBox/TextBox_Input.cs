@@ -1,7 +1,7 @@
-﻿using Bell.Commands;
+﻿using Bell.Actions;
 using Bell.Coordinates;
 using Bell.Inputs;
-using Action = Bell.Commands.Action;
+using Action = Bell.Actions.Action;
 
 namespace Bell;
 

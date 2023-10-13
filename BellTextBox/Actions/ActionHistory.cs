@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Bell.Commands;
+namespace Bell.Actions;
 
 internal class ActionHistory
 {

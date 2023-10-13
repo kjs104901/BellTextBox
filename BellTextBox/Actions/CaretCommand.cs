@@ -1,6 +1,6 @@
 ﻿using Bell.Coordinates;
 
-namespace Bell.Commands;
+namespace Bell.Actions;
 
 internal enum CaretMove
 {
