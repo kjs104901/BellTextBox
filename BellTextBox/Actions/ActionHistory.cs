@@ -24,7 +24,11 @@ internal class ActionHistory
             return;
 
         var action = _history.Last.Value;
-
+        action.UndoCommands();
+        
+        // TODO sequence undo
+        
+        _history.RemoveLast();
         _redoHistory.AddFirst(action);
     }
 
@@ -34,29 +38,17 @@ internal class ActionHistory
             return;
 
         var action = _redoHistory.First.Value;
+        action.DoCommands();
 
+        // TODO sequence redo
+        
+        _redoHistory.RemoveLast();
         _history.AddLast(action);
     }
 
     public string GetDebugString()
     {
-        StringBuilder sb = new();
-        sb.AppendLine("History");
-        foreach (Action actionSet in _history)
-        {
-            sb.Append("[");
-            sb.Append(actionSet.GetDebugString());
-            sb.Append("]");
-            sb.AppendLine();
-        }
-        sb.AppendLine("Redo History");
-        foreach (Action actionSet in _redoHistory)
-        {
-            sb.Append("[");
-            sb.Append(actionSet.GetDebugString());
-            sb.Append("]");
-            sb.AppendLine();
-        }
-        return sb.ToString();
+        // TODO debug string
+        throw new System.NotImplementedException();
     }
 }

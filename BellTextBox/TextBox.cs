@@ -69,17 +69,4 @@ public partial class TextBox
         Text.SetText(text);
         Page.SizeCache.SetDirty();
     }
-
-    private void DoAction(Command command)
-    {
-        Action action = new Action();
-        action.Add(command);
-        DoActionSet(action);
-    }
-
-    private void DoActionSet(Action action)
-    {
-        action.Do(this);
-        ActionHistory.AddHistory(action);
-    }
 }

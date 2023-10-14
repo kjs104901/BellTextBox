@@ -36,7 +36,7 @@ public class CaretManager
     {
         _textBox = textBox;
     }
-
+    
     public Caret SingleCaret(TextCoordinates textCoordinates = new())
     {
         if (Carets.Count > 1)

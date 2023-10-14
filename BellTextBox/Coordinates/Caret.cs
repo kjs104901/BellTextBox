@@ -8,4 +8,9 @@ public class Caret
     public TextCoordinates Position;
 
     public bool HasSelection => Selection != Position;
+
+    public Caret Clone()
+    {
+        return new Caret() { Selection = Selection, Position = Position };
+    }
 }

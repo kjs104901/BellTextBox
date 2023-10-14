@@ -134,7 +134,10 @@ public partial class TextBox
             }
             //else
             {
-                action.Add(new InputChar(EditDirection.Forward, new[] { '\t' }));
+                if (hk.HasFlag(HotKeys.Shift))
+                    //TODO Delete indent action.Add(new InputChar(EditDirection.Backward, new[] { '\t' }));
+                else
+                    action.Add(new InputChar(EditDirection.Forward, new[] { '\t' }));
             }
 
             DoActionSet(action);
