@@ -2,16 +2,25 @@
 
 namespace Bell.Actions;
 
-internal class ActionHistory
+internal class ActionManager
 {
-    private const int Capacity = 1000;
+    private readonly TextBox _textBox;
+    
+    private const int HistoryCapacity = 1000;
     private readonly LinkedList<Action> _history = new();
     private readonly LinkedList<Action> _redoHistory = new();
 
-    public void AddHistory(Action action)
+    public ActionManager(TextBox textBox)
     {
+        _textBox = textBox;
+    }
+
+    public void Do(Action action)
+    {
+        action.DoCommands();
+        
         _history.AddLast(action);
-        if (_history.Count > Capacity)
+        if (_history.Count > HistoryCapacity)
         {
             _history.RemoveFirst();
         }

@@ -81,4 +81,40 @@ public class CaretManager
         Carets.Clear();
         // TODO select multiple lines
     }
+
+    public void CopyClipboard()
+    {
+        /*
+        if (CaretManager.Carets.Count == 0)
+            return;
+
+        StringBuilder.Clear();
+        foreach (Caret caret in CaretManager.Carets)
+        {
+            if (caret.HasSelection)
+            {
+                StringBuilder.Append(Text.GetText(caret.SelectionStart, caret.SelectionEnd));
+            }
+        }
+
+        SetClipboard(StringBuilder.ToString());
+        */
+    }
+
+    public void PasteClipboard()
+    {
+        /*
+        if (CaretManager.Carets.Count == 0)
+            return;
+
+        string text = GetClipboard();
+        if (text == null)
+            return;
+
+        // if caret number is same as text line number, paste to each line
+
+
+        ActionManager.Do(new PasteAction(this, text));
+        */
+    }
 }

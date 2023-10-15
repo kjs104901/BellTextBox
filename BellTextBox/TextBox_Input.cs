@@ -16,7 +16,7 @@ public partial class TextBox
     public Vector2 ViewStart;
     public Vector2 ViewEnd;
     public float PageWidth;
-    
+
     private Vector2 _mouseDragStartPage;
     private TextCoordinates _mouseDragStartText;
 
@@ -45,174 +45,143 @@ public partial class TextBox
         var hk = KeyboardInput.HotKeys;
 
         if (hk.HasFlag(HotKeys.Ctrl | HotKeys.Z)) // Undo
-            ActionHistory.Undo();
+            ActionManager.Undo();
         else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.Y)) // Redo
-            ActionHistory.Redo();
-        //else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.C)) // copy
-        //    DoAction(new CopyCommand());
-        //else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.V)) // Paste
-        //    DoAction(new PasteCommand());
+            ActionManager.Redo();
+        else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.C)) // TODO Copy
+            CaretManager.CopyClipboard();
+        else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.V)) // TODO Paste
+            CaretManager.PasteClipboard();
         else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.X)) // Cut
         {
-            Action action = new();
-            //action.Add(new CopyCommand());
-            //TODO Delete select
-            //action.Add(new DeleteSelectionCommand());
-            //action.Add(new MoveCaretSelectionCommand(Caret.Position));
-            DoActionSet(action);
+            CaretManager.CopyClipboard();
+            // TODO delete if selection exists
         }
         else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.A)) // Select All
         {
-            Action action = new();
-            //action.Add(new MoveCaretSelectionCommand(CaretMove.StartOfFile));
-            //action.Add(new MoveCaretPositionCommand(CaretMove.EndOfFile));
-            DoActionSet(action);
+            CaretManager.MoveCaretsSelection(CaretMove.StartOfFile);
+            CaretManager.MoveCaretsPosition(CaretMove.EndOfFile);
         }
         else if (hk.HasFlag(HotKeys.Delete)) // Delete
         {
-            Action action = new();
-            //if (CaretManager.HasSelection())
-            {
-                //TODO Delete select
-                //action.Add(new DeleteSelectionCommand());
-                //action.Add(new MoveCaretSelectionCommand(Caret.Position));
-            }
-            //else
-            {
-                if (hk.HasFlag(HotKeys.Shift))
-                {
-                    //action.Add(new DeleteLineCommand());
-                }
-                else
-                {
-                    action.Add(new DeleteCommand(EditDirection.Forward, 1));
-                }
-            }
-
-            DoActionSet(action);
+            ActionManager.Do(new DeleteAction(this));
         }
         else if (hk.HasFlag(HotKeys.Backspace)) // Backspace
         {
-            Action action = new();
-            //if (CaretManager.HasSelection())
-            {
-                //TODO Delete select
-                //action.Add(new DeleteSelectionCommand());
-                //action.Add(new MoveCaretSelectionCommand(Caret.Position));
-            }
-            //else
-            {
-                //TODO 시작이었다면 위로 머지
-                action.Add(new DeleteCommand(EditDirection.Backward, 1));
-            }
-
-            DoActionSet(action);
+            ActionManager.Do(new BackspaceAction(this));
         }
         else if (hk.HasFlag(HotKeys.Enter)) // Enter
         {
-            Action action = new();
-            //if (CaretManager.HasSelection())
-            {
-                //TODO Delete select
-                //action.Add(new DeleteSelectionCommand());
-                //action.Add(new MoveCaretSelectionCommand(Caret.Position));
-            }
-
-            //TODO SplitLine
-            //actionSet.Add(new InputChar('\n'));
-            DoActionSet(action);
+            ActionManager.Do(new EnterAction(this));
         }
         else if (hk.HasFlag(HotKeys.Tab)) // Tab
         {
-            Action action = new();
-            //if (CaretManager.HasSelection())
-            {
-                if (hk.HasFlag(HotKeys.Shift))
-                    action.Add(new UnindentSelection());
-                else
-                    action.Add(new IndentSelection());
-            }
-            //else
-            {
-                if (hk.HasFlag(HotKeys.Shift))
-                    //TODO Delete indent action.Add(new InputChar(EditDirection.Backward, new[] { '\t' }));
-                else
-                    action.Add(new InputChar(EditDirection.Forward, new[] { '\t' }));
-            }
-
-            DoActionSet(action);
+            if (hk.HasFlag(HotKeys.Shift))
+                ActionManager.Do(new UnTabAction(this));
+            else
+                ActionManager.Do(new TabAction(this));
         }
         else if (hk.HasFlag(HotKeys.UpArrow)) // Move Up
         {
-            Action action = new();
-            //action.Add(new MoveCaretPositionCommand(CaretMove.Up));
-            if (false == hk.HasFlag(HotKeys.Shift))
-                //    action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
-                DoActionSet(action);
+            if (hk.HasFlag(HotKeys.Shift))
+            {
+                CaretManager.MoveCaretsSelection(CaretMove.Up);
+            }
+            else
+            {
+                CaretManager.MoveCaretsPosition(CaretMove.Up);
+                CaretManager.MoveCaretsSelection(CaretMove.Position);
+            }
         }
         else if (hk.HasFlag(HotKeys.DownArrow)) // Move Down
         {
-            Action action = new();
-            //action.Add(new MoveCaretPositionCommand(CaretMove.Down));
-            if (false == hk.HasFlag(HotKeys.Shift))
-                //    action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
-                DoActionSet(action);
+            if (hk.HasFlag(HotKeys.Shift))
+            {
+                CaretManager.MoveCaretsSelection(CaretMove.Down);
+            }
+            else
+            {
+                CaretManager.MoveCaretsPosition(CaretMove.Down);
+                CaretManager.MoveCaretsSelection(CaretMove.Position);
+            }
         }
         else if (hk.HasFlag(HotKeys.LeftArrow)) // Move Left
         {
-            Action action = new();
-            //action.Add(new MoveCaretPositionCommand(CaretMove.Left));
-            if (false == hk.HasFlag(HotKeys.Shift))
-                //    action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
-                DoActionSet(action);
+            if (hk.HasFlag(HotKeys.Shift))
+            {
+                CaretManager.MoveCaretsSelection(CaretMove.Left);
+            }
+            else
+            {
+                CaretManager.MoveCaretsPosition(CaretMove.Left);
+                CaretManager.MoveCaretsSelection(CaretMove.Position);
+            }
         }
         else if (hk.HasFlag(HotKeys.RightArrow)) // Move Right
         {
-            Action action = new();
-            //action.Add(new MoveCaretPositionCommand(CaretMove.Right));
-            if (false == hk.HasFlag(HotKeys.Shift))
-                //    action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
-                DoActionSet(action);
+            if (hk.HasFlag(HotKeys.Shift))
+            {
+                CaretManager.MoveCaretsSelection(CaretMove.Right);
+            }
+            else
+            {
+                CaretManager.MoveCaretsPosition(CaretMove.Right);
+                CaretManager.MoveCaretsSelection(CaretMove.Position);
+            }
         }
         else if (hk.HasFlag(HotKeys.PageUp)) // Move PageUp
         {
-            Action action = new();
-            //action.Add(new MoveCaretPositionCommand(CaretMove.PageUp));
-            if (false == hk.HasFlag(HotKeys.Shift))
-                //    action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
-                DoActionSet(action);
+            if (hk.HasFlag(HotKeys.Shift))
+            {
+                CaretManager.MoveCaretsSelection(CaretMove.PageUp);
+            }
+            else
+            {
+                CaretManager.MoveCaretsPosition(CaretMove.PageUp);
+                CaretManager.MoveCaretsSelection(CaretMove.Position);
+            }
         }
         else if (hk.HasFlag(HotKeys.PageDown)) // Move PageDown
         {
-            Action action = new();
-            //action.Add(new MoveCaretPositionCommand(CaretMove.PageDown));
-            if (false == hk.HasFlag(HotKeys.Shift))
-                //    action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
-                DoActionSet(action);
+            if (hk.HasFlag(HotKeys.Shift))
+            {
+                CaretManager.MoveCaretsSelection(CaretMove.PageDown);
+            }
+            else
+            {
+                CaretManager.MoveCaretsPosition(CaretMove.PageDown);
+                CaretManager.MoveCaretsSelection(CaretMove.Position);
+            }
         }
         else if (hk.HasFlag(HotKeys.Home))
         {
-            Action action = new();
-
-            //action.Add(hk.HasFlag(HotKeys.Ctrl)
-            //    ? new MoveCaretPositionCommand(CaretMove.EndOfFile)
-            //    : new MoveCaretPositionCommand(CaretMove.EndOfLine));
-
-            if (false == hk.HasFlag(HotKeys.Shift))
-                //    action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
-                DoActionSet(action);
+            if (hk.HasFlag(HotKeys.Shift))
+            {
+                CaretManager.MoveCaretsSelection(
+                    hk.HasFlag(HotKeys.Ctrl) ? CaretMove.StartOfFile : CaretMove.StartOfLine);
+            }
+            else
+            {
+                CaretManager.MoveCaretsPosition(
+                    hk.HasFlag(HotKeys.Ctrl) ? CaretMove.StartOfFile : CaretMove.StartOfLine);
+                
+                CaretManager.MoveCaretsSelection(CaretMove.Position);
+            }
         }
         else if (hk.HasFlag(HotKeys.End))
         {
-            Action action = new();
-
-            //action.Add(hk.HasFlag(HotKeys.Ctrl)
-            //    ? new MoveCaretPositionCommand(CaretMove.StartOfFile)
-            //    : new MoveCaretPositionCommand(CaretMove.StartOfLine));
-
-            if (false == hk.HasFlag(HotKeys.Shift))
-                //    action.Add(new MoveCaretSelectionCommand(CaretMove.Position));
-                DoActionSet(action);
+            if (hk.HasFlag(HotKeys.Shift))
+            {
+                CaretManager.MoveCaretsSelection(
+                    hk.HasFlag(HotKeys.Ctrl) ? CaretMove.EndOfFile : CaretMove.EndOfLine);
+            }
+            else
+            {
+                CaretManager.MoveCaretsPosition(
+                    hk.HasFlag(HotKeys.Ctrl) ? CaretMove.EndOfFile : CaretMove.EndOfLine);
+                
+                CaretManager.MoveCaretsSelection(CaretMove.Position);
+            }
         }
         else if (hk.HasFlag(HotKeys.Insert))
         {
@@ -222,7 +191,8 @@ public partial class TextBox
 
     private void ProcessKeyboardChars()
     {
-        Action action = new();
+        var hk = KeyboardInput.HotKeys;
+        
         foreach (char keyboardInputChar in KeyboardInput.Chars)
         {
             if (keyboardInputChar == 0)
@@ -230,31 +200,24 @@ public partial class TextBox
 
             if (keyboardInputChar == '\n')
             {
-                //Todo enter
+                ActionManager.Do(new EnterAction(this));
                 continue;
             }
 
             if (keyboardInputChar == '\t')
             {
-                //Todo tab
+                if (hk.HasFlag(HotKeys.Shift))
+                    ActionManager.Do(new UnTabAction(this));
+                else
+                    ActionManager.Do(new TabAction(this));
                 continue;
             }
 
             if (keyboardInputChar < 32)
                 continue;
-
-            action.Add(new InputChar(EditDirection.Forward, new[] { keyboardInputChar }));
+            
+            ActionManager.Do(new InputCharAction(this)); // keyboardInputChar
         }
-
-        DoActionSet(action);
-    }
-
-    private void DeleteSelection()
-    {
-        // delete forward Caret~
-        // merge line forward
-        // delete forward Caret~
-        // ...
     }
 
     private void ProcessMouseInput()
@@ -283,7 +246,9 @@ public partial class TextBox
             {
                 SetMouseCursor(MouseCursor.Hand);
             }
-            else if (textCoordinates.IsLineNumber) { }
+            else if (textCoordinates.IsLineNumber)
+            {
+            }
             else
             {
                 SetMouseCursor(MouseCursor.Beam);

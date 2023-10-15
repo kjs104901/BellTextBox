@@ -20,12 +20,11 @@ public partial class TextBox
     
     public readonly List<string> AutoCompleteList = new();
     public readonly StringBuilder StringBuilder = new();
+    
     public FontSizeManager FontSizeManager { get; }
     public CoordinatesManager CoordinatesManager { get; }
     internal CaretManager CaretManager { get; }
-
-    // Action
-    internal readonly ActionHistory ActionHistory = new();
+    internal ActionManager ActionManager { get; }
 
     public readonly Theme Theme;
 
@@ -37,31 +36,11 @@ public partial class TextBox
         FontSizeManager = new FontSizeManager(this);
         CoordinatesManager = new CoordinatesManager(this);
         CaretManager = new CaretManager(this);
+        ActionManager = new ActionManager(this);
 
         KeyboardInput.Chars = new List<char>();
 
         Theme = new DarkTheme();
-    }
-
-    // Method
-    public List<int> FindText(string text)
-    {
-        return new();
-    }
-
-    public bool Goto(int lineNumber)
-    {
-        return true;
-    }
-
-    public bool Fold(int lineNumber)
-    {
-        return true;
-    }
-
-    public bool Unfold(int lineNumber)
-    {
-        return true;
     }
 
     public void SetText(string text)

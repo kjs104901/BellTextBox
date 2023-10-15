@@ -5,19 +5,19 @@ namespace Bell.Actions;
 
 internal abstract class Action
 {
-    private TextBox _textBox;
+    private readonly TextBox _textBox;
     
     private readonly List<List<Command>> _caretsCommands = new();
 
     private readonly List<Caret> _startCarets = new();
     private readonly List<Caret> _endCarets = new();
-    
-    public Action(TextBox textBox)
+
+    protected Action(TextBox textBox)
     {
         _textBox = textBox;
     }
 
-    public abstract List<Command> CreateCommands(Caret caret);
+    protected abstract List<Command> CreateCommands(Caret caret);
     
     public void DoCommands()
     {
@@ -68,5 +68,77 @@ internal abstract class Action
     public string GetDebugString()
     {
         return string.Join(",", _caretsCommands.Select(a => a.GetType().ToString()));
+    }
+}
+
+internal class DeleteAction : Action
+{
+    public DeleteAction(TextBox textBox) : base(textBox)
+    {
+    }
+
+    protected override List<Command> CreateCommands(Caret caret)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+internal class BackspaceAction : Action
+{
+    public BackspaceAction(TextBox textBox) : base(textBox)
+    {
+    }
+
+    protected override List<Command> CreateCommands(Caret caret)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+internal class EnterAction : Action
+{
+    public EnterAction(TextBox textBox) : base(textBox)
+    {
+    }
+
+    protected override List<Command> CreateCommands(Caret caret)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+internal class TabAction : Action
+{
+    public TabAction(TextBox textBox) : base(textBox)
+    {
+    }
+
+    protected override List<Command> CreateCommands(Caret caret)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+internal class UnTabAction : Action
+{
+    public UnTabAction(TextBox textBox) : base(textBox)
+    {
+    }
+
+    protected override List<Command> CreateCommands(Caret caret)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+internal class InputCharAction : Action
+{
+    public InputCharAction(TextBox textBox) : base(textBox)
+    {
+    }
+
+    protected override List<Command> CreateCommands(Caret caret)
+    {
+        throw new NotImplementedException();
     }
 }
