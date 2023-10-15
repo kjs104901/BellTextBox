@@ -55,7 +55,7 @@ public partial class TextBox
         else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.X)) // Cut
         {
             CaretManager.CopyClipboard();
-            // TODO delete if selection exists
+            ActionManager.Do(new DeleteSelection(this));
         }
         else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.A)) // Select All
         {
@@ -64,14 +64,17 @@ public partial class TextBox
         }
         else if (hk.HasFlag(HotKeys.Delete)) // Delete
         {
-            ActionManager.Do(new DeleteAction(this));
+            ActionManager.Do(new DeleteSelection(this));
+            ActionManager.Do(new DeleteCharAction(this, EditDirection.Forward));
         }
         else if (hk.HasFlag(HotKeys.Backspace)) // Backspace
         {
-            ActionManager.Do(new BackspaceAction(this));
+            ActionManager.Do(new DeleteSelection(this));
+            ActionManager.Do(new DeleteCharAction(this, EditDirection.Backward));
         }
         else if (hk.HasFlag(HotKeys.Enter)) // Enter
         {
+            ActionManager.Do(new DeleteSelection(this));
             ActionManager.Do(new EnterAction(this));
         }
         else if (hk.HasFlag(HotKeys.Tab)) // Tab
@@ -192,6 +195,7 @@ public partial class TextBox
     private void ProcessKeyboardChars()
     {
         var hk = KeyboardInput.HotKeys;
+        bool selectionDeleted = false;
         
         foreach (char keyboardInputChar in KeyboardInput.Chars)
         {
@@ -215,8 +219,13 @@ public partial class TextBox
 
             if (keyboardInputChar < 32)
                 continue;
-            
-            ActionManager.Do(new InputCharAction(this)); // keyboardInputChar
+
+            if (false == selectionDeleted)
+            {
+                ActionManager.Do(new DeleteSelection(this));
+                selectionDeleted = true;
+            }
+            ActionManager.Do(new InputCharAction(this, EditDirection.Forward)); // keyboardInputChar
         }
     }
 

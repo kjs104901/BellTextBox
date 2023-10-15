@@ -71,9 +71,9 @@ internal abstract class Action
     }
 }
 
-internal class DeleteAction : Action
+internal class DeleteSelection : Action
 {
-    public DeleteAction(TextBox textBox) : base(textBox)
+    public DeleteSelection(TextBox textBox) : base(textBox)
     {
     }
 
@@ -83,9 +83,9 @@ internal class DeleteAction : Action
     }
 }
 
-internal class BackspaceAction : Action
+internal class InputCharAction : Action
 {
-    public BackspaceAction(TextBox textBox) : base(textBox)
+    public InputCharAction(TextBox textBox, EditDirection direction) : base(textBox)
     {
     }
 
@@ -95,6 +95,17 @@ internal class BackspaceAction : Action
     }
 }
 
+internal class DeleteCharAction : Action
+{
+    public DeleteCharAction(TextBox textBox, EditDirection direction) : base(textBox)
+    {
+    }
+
+    protected override List<Command> CreateCommands(Caret caret)
+    {
+        throw new NotImplementedException();
+    }
+}
 internal class EnterAction : Action
 {
     public EnterAction(TextBox textBox) : base(textBox)
@@ -122,18 +133,6 @@ internal class TabAction : Action
 internal class UnTabAction : Action
 {
     public UnTabAction(TextBox textBox) : base(textBox)
-    {
-    }
-
-    protected override List<Command> CreateCommands(Caret caret)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-internal class InputCharAction : Action
-{
-    public InputCharAction(TextBox textBox) : base(textBox)
     {
     }
 

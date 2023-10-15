@@ -6,12 +6,12 @@ internal enum EditDirection
     Backward
 }
 
-internal class InputChar : Command
+internal class InputCharCommand : Command
 {
     private EditDirection _direction;
     private char[] _chars;
     
-    public InputChar(EditDirection direction, char[] chars)
+    public InputCharCommand(EditDirection direction, char[] chars)
     {
         _direction = direction;
         _chars = chars;
@@ -26,12 +26,12 @@ internal class InputChar : Command
     }
 }
 
-internal class DeleteCommand : Command
+internal class DeleteCharCommand : Command
 {
     private EditDirection _direction;
     private int _count;
 
-    public DeleteCommand(EditDirection direction, int count)
+    public DeleteCharCommand(EditDirection direction, int count)
     {
         _direction = direction;
         _count = count;
