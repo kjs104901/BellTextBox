@@ -65,7 +65,7 @@ public class ImGuiBellTextBox : TextBox
         };
 
         ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.2f, 0.1f, 0.1f, 1.0f));
-        ImGui.BeginChild("##Page", Page.Size, false,
+        ImGui.BeginChild("##Page", PageSize, false,
             ImGuiWindowFlags.NoScrollbar);
 
         _drawList = ImGui.GetWindowDrawList();

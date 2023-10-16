@@ -1,6 +1,4 @@
-﻿using Bell.Coordinates;
-
-namespace Bell.Carets;
+﻿namespace Bell.Data;
 
 public class Caret
 {

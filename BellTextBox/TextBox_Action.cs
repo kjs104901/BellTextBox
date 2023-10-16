@@ -1,21 +1,15 @@
-﻿using System.Text;
+﻿using Bell.Data;
+using Action = Bell.Data.Action;
 
-namespace Bell.Actions;
+namespace Bell;
 
-internal class ActionManager
+public partial class TextBox
 {
-    private readonly TextBox _textBox;
-    
     private const int HistoryCapacity = 1000;
     private readonly LinkedList<Action> _history = new();
     private readonly LinkedList<Action> _redoHistory = new();
-
-    public ActionManager(TextBox textBox)
-    {
-        _textBox = textBox;
-    }
-
-    public void Do(Action action)
+    
+    internal void DoAction(Action action)
     {
         action.DoCommands();
         
@@ -27,7 +21,7 @@ internal class ActionManager
         _redoHistory.Clear();
     }
     
-    public void Undo()
+    internal void UndoAction()
     {
         if (_history.Last == null)
             return;
@@ -41,7 +35,7 @@ internal class ActionManager
         _redoHistory.AddFirst(action);
     }
 
-    public void Redo()
+    internal void RedoAction()
     {
         if (_redoHistory.First == null)
             return;
@@ -55,7 +49,7 @@ internal class ActionManager
         _history.AddLast(action);
     }
 
-    public string GetDebugString()
+    internal string GetActionDebugString()
     {
         // TODO debug string
         throw new System.NotImplementedException();

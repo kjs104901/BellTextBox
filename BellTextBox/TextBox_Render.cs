@@ -1,6 +1,4 @@
 ﻿using System.Numerics;
-using Bell.Carets;
-using Bell.Coordinates;
 using Bell.Data;
 using Bell.Inputs;
 using Bell.Languages;
@@ -25,13 +23,13 @@ public abstract partial class TextBox
 
     protected void Render()
     {
-        FontSizeManager.UpdateReferenceSize();
-        FoldWidth = FontSizeManager.GetFontReferenceWidth() * 2;
+        UpdateReferenceSize();
+        FoldWidth = GetFontReferenceWidth() * 2;
 
         float lineNumberWidthMax = 0.0f;
-        foreach (LineRender lineRender in Page.LineRenders)
+        foreach (LineRender lineRender in Text.ShowLineRenders)
         {
-            foreach (Caret caret in CaretManager.Carets)
+            foreach (Caret caret in Carets)
             {
                 if (caret.HasSelection)
                 {
@@ -39,7 +37,7 @@ public abstract partial class TextBox
                 }
             }
 
-            var lineY = lineRender.Row * FontSizeManager.GetFontSize();
+            var lineY = lineRender.Row * GetFontSize();
 
             float width = 0.0f;
             foreach (TextBlockRender textBlockRender in lineRender.TextBlockRenders)
@@ -56,7 +54,7 @@ public abstract partial class TextBox
                 float lineNumberWidth = 0.0f;
                 foreach (char c in lineRender.LineIndex.ToString())
                 {
-                    lineNumberWidth += FontSizeManager.GetFontWidth(c);
+                    lineNumberWidth += GetFontWidth(c);
                 }
                 lineNumberWidthMax = Math.Max(lineNumberWidthMax, lineNumberWidth);
                 
@@ -71,21 +69,21 @@ public abstract partial class TextBox
         }
         LineNumberWidthMax = lineNumberWidthMax + 30.0f; // TODO setting padding option
 
-        foreach (Caret caret in CaretManager.Carets)
+        foreach (Caret caret in Carets)
         {
-            Vector2 caretInPage = CoordinatesManager.TextToPage(caret.Position);
-            Vector2 caretInView = CoordinatesManager.PageToView(caretInPage);
+            Vector2 caretInPage = TextToPage(caret.Position);
+            Vector2 caretInView = PageToView(caretInPage);
 
             RenderLine(new Vector2(caretInView.X - 1, caretInView.Y),
-                new Vector2(caretInView.X - 1, caretInView.Y + FontSizeManager.GetFontSize()),
+                new Vector2(caretInView.X - 1, caretInView.Y + GetFontSize()),
                 Theme.DefaultFontColor.ToVector(),
                 2.0f);
 
-            Vector2 selectionInPage = CoordinatesManager.TextToPage(caret.Selection);
-            Vector2 selectionInView = CoordinatesManager.PageToView(selectionInPage);
+            Vector2 selectionInPage = TextToPage(caret.Selection);
+            Vector2 selectionInView = PageToView(selectionInPage);
 
             RenderLine(new Vector2(selectionInView.X - 1, selectionInView.Y),
-                new Vector2(selectionInView.X - 1, selectionInView.Y + FontSizeManager.GetFontSize()),
+                new Vector2(selectionInView.X - 1, selectionInView.Y + GetFontSize()),
                 Theme.LineCommentFontColor.ToVector(),
                 2.0f);
 

@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
-using Bell.Carets;
 
-namespace Bell.Actions;
+namespace Bell.Data;
 
 internal abstract class Action
 {
@@ -26,7 +25,7 @@ internal abstract class Action
         _startCarets.Clear();
         _endCarets.Clear();
         
-        foreach (Caret caret in _textBox.CaretManager.Carets)
+        foreach (Caret caret in _textBox.Carets)
         {
             _startCarets.Add(caret.Clone());
 
@@ -35,7 +34,7 @@ internal abstract class Action
 
             foreach (Command command in commands)
             {
-                // command.Do(caret);
+                // command.DoAction(caret);
             }
             
             _endCarets.Add(caret.Clone());
@@ -46,23 +45,23 @@ internal abstract class Action
     {
         Debug.Assert(_endCarets.Count == _caretsCommands.Count);
         
-        _textBox.CaretManager.Carets.Clear();
-        _textBox.CaretManager.Carets.AddRange(_endCarets);
+        _textBox.Carets.Clear();
+        _textBox.Carets.AddRange(_endCarets);
         
         for (int i = _caretsCommands.Count - 1; i >= 0; i--)
         {
             List<Command> commands = _caretsCommands[i];
-            Caret caret = _textBox.CaretManager.Carets[i];
+            Caret caret = _textBox.Carets[i];
             
             for (int j = commands.Count - 1; j >= 0; j--)
             {
                 Command command = commands[j];
-                // command.Undo(caret);
+                // command.UndoAction(caret);
             }
         }
         
-        _textBox.CaretManager.Carets.Clear();
-        _textBox.CaretManager.Carets.AddRange(_startCarets);
+        _textBox.Carets.Clear();
+        _textBox.Carets.AddRange(_startCarets);
     }
     
     public string GetDebugString()

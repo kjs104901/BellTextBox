@@ -1,26 +1,16 @@
-﻿namespace Bell.Coordinates;
+﻿namespace Bell;
 
-public class FontSizeManager
+public partial class TextBox
 {
-    private readonly TextBox _textBox;
     private readonly Dictionary<float, Dictionary<char, float>> _sizeCacheDictionary = new();
 
-    private Dictionary<char, float> _sizeWidthCache;
-    private float _sizeHeight;
+    private Dictionary<char, float> _sizeWidthCache = new();
     
-    public FontSizeManager(TextBox textBox)
-    {
-        _textBox = textBox;
-        _sizeWidthCache = new();
-        UpdateReferenceSize();
-    }
-
     public void UpdateReferenceSize()
     {
-        var fontSize = _textBox.GetFontSize();
+        var fontSize = GetFontSize();
         _sizeCacheDictionary.TryAdd(fontSize, new Dictionary<char, float>());
         _sizeWidthCache = _sizeCacheDictionary[fontSize];
-        _sizeHeight = fontSize;
     }
 
     public float GetFontReferenceWidth()
@@ -34,14 +24,9 @@ public class FontSizeManager
         
         if (false == _sizeWidthCache.TryGetValue(c, out float fontWidth))
         {
-            fontWidth = _textBox.GetCharWidth(c);
+            fontWidth = GetCharWidth(c);
             _sizeWidthCache[c] = fontWidth;
         }
         return fontWidth;
-    }
-
-    public float GetFontSize()
-    {
-        return _sizeHeight;
     }
 }

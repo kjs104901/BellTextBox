@@ -5,7 +5,10 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RootNamespace>Bell</RootNamespace>
+
+
     </PropertyGroup>
+
 
 
 

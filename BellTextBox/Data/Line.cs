@@ -1,5 +1,4 @@
 ﻿using System.Runtime.InteropServices;
-using Bell.Colors;
 using Bell.Languages;
 
 namespace Bell.Data;
@@ -79,7 +78,7 @@ public class Line
         if (WrapMode.None == _textBox.WrapMode)
             return cutoffs;
 
-        var lineWidth = _textBox.PageWidth - _textBox.LineNumberWidthMax - _textBox.FoldWidth;
+        var lineWidth = _textBox.PageSize.X - _textBox.LineNumberWidthMax - _textBox.FoldWidth;
         if (lineWidth < 1.0f)
             return cutoffs;
 
@@ -87,8 +86,8 @@ public class Line
 
         for (int i = 0; i < Chars.Count; i++)
         {
-            widthAccumulated += _textBox.FontSizeManager.GetFontWidth(Chars[i]);
-            if (widthAccumulated + _textBox.FontSizeManager.GetFontReferenceWidth() > lineWidth)
+            widthAccumulated += _textBox.GetFontWidth(Chars[i]);
+            if (widthAccumulated + _textBox.GetFontReferenceWidth() > lineWidth)
             {
                 if (_textBox.WrapMode == WrapMode.BreakWord)
                 {
@@ -104,8 +103,8 @@ public class Line
                         if (char.IsWhiteSpace(Chars[i]))
                             break;
 
-                        backWidth += _textBox.FontSizeManager.GetFontWidth(Chars[i]);
-                        if (backWidth + _textBox.FontSizeManager.GetFontReferenceWidth() * 10 > lineWidth)
+                        backWidth += _textBox.GetFontWidth(Chars[i]);
+                        if (backWidth + _textBox.GetFontReferenceWidth() * 10 > lineWidth)
                             break; // Give up on word wrap. break word.
 
                         i--;
@@ -162,7 +161,7 @@ public class Line
                 }
 
                 _buffers.Add(Chars[i]);
-                bufferWidth += _textBox.FontSizeManager.GetFontWidth(Chars[i]);
+                bufferWidth += _textBox.GetFontWidth(Chars[i]);
 
                 isFirstCharInLine = false;
                 continue;
@@ -184,7 +183,7 @@ public class Line
             }
 
             _buffers.Add(Chars[i]);
-            bufferWidth += _textBox.FontSizeManager.GetFontWidth(Chars[i]);
+            bufferWidth += _textBox.GetFontWidth(Chars[i]);
 
             if (Cutoffs.Contains(i)) // need new line
             {

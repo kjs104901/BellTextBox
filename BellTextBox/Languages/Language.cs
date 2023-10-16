@@ -1,5 +1,4 @@
-﻿using Bell.Colors;
-using Bell.Data;
+﻿using Bell.Data;
 
 namespace Bell.Languages;
 

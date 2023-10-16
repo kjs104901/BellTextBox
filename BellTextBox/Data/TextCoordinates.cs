@@ -1,4 +1,4 @@
-﻿namespace Bell.Coordinates;
+﻿namespace Bell.Data;
 
 public struct TextCoordinates : IEquatable<TextCoordinates>
 {

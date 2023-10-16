@@ -1,4 +1,4 @@
-﻿namespace Bell.Data;
+﻿namespace Bell;
 
 public class Cache<T>
 {

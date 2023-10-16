@@ -12,12 +12,16 @@ public class Text
     public List<LineRender> LineRenders => LineRendersCache.Get();
     public readonly Cache<List<LineRender>> LineRendersCache;
     
+    public List<LineRender> ShowLineRenders => ShowLineRendersCache.Get();
+    public readonly Cache<List<LineRender>> ShowLineRendersCache;
+    
     public Text(TextBox textBox)
     {
         _textBox = textBox;
 
         LinesCache = new Cache<List<Line>>(new List<Line>(), UpdateLines);
         LineRendersCache = new Cache<List<LineRender>>(new List<LineRender>(), UpdateLineRenders);
+        ShowLineRendersCache = new Cache<List<LineRender>>(new List<LineRender>(), UpdateShowLineRenders);
     }
     
     public void SetText(string text)
@@ -58,6 +62,25 @@ public class Text
                 }
             }
         }
+        return lineRenders;
+    }
+    
+    private List<LineRender> UpdateShowLineRenders(List<LineRender> lineRenders)
+    {
+        lineRenders.Clear();
+
+        var pageStart = _textBox.ViewToPage(_textBox.ViewStart);
+        var pageEnd = _textBox.ViewToPage(_textBox.ViewEnd);
+
+        var textStart = _textBox.PageToText(pageStart, -3);
+        var textEnd = _textBox.PageToText(pageEnd, 3);
+
+        for (int i = textStart.Row; i <= textEnd.Row; i++)
+        {
+            if (_textBox.Text.LineRenders.Count > i)
+                lineRenders.Add(_textBox.Text.LineRenders[i]);
+        }
+
         return lineRenders;
     }
 

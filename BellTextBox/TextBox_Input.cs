@@ -1,9 +1,6 @@
 ﻿using System.Numerics;
-using Bell.Actions;
-using Bell.Carets;
-using Bell.Coordinates;
+using Bell.Data;
 using Bell.Inputs;
-using Action = Bell.Actions.Action;
 
 namespace Bell;
 
@@ -15,8 +12,11 @@ public partial class TextBox
 
     public Vector2 ViewStart;
     public Vector2 ViewEnd;
-    public float PageWidth;
-
+    public Vector2 PageSize;
+    
+    private TextCoordinates _textStart;
+    private TextCoordinates _textEnd;
+    
     private Vector2 _mouseDragStartPage;
     private TextCoordinates _mouseDragStartText;
 
@@ -44,146 +44,146 @@ public partial class TextBox
     {
         var hk = KeyboardInput.HotKeys;
 
-        if (hk.HasFlag(HotKeys.Ctrl | HotKeys.Z)) // Undo
-            ActionManager.Undo();
-        else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.Y)) // Redo
-            ActionManager.Redo();
+        if (hk.HasFlag(HotKeys.Ctrl | HotKeys.Z)) // UndoAction
+            UndoAction();
+        else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.Y)) // RedoAction
+            RedoAction();
         else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.C)) // TODO Copy
-            CaretManager.CopyClipboard();
+            CopyClipboard();
         else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.V)) // TODO Paste
-            CaretManager.PasteClipboard();
+            PasteClipboard();
         else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.X)) // Cut
         {
-            CaretManager.CopyClipboard();
-            ActionManager.Do(new DeleteSelection(this));
+            CopyClipboard();
+            DoAction(new DeleteSelection(this));
         }
         else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.A)) // Select All
         {
-            CaretManager.MoveCaretsSelection(CaretMove.StartOfFile);
-            CaretManager.MoveCaretsPosition(CaretMove.EndOfFile);
+            MoveCaretsSelection(CaretMove.StartOfFile);
+            MoveCaretsPosition(CaretMove.EndOfFile);
         }
         else if (hk.HasFlag(HotKeys.Delete)) // Delete
         {
-            ActionManager.Do(new DeleteSelection(this));
-            ActionManager.Do(new DeleteCharAction(this, EditDirection.Forward));
+            DoAction(new DeleteSelection(this));
+            DoAction(new DeleteCharAction(this, EditDirection.Forward));
         }
         else if (hk.HasFlag(HotKeys.Backspace)) // Backspace
         {
-            ActionManager.Do(new DeleteSelection(this));
-            ActionManager.Do(new DeleteCharAction(this, EditDirection.Backward));
+            DoAction(new DeleteSelection(this));
+            DoAction(new DeleteCharAction(this, EditDirection.Backward));
         }
         else if (hk.HasFlag(HotKeys.Enter)) // Enter
         {
-            ActionManager.Do(new DeleteSelection(this));
-            ActionManager.Do(new EnterAction(this));
+            DoAction(new DeleteSelection(this));
+            DoAction(new EnterAction(this));
         }
         else if (hk.HasFlag(HotKeys.Tab)) // Tab
         {
             if (hk.HasFlag(HotKeys.Shift))
-                ActionManager.Do(new UnTabAction(this));
+                DoAction(new UnTabAction(this));
             else
-                ActionManager.Do(new TabAction(this));
+                DoAction(new TabAction(this));
         }
         else if (hk.HasFlag(HotKeys.UpArrow)) // Move Up
         {
             if (hk.HasFlag(HotKeys.Shift))
             {
-                CaretManager.MoveCaretsSelection(CaretMove.Up);
+                MoveCaretsSelection(CaretMove.Up);
             }
             else
             {
-                CaretManager.MoveCaretsPosition(CaretMove.Up);
-                CaretManager.MoveCaretsSelection(CaretMove.Position);
+                MoveCaretsPosition(CaretMove.Up);
+                MoveCaretsSelection(CaretMove.Position);
             }
         }
         else if (hk.HasFlag(HotKeys.DownArrow)) // Move Down
         {
             if (hk.HasFlag(HotKeys.Shift))
             {
-                CaretManager.MoveCaretsSelection(CaretMove.Down);
+                MoveCaretsSelection(CaretMove.Down);
             }
             else
             {
-                CaretManager.MoveCaretsPosition(CaretMove.Down);
-                CaretManager.MoveCaretsSelection(CaretMove.Position);
+                MoveCaretsPosition(CaretMove.Down);
+                MoveCaretsSelection(CaretMove.Position);
             }
         }
         else if (hk.HasFlag(HotKeys.LeftArrow)) // Move Left
         {
             if (hk.HasFlag(HotKeys.Shift))
             {
-                CaretManager.MoveCaretsSelection(CaretMove.Left);
+                MoveCaretsSelection(CaretMove.Left);
             }
             else
             {
-                CaretManager.MoveCaretsPosition(CaretMove.Left);
-                CaretManager.MoveCaretsSelection(CaretMove.Position);
+                MoveCaretsPosition(CaretMove.Left);
+                MoveCaretsSelection(CaretMove.Position);
             }
         }
         else if (hk.HasFlag(HotKeys.RightArrow)) // Move Right
         {
             if (hk.HasFlag(HotKeys.Shift))
             {
-                CaretManager.MoveCaretsSelection(CaretMove.Right);
+                MoveCaretsSelection(CaretMove.Right);
             }
             else
             {
-                CaretManager.MoveCaretsPosition(CaretMove.Right);
-                CaretManager.MoveCaretsSelection(CaretMove.Position);
+                MoveCaretsPosition(CaretMove.Right);
+                MoveCaretsSelection(CaretMove.Position);
             }
         }
         else if (hk.HasFlag(HotKeys.PageUp)) // Move PageUp
         {
             if (hk.HasFlag(HotKeys.Shift))
             {
-                CaretManager.MoveCaretsSelection(CaretMove.PageUp);
+                MoveCaretsSelection(CaretMove.PageUp);
             }
             else
             {
-                CaretManager.MoveCaretsPosition(CaretMove.PageUp);
-                CaretManager.MoveCaretsSelection(CaretMove.Position);
+                MoveCaretsPosition(CaretMove.PageUp);
+                MoveCaretsSelection(CaretMove.Position);
             }
         }
         else if (hk.HasFlag(HotKeys.PageDown)) // Move PageDown
         {
             if (hk.HasFlag(HotKeys.Shift))
             {
-                CaretManager.MoveCaretsSelection(CaretMove.PageDown);
+                MoveCaretsSelection(CaretMove.PageDown);
             }
             else
             {
-                CaretManager.MoveCaretsPosition(CaretMove.PageDown);
-                CaretManager.MoveCaretsSelection(CaretMove.Position);
+                MoveCaretsPosition(CaretMove.PageDown);
+                MoveCaretsSelection(CaretMove.Position);
             }
         }
         else if (hk.HasFlag(HotKeys.Home))
         {
             if (hk.HasFlag(HotKeys.Shift))
             {
-                CaretManager.MoveCaretsSelection(
+                MoveCaretsSelection(
                     hk.HasFlag(HotKeys.Ctrl) ? CaretMove.StartOfFile : CaretMove.StartOfLine);
             }
             else
             {
-                CaretManager.MoveCaretsPosition(
+                MoveCaretsPosition(
                     hk.HasFlag(HotKeys.Ctrl) ? CaretMove.StartOfFile : CaretMove.StartOfLine);
                 
-                CaretManager.MoveCaretsSelection(CaretMove.Position);
+                MoveCaretsSelection(CaretMove.Position);
             }
         }
         else if (hk.HasFlag(HotKeys.End))
         {
             if (hk.HasFlag(HotKeys.Shift))
             {
-                CaretManager.MoveCaretsSelection(
+                MoveCaretsSelection(
                     hk.HasFlag(HotKeys.Ctrl) ? CaretMove.EndOfFile : CaretMove.EndOfLine);
             }
             else
             {
-                CaretManager.MoveCaretsPosition(
+                MoveCaretsPosition(
                     hk.HasFlag(HotKeys.Ctrl) ? CaretMove.EndOfFile : CaretMove.EndOfLine);
                 
-                CaretManager.MoveCaretsSelection(CaretMove.Position);
+                MoveCaretsSelection(CaretMove.Position);
             }
         }
         else if (hk.HasFlag(HotKeys.Insert))
@@ -204,16 +204,16 @@ public partial class TextBox
 
             if (keyboardInputChar == '\n')
             {
-                ActionManager.Do(new EnterAction(this));
+                DoAction(new EnterAction(this));
                 continue;
             }
 
             if (keyboardInputChar == '\t')
             {
                 if (hk.HasFlag(HotKeys.Shift))
-                    ActionManager.Do(new UnTabAction(this));
+                    DoAction(new UnTabAction(this));
                 else
-                    ActionManager.Do(new TabAction(this));
+                    DoAction(new TabAction(this));
                 continue;
             }
 
@@ -222,10 +222,10 @@ public partial class TextBox
 
             if (false == selectionDeleted)
             {
-                ActionManager.Do(new DeleteSelection(this));
+                DoAction(new DeleteSelection(this));
                 selectionDeleted = true;
             }
-            ActionManager.Do(new InputCharAction(this, EditDirection.Forward)); // keyboardInputChar
+            DoAction(new InputCharAction(this, EditDirection.Forward)); // keyboardInputChar
         }
     }
 
@@ -233,8 +233,8 @@ public partial class TextBox
     {
         var hk = KeyboardInput.HotKeys;
 
-        Vector2 pageCoordinates = CoordinatesManager.ViewToPage(MouseInput.Position);
-        TextCoordinates textCoordinates = CoordinatesManager.PageToText(pageCoordinates);
+        Vector2 pageCoordinates = ViewToPage(MouseInput.Position);
+        TextCoordinates textCoordinates = PageToText(pageCoordinates);
 
         if (textCoordinates.IsFold)
         {
@@ -275,48 +275,48 @@ public partial class TextBox
         {
             if (hk.HasFlag(HotKeys.Shift))
             {
-                CaretManager.SingleCaret().Selection = textCoordinates;
+                SingleCaret().Selection = textCoordinates;
             }
             else if (hk.HasFlag(HotKeys.Alt))
             {
-                CaretManager.AddCaret(textCoordinates);
+                AddCaret(textCoordinates);
             }
             else
             {
-                CaretManager.SingleCaret(textCoordinates);
+                SingleCaret(textCoordinates);
             }
         }
         else if (MouseAction.DoubleClick == MouseInput.LeftAction)
         {
-            CaretManager.SingleCaret(textCoordinates);
+            SingleCaret(textCoordinates);
 
             if (hk.HasFlag(HotKeys.Shift))
             {
                 // Select Line
-                CaretManager.MoveCaretsPosition(CaretMove.EndOfLine);
-                CaretManager.MoveCaretsSelection(CaretMove.StartOfLine);
+                MoveCaretsPosition(CaretMove.EndOfLine);
+                MoveCaretsSelection(CaretMove.StartOfLine);
             }
             else
             {
                 // Select word
-                CaretManager.MoveCaretsPosition(CaretMove.EndOfWord);
-                CaretManager.MoveCaretsSelection(CaretMove.StartOfWord);
+                MoveCaretsPosition(CaretMove.EndOfWord);
+                MoveCaretsSelection(CaretMove.StartOfWord);
             }
         }
         else if (MouseAction.Dragging == MouseInput.LeftAction)
         {
             if (hk.HasFlag(HotKeys.Alt))
             {
-                CaretManager.SelectRectangle(_mouseDragStartPage, pageCoordinates);
+                SelectRectangle(_mouseDragStartPage, pageCoordinates);
             }
             else
             {
-                CaretManager.SingleCaret(_mouseDragStartText).Position = textCoordinates;
+                SingleCaret(_mouseDragStartText).Position = textCoordinates;
             }
         }
         else if (MouseAction.Dragging == MouseInput.MiddleAction)
         {
-            CaretManager.SelectRectangle(_mouseDragStartPage, pageCoordinates);
+            SelectRectangle(_mouseDragStartPage, pageCoordinates);
         }
     }
 
@@ -332,11 +332,25 @@ public partial class TextBox
             X = ViewInput.X + ViewInput.W,
             Y = ViewInput.Y + ViewInput.H
         };
+        
+        var pageStart = ViewToPage(ViewStart);
+        var pageEnd = ViewToPage(ViewEnd);
 
-        if (Math.Abs(PageWidth - (ViewInput.W - LineNumberWidthMax - FoldWidth)) > 1.0f)
+        TextCoordinates textStart = PageToText(pageStart, -3);
+        TextCoordinates textEnd = PageToText(pageEnd, 3);
+
+        if (_textStart != textStart || _textEnd != textEnd)
         {
-            PageWidth = ViewInput.W;
-            Page.LineRendersCache.SetDirty();
+            Text.ShowLineRendersCache.SetDirty();
+            
+            _textStart = textStart;
+            _textEnd = textEnd;
         }
+        
+        if (WrapMode.Word == WrapMode || WrapMode.BreakWord == WrapMode)
+        {
+            PageSize.X = ViewInput.W;
+        }
+        PageSize.Y = Text.LineRenders.Count * GetFontSize();
     }
 }
