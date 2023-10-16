@@ -142,8 +142,10 @@ public class Line
     {
         lineRenders.Clear();
 
+        float tabWidth = _textBox.CountTabStart(String) * _textBox.GetTabRenderSize(); // TODO Cache
+        
         int wrapIndex = 0;
-        LineRender lineRender = new LineRender(Index, wrapIndex);
+        LineRender lineRender = new LineRender(Index, wrapIndex, 0.0f);
 
         bool isFirstCharInLine = true;
         ColorStyle groupColor = _textBox.Theme.DefaultFontColor;
@@ -192,7 +194,7 @@ public class Line
                 lineRenders.Add(lineRender);
                 wrapIndex++;
 
-                lineRender = new LineRender(Index, wrapIndex);
+                lineRender = new LineRender(Index, wrapIndex, tabWidth);
 
                 isFirstCharInLine = true;
                 groupColor = _textBox.Theme.DefaultFontColor;

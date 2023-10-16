@@ -6,22 +6,22 @@ namespace Bell;
 public enum CaretMove
 {
     None,
-    
+
     Up,
     Down,
     Left,
     Right,
-    
+
     StartOfFile,
     EndOfFile,
     StartOfLine,
     EndOfLine,
     StartOfWord,
     EndOfWord,
-    
+
     PageUp,
     PageDown,
-    
+
     Position,
     Selection
 }
@@ -29,7 +29,7 @@ public enum CaretMove
 public partial class TextBox
 {
     public readonly List<Caret> Carets = new();
-    
+
     public Caret SingleCaret(TextCoordinates textCoordinates = new())
     {
         if (Carets.Count > 1)
@@ -44,7 +44,7 @@ public partial class TextBox
         {
             Carets.Add(new Caret() { Position = textCoordinates, Selection = textCoordinates });
         }
-        
+
         return Carets[0];
     }
 
@@ -60,7 +60,7 @@ public partial class TextBox
             // TODO caret move
         }
     }
-    
+
     public void MoveCaretsSelection(CaretMove caretMove)
     {
         foreach (Caret caret in Carets)
@@ -110,7 +110,7 @@ public partial class TextBox
         ActionManager.DoAction(new PasteAction(this, text));
         */
     }
-    
+
     public Vector2 ViewToPage(Vector2 viewCoordinates)
     {
         Vector2 pageCoordinates = new()
@@ -124,19 +124,19 @@ public partial class TextBox
     public TextCoordinates PageToText(Vector2 pageCoordinates, int yOffset = 0)
     {
         TextCoordinates textCoordinates = new();
-        
+
         int row = (int)(pageCoordinates.Y / GetFontHeight()) + yOffset;
         if (row < 0)
             row = 0;
         if (row >= Text.LineRenders.Count)
             row = Text.LineRenders.Count - 1;
-        
+
         if (pageCoordinates.X < -FoldWidth)
         {
             textCoordinates.IsLineNumber = true;
             textCoordinates.Column = 0;
         }
-        else if (pageCoordinates.X < 0.0f)
+        else if (pageCoordinates.X < -FoldWidth * 0.2)
         {
             textCoordinates.IsFold = true;
             textCoordinates.Column = 0;
@@ -146,7 +146,7 @@ public partial class TextBox
             LineRender lineRender = Text.LineRenders[row];
 
             int column = 0;
-            float pageX = pageCoordinates.X;
+            float pageX = pageCoordinates.X - lineRender.TabWidth;
             foreach (var textBlockRender in lineRender.TextBlockRenders)
             {
                 if (pageX < textBlockRender.Width)
@@ -154,25 +154,26 @@ public partial class TextBox
                     foreach (char c in textBlockRender.Text)
                     {
                         var fontWidth = GetFontWidth(c);
-                        
+
                         if (pageX < fontWidth * 0.5)
                             break;
 
                         column += 1;
                         pageX -= fontWidth;
                     }
+
                     break;
                 }
 
                 column += textBlockRender.Text.Length;
                 pageX -= textBlockRender.Width;
             }
-            
+
             textCoordinates.Column = column;
         }
-        
+
         textCoordinates.Row = row;
-        
+
         return textCoordinates;
     }
 
@@ -185,9 +186,9 @@ public partial class TextBox
         if (Text.LineRenders.Count > textCoordinates.Row)
         {
             LineRender lineRender = Text.LineRenders[textCoordinates.Row];
-            
+
             int column = textCoordinates.Column;
-            float pageX = 0.0f;
+            float pageX = 0.0f + lineRender.TabWidth;
             foreach (var textBlockRender in lineRender.TextBlockRenders)
             {
                 if (column < textBlockRender.Text.Length)
@@ -196,18 +197,21 @@ public partial class TextBox
                     {
                         if (column < 1)
                             break;
-                        
+
                         column -= 1;
                         pageX += GetFontWidth(c);
                     }
+
                     break;
                 }
+
                 column -= textBlockRender.Text.Length;
                 pageX += textBlockRender.Width;
             }
+
             pageCoordinates.X = pageX;
         }
-        
+
         pageCoordinates.Y = textCoordinates.Row * GetFontHeight();
 
         return pageCoordinates;

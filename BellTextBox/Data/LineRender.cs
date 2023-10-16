@@ -11,13 +11,17 @@ public class LineRender
     public int WrapIndex;
     
     public int Row;
+    
+    public float TabWidth;
 
     public readonly List<TextBlockRender> TextBlockRenders = new();
     
-    public LineRender(int lineIndex, int wrapIndex)
+    public LineRender(int lineIndex, int wrapIndex, float tabWidth)
     {
         LineIndex = lineIndex;
         WrapIndex = wrapIndex;
+        
+        TabWidth = tabWidth;
     }
 }
 

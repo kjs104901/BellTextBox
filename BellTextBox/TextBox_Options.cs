@@ -29,9 +29,12 @@ public partial class TextBox
     public bool Overwrite { get; set; } = false;
     public bool ReadOnly { get; set; } = false;
     public WrapMode WrapMode { get; set; } = WrapMode.Word;
-    public EolMode EolMode = EolMode.LF;
+    public bool WordWrapIndent { get; set; } = true;
     public TabMode TabMode = TabMode.Space;
     public int TabSize = 4;
+    
+    public EolMode EolMode = EolMode.LF;
+    
     public bool SyntaxHighlighting { get; set; } = true;
     public bool SyntaxFolding { get; set; } = true;
     
@@ -39,4 +42,24 @@ public partial class TextBox
     public float LetterSpacing { get; set; } = 0.0f;
     
     public Language Language { get; set; } = Language.PlainText();
+
+    public int CountTabStart(string line)
+    {
+        string tabString = TabMode.Space == TabMode ? new string(' ', TabSize) : "\t";
+
+        int count = 0;
+        while (line.StartsWith(tabString))
+        {
+            count++;
+            line = line.Remove(0, tabString.Length);
+        }
+        return count;
+    }
+
+    public float GetTabRenderSize()
+    {
+        if (WordWrapIndent)
+            return GetCharWidth(' ') * TabSize;
+        return 0.0f;
+    }
 }

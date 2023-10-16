@@ -34,11 +34,11 @@ public abstract partial class TextBox
             var lineY = lineRender.Row * GetFontHeight();
             var lineTextY = lineRender.Row * GetFontHeight() + GetFontHeightOffset();
 
-            float width = 0.0f;
+            float width = 0.0f; //TODO move to cache update?
             foreach (TextBlockRender textBlockRender in lineRender.TextBlockRenders)
             {
                 RenderText(
-                    new Vector2(LineNumberWidth + FoldWidth + width, lineTextY),
+                    new Vector2(LineNumberWidth + FoldWidth + width + lineRender.TabWidth, lineTextY),
                     textBlockRender.Text,
                     textBlockRender.ColorStyle.ToVector());
                 width += textBlockRender.Width;
