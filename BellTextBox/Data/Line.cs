@@ -78,7 +78,7 @@ public class Line
         if (WrapMode.None == _textBox.WrapMode)
             return cutoffs;
 
-        var lineWidth = _textBox.PageSize.X - _textBox.LineNumberWidthMax - _textBox.FoldWidth;
+        var lineWidth = _textBox.PageSize.X - _textBox.LineNumberWidth - _textBox.FoldWidth;
         if (lineWidth < 1.0f)
             return cutoffs;
 

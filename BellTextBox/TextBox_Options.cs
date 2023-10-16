@@ -34,5 +34,9 @@ public partial class TextBox
     public int TabSize = 4;
     public bool SyntaxHighlighting { get; set; } = true;
     public bool SyntaxFolding { get; set; } = true;
+    
+    public float LeadingHeight { get; set; } = 1.2f;
+    public float LetterSpacing { get; set; } = 0.0f;
+    
     public Language Language { get; set; } = Language.PlainText();
 }

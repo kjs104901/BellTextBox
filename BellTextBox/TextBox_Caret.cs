@@ -115,7 +115,7 @@ public partial class TextBox
     {
         Vector2 pageCoordinates = new()
         {
-            X = viewCoordinates.X - LineNumberWidthMax - FoldWidth,
+            X = viewCoordinates.X - LineNumberWidth - FoldWidth,
             Y = viewCoordinates.Y
         };
         return pageCoordinates;
@@ -125,7 +125,7 @@ public partial class TextBox
     {
         TextCoordinates textCoordinates = new();
         
-        int row = (int)(pageCoordinates.Y / GetFontSize()) + yOffset;
+        int row = (int)(pageCoordinates.Y / GetFontHeight()) + yOffset;
         if (row < 0)
             row = 0;
         if (row >= Text.LineRenders.Count)
@@ -208,7 +208,7 @@ public partial class TextBox
             pageCoordinates.X = pageX;
         }
         
-        pageCoordinates.Y = textCoordinates.Row * GetFontSize();
+        pageCoordinates.Y = textCoordinates.Row * GetFontHeight();
 
         return pageCoordinates;
     }
@@ -217,7 +217,7 @@ public partial class TextBox
     {
         Vector2 viewCoordinates = new()
         {
-            X = pageCoordinates.X + LineNumberWidthMax + FoldWidth,
+            X = pageCoordinates.X + LineNumberWidth + FoldWidth,
             Y = pageCoordinates.Y
         };
         return viewCoordinates;

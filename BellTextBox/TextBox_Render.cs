@@ -7,18 +7,12 @@ namespace Bell;
 
 public abstract partial class TextBox
 {
-    public abstract float GetCharWidth(char c);
-    public abstract float GetFontSize();
-
     protected abstract void RenderText(Vector2 pos, string text, Vector4 color);
     protected abstract void RenderLine(Vector2 start, Vector2 end, Vector4 color, float thickness);
 
-    public abstract void SetClipboard(string text);
-    public abstract string GetClipboard();
-
     protected abstract void SetMouseCursor(MouseCursor mouseCursor);
     
-    public float LineNumberWidthMax = 10.0f;
+    public float LineNumberWidth = 10.0f;
     public float FoldWidth = 10.0f;
 
     protected void Render()
@@ -37,13 +31,14 @@ public abstract partial class TextBox
                 }
             }
 
-            var lineY = lineRender.Row * GetFontSize();
+            var lineY = lineRender.Row * GetFontHeight();
+            var lineTextY = lineRender.Row * GetFontHeight() + GetFontHeightOffset();
 
             float width = 0.0f;
             foreach (TextBlockRender textBlockRender in lineRender.TextBlockRenders)
             {
                 RenderText(
-                    new Vector2(LineNumberWidthMax + FoldWidth + width, lineY),
+                    new Vector2(LineNumberWidth + FoldWidth + width, lineTextY),
                     textBlockRender.Text,
                     textBlockRender.ColorStyle.ToVector());
                 width += textBlockRender.Width;
@@ -58,32 +53,32 @@ public abstract partial class TextBox
                 }
                 lineNumberWidthMax = Math.Max(lineNumberWidthMax, lineNumberWidth);
                 
-                RenderText(new Vector2(LineNumberWidthMax - lineNumberWidth, lineY),
+                RenderText(new Vector2(LineNumberWidth - lineNumberWidth, lineTextY),
                     lineRender.LineIndex.ToString(),
                     Theme.DefaultFontColor.ToVector());
             }
             
-            RenderText(new Vector2(LineNumberWidthMax, lineY),
+            RenderText(new Vector2(LineNumberWidth, lineTextY),
                 "#",
                 Theme.DefaultFontColor.ToVector());
         }
-        LineNumberWidthMax = lineNumberWidthMax + 30.0f; // TODO setting padding option
+        LineNumberWidth = lineNumberWidthMax + 30.0f; // TODO setting padding option
 
         foreach (Caret caret in Carets)
         {
             Vector2 caretInPage = TextToPage(caret.Position);
             Vector2 caretInView = PageToView(caretInPage);
 
-            RenderLine(new Vector2(caretInView.X - 1, caretInView.Y),
-                new Vector2(caretInView.X - 1, caretInView.Y + GetFontSize()),
+            RenderLine(new Vector2(caretInView.X - 1, caretInView.Y + GetFontHeightOffset()),
+                new Vector2(caretInView.X - 1, caretInView.Y + GetFontHeight() - GetFontHeightOffset()),
                 Theme.DefaultFontColor.ToVector(),
                 2.0f);
 
             Vector2 selectionInPage = TextToPage(caret.Selection);
             Vector2 selectionInView = PageToView(selectionInPage);
 
-            RenderLine(new Vector2(selectionInView.X - 1, selectionInView.Y),
-                new Vector2(selectionInView.X - 1, selectionInView.Y + GetFontSize()),
+            RenderLine(new Vector2(selectionInView.X - 1, selectionInView.Y + GetFontHeightOffset()),
+                new Vector2(selectionInView.X - 1, selectionInView.Y + GetFontHeight() - GetFontHeightOffset()),
                 Theme.LineCommentFontColor.ToVector(),
                 2.0f);
 

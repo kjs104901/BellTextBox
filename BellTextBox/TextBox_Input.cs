@@ -349,6 +349,6 @@ public partial class TextBox
         {
             PageSize.X = viewInput.W;
         }
-        PageSize.Y = Text.LineRenders.Count * GetFontSize();
+        PageSize.Y = Text.LineRenders.Count * GetFontHeight();
     }
 }
