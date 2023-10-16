@@ -65,13 +65,29 @@ public partial class TextBox
         }
         else if (hk.HasFlag(HotKeys.Delete)) // Delete
         {
-            DoAction(new DeleteSelection(this));
-            DoAction(new DeleteCharAction(this, EditDirection.Forward));
+            if (hk.HasFlag(HotKeys.Shift))
+            {
+                MoveCaretsSelection(CaretMove.StartOfFile);
+                MoveCaretsPosition(CaretMove.EndOfFile);
+                DoAction(new DeleteSelection(this));
+            }
+            else
+            {
+                DoAction(new DeleteSelection(this));
+                DoAction(new DeleteCharAction(this, EditDirection.Forward));
+            }
         }
         else if (hk.HasFlag(HotKeys.Backspace)) // Backspace
         {
-            DoAction(new DeleteSelection(this));
-            DoAction(new DeleteCharAction(this, EditDirection.Backward));
+            if (hk.HasFlag(HotKeys.Alt))
+            {
+                UndoAction();
+            }
+            else
+            {
+                DoAction(new DeleteSelection(this));
+                DoAction(new DeleteCharAction(this, EditDirection.Backward));
+            }
         }
         else if (hk.HasFlag(HotKeys.Enter)) // Enter
         {

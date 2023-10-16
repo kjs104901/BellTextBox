@@ -31,6 +31,9 @@ public enum HotKeys : uint
     Backspace = 1 << 19,
     Enter = 1 << 20,
     Tab = 1 << 21,
+    
+    F3 = 1 << 22,
+    Escape = 1 << 23,
 }
 
 public struct KeyboardInput

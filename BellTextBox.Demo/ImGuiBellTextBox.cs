@@ -38,6 +38,9 @@ public class ImGuiBellTextBox : TextBox
         (ImGuiKey.Backspace, HotKeys.Backspace),
         (ImGuiKey.Enter, HotKeys.Enter),
         (ImGuiKey.Tab, HotKeys.Tab),
+        
+        (ImGuiKey.F3, HotKeys.F3),
+        (ImGuiKey.Escape, HotKeys.Escape),
     };
 
     public void Update(Vector2 size)
