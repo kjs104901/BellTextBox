@@ -87,7 +87,7 @@ public abstract partial class TextBox
                 Theme.LineCommentFontColor.ToVector(),
                 2.0f);
 
-            RenderText(caretInView, KeyboardInput.ImeComposition, Theme.DefaultFontColor.ToVector());
+            RenderText(caretInView, _imeComposition, Theme.DefaultFontColor.ToVector());
         }
     }
 }

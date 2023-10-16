@@ -6,13 +6,18 @@ namespace Bell;
 
 public partial class TextBox
 {
-    protected KeyboardInput KeyboardInput;
-    protected MouseInput MouseInput;
-    protected ViewInput ViewInput;
+    //protected KeyboardInput KeyboardInput;
+    //protected MouseInput MouseInput;
+    //protected ViewInput ViewInput;
 
     public Vector2 ViewStart;
     public Vector2 ViewEnd;
     public Vector2 PageSize;
+
+    private bool _shiftPressed;
+    private bool _altPressed;
+    
+    private string _imeComposition;
     
     private TextCoordinates _textStart;
     private TextCoordinates _textEnd;
@@ -22,27 +27,23 @@ public partial class TextBox
 
     protected void InputStart()
     {
-        KeyboardInput.HotKeys = HotKeys.None;
-        KeyboardInput.Chars.Clear();
-        KeyboardInput.ImeComposition = string.Empty;
-
-        MouseInput.Position.X = 0.0f;
-        MouseInput.Position.Y = 0.0f;
-        MouseInput.LeftAction = MouseAction.None;
-        MouseInput.MiddleAction = MouseAction.None;
+        //KeyboardInput.HotKeys = HotKeys.None;
+        //KeyboardInput.Chars.Clear();
+        //KeyboardInput.ImeComposition = string.Empty;
+//
+        //MouseInput.Position.X = 0.0f;
+        //MouseInput.Position.Y = 0.0f;
+        //MouseInput.LeftAction = MouseAction.None;
+        //MouseInput.MiddleAction = MouseAction.None;
     }
 
-    protected void InputEnd()
+    protected void ProcessKeyboardInput(KeyboardInput keyboardInput)
     {
-        ProcessKeyboardHotKeys();
-        ProcessKeyboardChars();
-        ProcessMouseInput();
-        ProcessViewInput();
-    }
+        var hk = keyboardInput.HotKeys;
 
-    private void ProcessKeyboardHotKeys()
-    {
-        var hk = KeyboardInput.HotKeys;
+        _shiftPressed |= hk.HasFlag(HotKeys.Shift);
+        _altPressed |= hk.HasFlag(HotKeys.Alt);
+        _imeComposition = keyboardInput.ImeComposition;
 
         if (hk.HasFlag(HotKeys.Ctrl | HotKeys.Z)) // UndoAction
             UndoAction();
@@ -190,66 +191,60 @@ public partial class TextBox
         {
             Overwrite = !Overwrite;
         }
-    }
-
-    private void ProcessKeyboardChars()
-    {
-        var hk = KeyboardInput.HotKeys;
-        bool selectionDeleted = false;
         
-        foreach (char keyboardInputChar in KeyboardInput.Chars)
+        // Chars
+        bool selectionDeleted = false;
+        if (null != keyboardInput.Chars)
         {
-            if (keyboardInputChar == 0)
-                continue;
-
-            if (keyboardInputChar == '\n')
+            foreach (char keyboardInputChar in keyboardInput.Chars)
             {
-                DoAction(new EnterAction(this));
-                continue;
-            }
+                if (keyboardInputChar == 0)
+                    continue;
 
-            if (keyboardInputChar == '\t')
-            {
-                if (hk.HasFlag(HotKeys.Shift))
-                    DoAction(new UnTabAction(this));
-                else
-                    DoAction(new TabAction(this));
-                continue;
-            }
+                if (keyboardInputChar == '\n')
+                {
+                    DoAction(new EnterAction(this));
+                    continue;
+                }
 
-            if (keyboardInputChar < 32)
-                continue;
+                if (keyboardInputChar == '\t')
+                {
+                    if (hk.HasFlag(HotKeys.Shift))
+                        DoAction(new UnTabAction(this));
+                    else
+                        DoAction(new TabAction(this));
+                    continue;
+                }
 
-            if (false == selectionDeleted)
-            {
-                DoAction(new DeleteSelection(this));
-                selectionDeleted = true;
+                if (keyboardInputChar < 32)
+                    continue;
+
+                if (false == selectionDeleted)
+                {
+                    DoAction(new DeleteSelection(this));
+                    selectionDeleted = true;
+                }
+                DoAction(new InputCharAction(this, EditDirection.Forward)); // keyboardInputChar
             }
-            DoAction(new InputCharAction(this, EditDirection.Forward)); // keyboardInputChar
         }
     }
 
-    private void ProcessMouseInput()
+    protected void ProcessMouseInput(MouseInput mouseInput)
     {
-        var hk = KeyboardInput.HotKeys;
-
-        Vector2 pageCoordinates = ViewToPage(MouseInput.Position);
+        Vector2 pageCoordinates = ViewToPage(mouseInput.Position);
         TextCoordinates textCoordinates = PageToText(pageCoordinates);
 
         if (textCoordinates.IsFold)
         {
-            if (MouseAction.Click == MouseInput.LeftAction)
+            if (MouseAction.Click == mouseInput.LeftAction)
             {
                 //TODO fold unfold
                 // if hit then return;
             }
         }
 
-        var mouseScreenX = MouseInput.Position.X - ViewInput.X;
-        var mouseScreenY = MouseInput.Position.Y - ViewInput.Y;
-
-        if (mouseScreenX > 0 && mouseScreenX < ViewInput.W &&
-            mouseScreenY > 0 && mouseScreenY < ViewInput.H)
+        if (mouseInput.Position.X > ViewStart.X && mouseInput.Position.X < ViewEnd.X &&
+            mouseInput.Position.Y > ViewStart.Y && mouseInput.Position.Y < ViewEnd.Y)
         {
             if (textCoordinates.IsFold)
             {
@@ -264,20 +259,20 @@ public partial class TextBox
             }
         }
 
-        if (MouseAction.Click == MouseInput.LeftAction ||
-            MouseAction.Click == MouseInput.MiddleAction)
+        if (MouseAction.Click == mouseInput.LeftAction ||
+            MouseAction.Click == mouseInput.MiddleAction)
         {
             _mouseDragStartPage = pageCoordinates;
             _mouseDragStartText = textCoordinates;
         }
 
-        if (MouseAction.Click == MouseInput.LeftAction)
+        if (MouseAction.Click == mouseInput.LeftAction)
         {
-            if (hk.HasFlag(HotKeys.Shift))
+            if (_shiftPressed)
             {
                 SingleCaret().Selection = textCoordinates;
             }
-            else if (hk.HasFlag(HotKeys.Alt))
+            else if (_altPressed)
             {
                 AddCaret(textCoordinates);
             }
@@ -286,11 +281,11 @@ public partial class TextBox
                 SingleCaret(textCoordinates);
             }
         }
-        else if (MouseAction.DoubleClick == MouseInput.LeftAction)
+        else if (MouseAction.DoubleClick == mouseInput.LeftAction)
         {
             SingleCaret(textCoordinates);
 
-            if (hk.HasFlag(HotKeys.Shift))
+            if (_shiftPressed)
             {
                 // Select Line
                 MoveCaretsPosition(CaretMove.EndOfLine);
@@ -303,9 +298,9 @@ public partial class TextBox
                 MoveCaretsSelection(CaretMove.StartOfWord);
             }
         }
-        else if (MouseAction.Dragging == MouseInput.LeftAction)
+        else if (MouseAction.Dragging == mouseInput.LeftAction)
         {
-            if (hk.HasFlag(HotKeys.Alt))
+            if (_altPressed)
             {
                 SelectRectangle(_mouseDragStartPage, pageCoordinates);
             }
@@ -314,23 +309,26 @@ public partial class TextBox
                 SingleCaret(_mouseDragStartText).Position = textCoordinates;
             }
         }
-        else if (MouseAction.Dragging == MouseInput.MiddleAction)
+        else if (MouseAction.Dragging == mouseInput.MiddleAction)
         {
             SelectRectangle(_mouseDragStartPage, pageCoordinates);
         }
+
+        _shiftPressed = false;
+        _altPressed = false;
     }
 
-    private void ProcessViewInput()
+    protected void ProcessViewInput(ViewInput viewInput)
     {
         ViewStart = new Vector2()
         {
-            X = ViewInput.X,
-            Y = ViewInput.Y
+            X = viewInput.X,
+            Y = viewInput.Y
         };
         ViewEnd = new Vector2()
         {
-            X = ViewInput.X + ViewInput.W,
-            Y = ViewInput.Y + ViewInput.H
+            X = viewInput.X + viewInput.W,
+            Y = viewInput.Y + viewInput.H
         };
         
         var pageStart = ViewToPage(ViewStart);
@@ -349,7 +347,7 @@ public partial class TextBox
         
         if (WrapMode.Word == WrapMode || WrapMode.BreakWord == WrapMode)
         {
-            PageSize.X = ViewInput.W;
+            PageSize.X = viewInput.W;
         }
         PageSize.Y = Text.LineRenders.Count * GetFontSize();
     }

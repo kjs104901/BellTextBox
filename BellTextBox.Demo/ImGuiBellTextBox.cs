@@ -75,54 +75,64 @@ public class ImGuiBellTextBox : TextBox
         _drawList.AddText(_drawPos, ImGui.ColorConvertFloat4ToU32(new Vector4(0.2f, 0.1f, 0.1f, 1.0f)),
             ImGui.IsWindowFocused().ToString());
 
+        KeyboardInput keyboardInput = new KeyboardInput();
+        MouseInput mouseInput = new MouseInput();
+        ViewInput viewInput = new ViewInput();
+        
         ImGui.Text(ImGui.IsWindowFocused().ToString());
         if (ImGui.IsWindowFocused() ||
             (ImGui.IsWindowHovered() && ImGui.IsMouseClicked(0)))
         {
             var io = ImGui.GetIO();
             if (io.KeyShift)
-                KeyboardInput.HotKeys |= HotKeys.Shift;
+                keyboardInput.HotKeys |= HotKeys.Shift;
             if (io.KeyCtrl)
-                KeyboardInput.HotKeys |= HotKeys.Ctrl;
+                keyboardInput.HotKeys |= HotKeys.Ctrl;
             if (io.KeyAlt)
-                KeyboardInput.HotKeys |= HotKeys.Alt;
+                keyboardInput.HotKeys |= HotKeys.Alt;
             foreach (var keyMap in _keyboardMapping)
             {
                 if (ImGui.IsKeyPressed(ImGui.GetKeyIndex(keyMap.Item1)))
-                    KeyboardInput.HotKeys |= keyMap.Item2;
+                    keyboardInput.HotKeys |= keyMap.Item2;
             }
 
-            for (int i = 0; i < io.InputQueueCharacters.Size; i++)
+            if (io.InputQueueCharacters.Size > 0)
             {
-                KeyboardInput.Chars.Add((char)io.InputQueueCharacters[i]);
+                keyboardInput.Chars = new List<char>();
+                for (int i = 0; i < io.InputQueueCharacters.Size; i++)
+                {
+                    keyboardInput.Chars.Add((char)io.InputQueueCharacters[i]);
+                }
             }
-
-            KeyboardInput.ImeComposition = ImeHandler.GetCompositionString();
-
+            keyboardInput.ImeComposition = ImeHandler.GetCompositionString();
+            
+            ProcessKeyboardInput(keyboardInput);
+            
             if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
-                MouseInput.LeftAction = MouseAction.Click;
+                mouseInput.LeftAction = MouseAction.Click;
             if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
-                MouseInput.LeftAction = MouseAction.DoubleClick;
+                mouseInput.LeftAction = MouseAction.DoubleClick;
             if (ImGui.IsMouseDragging(ImGuiMouseButton.Left) && ImGui.IsMouseDown(ImGuiMouseButton.Left))
-                MouseInput.LeftAction = MouseAction.Dragging;
+                mouseInput.LeftAction = MouseAction.Dragging;
 
             if (ImGui.IsMouseClicked(ImGuiMouseButton.Middle))
-                MouseInput.MiddleAction = MouseAction.Click;
+                mouseInput.MiddleAction = MouseAction.Click;
             if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Middle))
-                MouseInput.MiddleAction = MouseAction.DoubleClick;
+                mouseInput.MiddleAction = MouseAction.DoubleClick;
             if (ImGui.IsMouseDragging(ImGuiMouseButton.Middle) && ImGui.IsMouseDown(ImGuiMouseButton.Middle))
-                MouseInput.MiddleAction = MouseAction.Dragging;
+                mouseInput.MiddleAction = MouseAction.Dragging;
         }
 
         var mouse = ImGui.GetMousePos();
-        MouseInput.Position.X = mouse.X - _drawPos.X;
-        MouseInput.Position.Y = mouse.Y - _drawPos.Y;
+        mouseInput.Position.X = mouse.X - _drawPos.X;
+        mouseInput.Position.Y = mouse.Y - _drawPos.Y;
+        ProcessMouseInput(mouseInput);
 
-        ViewInput.X = scroll.X;
-        ViewInput.Y = scroll.Y;
-        ViewInput.W = contentSize.X - ImGui.GetStyle().ScrollbarSize;;
-        ViewInput.H = contentSize.Y;
-        InputEnd();
+        viewInput.X = scroll.X;
+        viewInput.Y = scroll.Y;
+        viewInput.W = contentSize.X - ImGui.GetStyle().ScrollbarSize;;
+        viewInput.H = contentSize.Y;
+        ProcessViewInput(viewInput);
 
         Render();
 

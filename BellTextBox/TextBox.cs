@@ -15,9 +15,6 @@ public partial class TextBox
     protected TextBox()
     {
         Text = new Text(this);
-
-        KeyboardInput.Chars = new List<char>();
-
         Theme = new DarkTheme();
     }
 
