@@ -172,6 +172,14 @@ public class ImGuiBellTextBox : TextBox
         _drawList.AddLine(startPos, endPos, ImGui.ColorConvertFloat4ToU32(color), thickness);
     }
 
+    protected override void RenderRectangle(Vector2 start, Vector2 end, Vector4 color)
+    {
+        var startPos = new Vector2(_drawPos.X + start.X, _drawPos.Y + start.Y);
+        var endPos = new Vector2(_drawPos.X + end.X, _drawPos.Y + end.Y);
+        
+        _drawList.AddRectFilled(startPos, endPos, ImGui.ColorConvertFloat4ToU32(color));
+    }
+
     public override void SetClipboard(string text)
     {
         throw new NotImplementedException();

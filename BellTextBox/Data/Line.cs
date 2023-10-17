@@ -148,22 +148,28 @@ public class Line
         LineRender lineRender = new LineRender(Index, wrapIndex, 0.0f);
 
         bool isFirstCharInLine = true;
-        ColorStyle groupColor = _textBox.Theme.DefaultFontColor;
+        ColorStyle renderGroupColor = _textBox.Theme.DefaultFontColor;
 
         _buffers.Clear();
         float bufferWidth = 0.0f;
+        float posX = 0.0f;
 
         for (int i = 0; i < Chars.Count; i++)
         {
+            char c = Chars[i];
+            float cWidth = _textBox.GetFontWidth(c);
+            
+            lineRender.CharWidths.Add(cWidth);
+            
             if (isFirstCharInLine)
             {
                 if (Colors.TryGetValue(i, out var firstColor))
                 {
-                    groupColor = firstColor;
+                    renderGroupColor = firstColor;
                 }
 
-                _buffers.Add(Chars[i]);
-                bufferWidth += _textBox.GetFontWidth(Chars[i]);
+                _buffers.Add(c);
+                bufferWidth += cWidth;
 
                 isFirstCharInLine = false;
                 continue;
@@ -174,31 +180,34 @@ public class Line
                 color = _textBox.Theme.DefaultFontColor;
             }
 
-            if (groupColor != color) // need new group
+            if (renderGroupColor != color) // need new render group
             {
                 lineRender.TextBlockRenders.Add(new()
-                    { Text = String.Concat(_buffers), ColorStyle = groupColor, Width = bufferWidth });
+                    { Text = String.Concat(_buffers), ColorStyle = renderGroupColor, Width = bufferWidth, PosX = posX });
+                posX += bufferWidth;
 
-                groupColor = color;
+                renderGroupColor = color;
                 _buffers.Clear();
                 bufferWidth = 0.0f;
             }
 
-            _buffers.Add(Chars[i]);
-            bufferWidth += _textBox.GetFontWidth(Chars[i]);
+            _buffers.Add(c);
+            bufferWidth += cWidth;
 
             if (Cutoffs.Contains(i)) // need new line
             {
                 lineRender.TextBlockRenders.Add(new()
-                    { Text = String.Concat(_buffers), ColorStyle = groupColor, Width = bufferWidth });
+                    { Text = String.Concat(_buffers), ColorStyle = renderGroupColor, Width = bufferWidth, PosX = posX });
                 lineRenders.Add(lineRender);
+                
                 wrapIndex++;
-
                 lineRender = new LineRender(Index, wrapIndex, tabWidth);
 
                 isFirstCharInLine = true;
-                groupColor = _textBox.Theme.DefaultFontColor;
+                renderGroupColor = _textBox.Theme.DefaultFontColor;
                 _buffers.Clear();
+                
+                posX = 0.0f;
                 bufferWidth = 0.0f;
             }
         }
@@ -206,7 +215,7 @@ public class Line
         // Add remains
         if (_buffers.Count > 0 || wrapIndex == 0)
             lineRender.TextBlockRenders.Add(new()
-                { Text = String.Concat(_buffers), ColorStyle = groupColor, Width = bufferWidth });
+                { Text = String.Concat(_buffers), ColorStyle = renderGroupColor, Width = bufferWidth, PosX = posX });
 
         if (lineRender.TextBlockRenders.Count > 0)
             lineRenders.Add(lineRender);

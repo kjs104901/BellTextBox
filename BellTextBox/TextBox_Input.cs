@@ -39,6 +39,8 @@ public partial class TextBox
 
     protected void ProcessKeyboardInput(KeyboardInput keyboardInput)
     {
+        _caretChanged = false;
+
         var hk = keyboardInput.HotKeys;
 
         _shiftPressed |= hk.HasFlag(HotKeys.Shift);

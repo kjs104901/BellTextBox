@@ -29,6 +29,8 @@ public enum CaretMove
 public partial class TextBox
 {
     public readonly List<Caret> Carets = new();
+    
+    private bool _caretChanged;
 
     public Caret SingleCaret(TextCoordinates textCoordinates = new())
     {
@@ -45,12 +47,14 @@ public partial class TextBox
             Carets.Add(new Caret() { Position = textCoordinates, Selection = textCoordinates });
         }
 
+        _caretChanged = true;
         return Carets[0];
     }
 
     public void AddCaret(TextCoordinates textCoordinates)
     {
         Carets.Add(new Caret() { Position = textCoordinates, Selection = textCoordinates });
+        _caretChanged = true;
     }
 
     public void MoveCaretsPosition(CaretMove caretMove)
@@ -59,6 +63,7 @@ public partial class TextBox
         {
             // TODO caret move
         }
+        _caretChanged = true;
     }
 
     public void MoveCaretsSelection(CaretMove caretMove)
@@ -67,12 +72,14 @@ public partial class TextBox
         {
             // TODO caret move
         }
+        _caretChanged = true;
     }
 
     public void SelectRectangle(Vector2 startPosition, Vector2 endPosition)
     {
         Carets.Clear();
         // TODO select multiple lines
+        _caretChanged = true;
     }
 
     public void CopyClipboard()
