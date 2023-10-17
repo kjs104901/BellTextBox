@@ -49,7 +49,7 @@ public class FontStyle : IComparable<FontStyle>
     private readonly string _id;
     
     // 한글 주석 테스트
-
+" + '\t' + @"
     public float R;
     public float G;
     public float B;
