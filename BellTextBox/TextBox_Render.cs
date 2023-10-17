@@ -46,10 +46,30 @@ public abstract partial class TextBox
             foreach (TextBlockRender textBlockRender in lineRender.TextBlockRenders)
             {
                 RenderText(
-                    new Vector2(lineStartX + textBlockRender.PosX,
-                        lineTextStartY),
+                    new Vector2(lineStartX + textBlockRender.PosX, lineTextStartY),
                     textBlockRender.Text,
                     textBlockRender.ColorStyle.ToVector());
+            }
+
+            foreach (WhiteSpaceRender whiteSpaceRender in lineRender.WhiteSpaceRenders)
+            {
+                if (whiteSpaceRender.C == ' ')
+                {
+                    RenderText(
+                        new Vector2(lineStartX + whiteSpaceRender.PosX, lineTextStartY),
+                        "·",
+                        Theme.LineWhiteSpaceFontColor.ToVector());
+                }
+                else if (whiteSpaceRender.C == '\t')
+                {
+                    RenderLine(
+                        new Vector2(lineStartX + whiteSpaceRender.PosX,
+                            lineTextStartY),
+                        new Vector2(lineStartX + whiteSpaceRender.PosX + GetCharWidth(' ') * 4, // TODO setting tab size
+                            lineTextStartY),
+                        Theme.LineWhiteSpaceFontColor.ToVector(),
+                        1.0f);
+                }
             }
 
             if (lineRender.WrapIndex == 0)

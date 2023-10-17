@@ -24,7 +24,7 @@ public partial class TextBox
         
         if (false == _sizeWidthCache.TryGetValue(c, out float fontWidth))
         {
-            fontWidth = GetCharWidth(c) + LetterSpacing;
+            fontWidth = GetCharWidth(c);
             _sizeWidthCache[c] = fontWidth;
         }
         return fontWidth;

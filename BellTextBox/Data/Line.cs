@@ -57,6 +57,9 @@ public class Line
     private Dictionary<int, ColorStyle> UpdateColors(Dictionary<int, ColorStyle> colors)
     {
         colors.Clear();
+        if (_textBox.SyntaxHighlightEnabled == false)
+            return colors;
+
         for (int i = 0; i < Chars.Count; i++)
         {
             if (char.IsLower(Chars[i]))
@@ -137,13 +140,13 @@ public class Line
         _textBox.StringBuilder.Append(CollectionsMarshal.AsSpan(Chars));
         return _textBox.StringBuilder.ToString();
     }
-    
+
     private List<LineRender> UpdateLineRenders(List<LineRender> lineRenders)
     {
         lineRenders.Clear();
 
         float tabWidth = _textBox.CountTabStart(String) * _textBox.GetTabRenderSize(); // TODO Cache
-        
+
         int wrapIndex = 0;
         LineRender lineRender = new LineRender(Index, wrapIndex, 0.0f);
 
@@ -158,8 +161,13 @@ public class Line
         {
             char c = Chars[i];
             float cWidth = _textBox.GetFontWidth(c);
-            
+
             lineRender.CharWidths.Add(cWidth);
+            
+            if (_textBox.ShowingWhitespace && char.IsWhiteSpace(c))
+            {
+                lineRender.WhiteSpaceRenders.Add(new() { C = c, PosX = posX + bufferWidth });
+            }
             
             if (isFirstCharInLine)
             {
@@ -183,7 +191,9 @@ public class Line
             if (renderGroupColor != color) // need new render group
             {
                 lineRender.TextBlockRenders.Add(new()
-                    { Text = String.Concat(_buffers), ColorStyle = renderGroupColor, Width = bufferWidth, PosX = posX });
+                {
+                    Text = String.Concat(_buffers), ColorStyle = renderGroupColor, Width = bufferWidth, PosX = posX
+                });
                 posX += bufferWidth;
 
                 renderGroupColor = color;
@@ -197,16 +207,18 @@ public class Line
             if (Cutoffs.Contains(i)) // need new line
             {
                 lineRender.TextBlockRenders.Add(new()
-                    { Text = String.Concat(_buffers), ColorStyle = renderGroupColor, Width = bufferWidth, PosX = posX });
+                {
+                    Text = String.Concat(_buffers), ColorStyle = renderGroupColor, Width = bufferWidth, PosX = posX
+                });
                 lineRenders.Add(lineRender);
-                
+
                 wrapIndex++;
                 lineRender = new LineRender(Index, wrapIndex, tabWidth);
 
                 isFirstCharInLine = true;
                 renderGroupColor = _textBox.Theme.DefaultFontColor;
                 _buffers.Clear();
-                
+
                 posX = 0.0f;
                 bufferWidth = 0.0f;
             }

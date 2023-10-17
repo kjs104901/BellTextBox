@@ -10,6 +10,8 @@ public class LineRender
     public float TabWidth;
 
     public readonly List<TextBlockRender> TextBlockRenders = new();
+    public readonly List<WhiteSpaceRender> WhiteSpaceRenders = new();
+    
     public readonly List<float> CharWidths = new();
 
     public bool CaretSet { get; private set; }
@@ -131,4 +133,10 @@ public struct TextBlockRender
 
     public float PosX;
     public float Width;
+}
+
+public struct WhiteSpaceRender
+{
+    public char C;
+    public float PosX;
 }

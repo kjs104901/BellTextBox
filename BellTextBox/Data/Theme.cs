@@ -7,6 +7,7 @@ public class Theme
     public ColorStyle BlockCommentFontColor;
     
     public ColorStyle LineSelectedBackgroundColor;
+    public ColorStyle LineWhiteSpaceFontColor;
 }
 
 public class DarkTheme : Theme
@@ -18,6 +19,7 @@ public class DarkTheme : Theme
         BlockCommentFontColor = new ColorStyle(0.9f, 0.1f, 0.1f, 1.0f);
 
         LineSelectedBackgroundColor = new ColorStyle(0.3f, 0.4f, 0.3f, 0.5f);
+        LineWhiteSpaceFontColor = new ColorStyle(0.3f, 0.4f, 0.1f, 1.0f);
     }
 }
 
