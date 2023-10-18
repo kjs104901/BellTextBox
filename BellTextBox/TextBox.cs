@@ -5,8 +5,6 @@ namespace Bell;
 
 public partial class TextBox
 {
-    public Text Text { get; private set; }
-    
     public readonly List<string> AutoCompleteList = new();
     public readonly StringBuilder StringBuilder = new();
 
@@ -14,12 +12,9 @@ public partial class TextBox
 
     protected TextBox()
     {
-        Text = new Text(this);
         Theme = new DarkTheme();
-    }
-
-    public void SetText(string text)
-    {
-        Text.SetText(text);
+        
+        LineRendersCache = new Cache<List<LineRender>>(new List<LineRender>(), UpdateLineRenders);
+        ShowLineRendersCache = new Cache<List<LineRender>>(new List<LineRender>(), UpdateShowLineRenders);
     }
 }

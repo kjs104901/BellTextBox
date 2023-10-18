@@ -135,8 +135,8 @@ public partial class TextBox
         int row = (int)(pageCoordinates.Y / GetFontHeight()) + yOffset;
         if (row < 0)
             row = 0;
-        if (row >= Text.LineRenders.Count)
-            row = Text.LineRenders.Count - 1;
+        if (row >= LineRenders.Count)
+            row = LineRenders.Count - 1;
 
         if (pageCoordinates.X < -FoldWidth)
         {
@@ -148,9 +148,9 @@ public partial class TextBox
             textCoordinates.IsFold = true;
             textCoordinates.Column = 0;
         }
-        else if (Text.LineRenders.Count > row)
+        else if (LineRenders.Count > row)
         {
-            LineRender lineRender = Text.LineRenders[row];
+            LineRender lineRender = LineRenders[row];
 
             int column = 0;
             float pageX = pageCoordinates.X - lineRender.TabWidth;
@@ -190,9 +190,9 @@ public partial class TextBox
 
         pageCoordinates.X = 0;
 
-        if (Text.LineRenders.Count > textCoordinates.Row)
+        if (LineRenders.Count > textCoordinates.Row)
         {
-            LineRender lineRender = Text.LineRenders[textCoordinates.Row];
+            LineRender lineRender = LineRenders[textCoordinates.Row];
 
             int column = textCoordinates.Column;
             float pageX = 0.0f + lineRender.TabWidth;

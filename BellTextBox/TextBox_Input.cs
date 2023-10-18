@@ -357,7 +357,7 @@ public partial class TextBox
 
         if (_textStart != textStart || _textEnd != textEnd)
         {
-            Text.ShowLineRendersCache.SetDirty();
+            ShowLineRendersCache.SetDirty();
             
             _textStart = textStart;
             _textEnd = textEnd;
@@ -367,6 +367,6 @@ public partial class TextBox
         {
             PageSize.X = viewInput.W;
         }
-        PageSize.Y = Text.LineRenders.Count * GetFontHeight();
+        PageSize.Y = LineRenders.Count * GetFontHeight();
     }
 }

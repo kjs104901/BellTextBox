@@ -22,7 +22,7 @@ public abstract partial class TextBox
         FoldWidth = GetFontReferenceWidth() * 2;
 
         float lineNumberWidthMax = 0.0f;
-        foreach (LineRender lineRender in Text.ShowLineRenders)
+        foreach (LineRender lineRender in ShowLineRenders)
         {
             if (_caretChanged || lineRender.CaretSet == false)
             {
