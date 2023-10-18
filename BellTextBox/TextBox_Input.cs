@@ -256,8 +256,12 @@ public partial class TextBox
         {
             if (MouseAction.Click == mouseInput.LeftAction)
             {
-                //TODO fold unfold
-                // if hit then return;
+                var folding = LineRenders[textCoordinates.Row].Folding;
+                if (null != folding)
+                {
+                    folding.Folded = !folding.Folded;
+                    return;
+                }
             }
         }
 

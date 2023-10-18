@@ -4,6 +4,10 @@ public partial class Language
 {
     public static Language PlainText()
     {
-        return new Language();
+        Language language = new();
+        
+        language.Foldings.Add(("{", "}"));
+        
+        return language;
     }
 }

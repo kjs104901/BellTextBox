@@ -143,40 +143,42 @@ public partial class TextBox
             textCoordinates.IsLineNumber = true;
             textCoordinates.Column = 0;
         }
-        else if (pageCoordinates.X < -FoldWidth * 0.2)
-        {
-            textCoordinates.IsFold = true;
-            textCoordinates.Column = 0;
-        }
         else if (LineRenders.Count > row)
         {
             LineRender lineRender = LineRenders[row];
-
-            int column = 0;
-            float pageX = pageCoordinates.X - lineRender.TabWidth;
-            foreach (var textBlockRender in lineRender.TextBlockRenders)
+            
+            if (pageCoordinates.X < -FoldWidth * 0.2 && lineRender.Folding != null)
             {
-                if (pageX < textBlockRender.Width)
+                textCoordinates.IsFold = true;
+                textCoordinates.Column = 0;
+            }
+            else
+            {
+                int column = 0;
+                float pageX = pageCoordinates.X - lineRender.TabWidth;
+                foreach (var textBlockRender in lineRender.TextBlockRenders)
                 {
-                    foreach (char c in textBlockRender.Text)
+                    if (pageX < textBlockRender.Width)
                     {
-                        var fontWidth = GetFontWidth(c);
+                        foreach (char c in textBlockRender.Text)
+                        {
+                            var fontWidth = GetFontWidth(c);
 
-                        if (pageX < fontWidth * 0.5)
-                            break;
+                            if (pageX < fontWidth * 0.5)
+                                break;
 
-                        column += 1;
-                        pageX -= fontWidth;
+                            column += 1;
+                            pageX -= fontWidth;
+                        }
+
+                        break;
                     }
 
-                    break;
+                    column += textBlockRender.Text.Length;
+                    pageX -= textBlockRender.Width;
                 }
-
-                column += textBlockRender.Text.Length;
-                pageX -= textBlockRender.Width;
+                textCoordinates.Column = column;
             }
-
-            textCoordinates.Column = column;
         }
 
         textCoordinates.Row = row;

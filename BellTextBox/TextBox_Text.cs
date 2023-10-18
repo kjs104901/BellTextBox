@@ -31,13 +31,44 @@ public partial class TextBox
         lineRenders.Clear();
 
         int row = 0;
+
+        int foldingCount = 0;
         foreach (Line line in Lines)
         {
-            if (line.Visible)
+            bool visible = true;
+            
+            Folding? lineFolding = null;
+            
+            foreach (Folding folding in FoldingList)
+            {
+                if (folding.End == line.Index)
+                {
+                    foldingCount--;
+                }
+                
+                if (folding.Start < line.Index && line.Index < folding.End)
+                {
+                    if (folding.Folded)
+                    {
+                        visible = (0 == foldingCount);
+                        break;
+                    }
+                }
+                
+                if (folding.Start == line.Index)
+                {
+                    lineFolding = folding;
+                    foldingCount++;
+                }
+
+            }
+            
+            if (visible)
             {
                 foreach (LineRender lineRender in line.LineRenders)
                 {
                     lineRender.Row = row++;
+                    lineRender.Folding = lineFolding;
                     lineRenders.Add(lineRender);
                 }
             }

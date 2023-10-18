@@ -16,5 +16,6 @@ public partial class TextBox
         
         LineRendersCache = new Cache<List<LineRender>>(new List<LineRender>(), UpdateLineRenders);
         ShowLineRendersCache = new Cache<List<LineRender>>(new List<LineRender>(), UpdateShowLineRenders);
+        FoldingListCache = new Cache<List<Folding>>(new List<Folding>(), UpdateFoldingList);
     }
 }

@@ -29,6 +29,8 @@ public abstract partial class TextBox
                 lineRender.SetCarets(Carets);
             }
 
+            var a = FoldingList;
+
             var lineY = lineRender.Row * GetFontHeight();
             var lineTextStartY = lineY + GetFontHeightOffset();
             var lineEndY = (lineRender.Row + 1) * GetFontHeight();
@@ -86,10 +88,13 @@ public abstract partial class TextBox
                     lineRender.LineIndex.ToString(),
                     Theme.DefaultFontColor.ToVector());
             }
-
-            RenderText(new Vector2(LineNumberWidth, lineTextStartY),
-                "#",
-                Theme.DefaultFontColor.ToVector());
+            
+            if (lineRender.Folding != null)
+            {
+                RenderText(new Vector2(LineNumberWidth, lineTextStartY),
+                    lineRender.Folding.Folded ? " >" : " V",
+                    Theme.DefaultFontColor.ToVector());
+            }
 
 
             if (lineRender.CaretPosition)

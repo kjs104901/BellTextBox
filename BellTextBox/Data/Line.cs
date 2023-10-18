@@ -27,9 +27,6 @@ public class Line
     public List<LineRender> LineRenders => LineRendersCache.Get();
     public readonly Cache<List<LineRender>> LineRendersCache;
 
-    public bool Visible = true;
-    public bool Folded = false;
-
     public Line(TextBox textBox, int index)
     {
         _textBox = textBox;
@@ -233,5 +230,32 @@ public class Line
             lineRenders.Add(lineRender);
 
         return lineRenders;
+    }
+
+    public int CountSubstrings(string findText)
+    {
+        int count = 0;
+        
+        int textLength = Chars.Count;
+        int findTextLength = findText.Length;
+
+        for (int i = 0; i <= textLength - findTextLength; i++)
+        {
+            bool isMatch = true;
+            for (int j = 0; j < findTextLength; j++)
+            {
+                if (Chars[i + j] != findText[j])
+                {
+                    isMatch = false;
+                    break;
+                }
+            }
+            if (isMatch)
+            {
+                count++;
+                i += findTextLength - 1;  // Skip the length of substring to avoid overlapping counts
+            }
+        }
+        return count;
     }
 }

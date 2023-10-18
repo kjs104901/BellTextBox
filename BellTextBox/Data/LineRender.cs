@@ -6,6 +6,7 @@ public class LineRender
     public int WrapIndex;
     
     public int Row;
+    public Folding? Folding;
     
     public float TabWidth;
 
