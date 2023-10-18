@@ -135,19 +135,19 @@ public partial class TextBox
         int row = (int)(pageCoordinates.Y / GetFontHeight()) + yOffset;
         if (row < 0)
             row = 0;
-        if (row >= LineRenders.Count)
-            row = LineRenders.Count - 1;
+        if (row >= SubLines.Count)
+            row = SubLines.Count - 1;
 
         if (pageCoordinates.X < -FoldWidth)
         {
             textCoordinates.IsLineNumber = true;
             textCoordinates.Column = 0;
         }
-        else if (LineRenders.Count > row)
+        else if (SubLines.Count > row)
         {
-            LineRender lineRender = LineRenders[row];
+            SubLine subLine = SubLines[row];
             
-            if (pageCoordinates.X < -FoldWidth * 0.2 && lineRender.Folding != null)
+            if (pageCoordinates.X < -FoldWidth * 0.2 && subLine.Folding != null)
             {
                 textCoordinates.IsFold = true;
                 textCoordinates.Column = 0;
@@ -155,8 +155,8 @@ public partial class TextBox
             else
             {
                 int column = 0;
-                float pageX = pageCoordinates.X - lineRender.TabWidth;
-                foreach (var textBlockRender in lineRender.TextBlockRenders)
+                float pageX = pageCoordinates.X - subLine.TabWidth;
+                foreach (var textBlockRender in subLine.TextBlockRenders)
                 {
                     if (pageX < textBlockRender.Width)
                     {
@@ -192,13 +192,13 @@ public partial class TextBox
 
         pageCoordinates.X = 0;
 
-        if (LineRenders.Count > textCoordinates.Row)
+        if (SubLines.Count > textCoordinates.Row)
         {
-            LineRender lineRender = LineRenders[textCoordinates.Row];
+            SubLine subLine = SubLines[textCoordinates.Row];
 
             int column = textCoordinates.Column;
-            float pageX = 0.0f + lineRender.TabWidth;
-            foreach (var textBlockRender in lineRender.TextBlockRenders)
+            float pageX = 0.0f + subLine.TabWidth;
+            foreach (var textBlockRender in subLine.TextBlockRenders)
             {
                 if (column < textBlockRender.Text.Length)
                 {

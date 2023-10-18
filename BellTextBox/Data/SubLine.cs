@@ -1,9 +1,9 @@
 ﻿namespace Bell.Data;
 
-public class LineRender
+public class SubLine
 {
     public int LineIndex;
-    public int WrapIndex;
+    public int SubIndex;
     
     public int Row;
     public Folding? Folding;
@@ -26,10 +26,10 @@ public class LineRender
     public bool CaretPosition { get; private set; }
     public float CaretPositionPosition { get; private set; }
     
-    public LineRender(int lineIndex, int wrapIndex, float tabWidth)
+    public SubLine(int lineIndex, int subIndex, float tabWidth)
     {
         LineIndex = lineIndex;
-        WrapIndex = wrapIndex;
+        SubIndex = subIndex;
         
         TabWidth = tabWidth;
     }

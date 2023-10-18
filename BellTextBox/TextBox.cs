@@ -14,8 +14,8 @@ public partial class TextBox
     {
         Theme = new DarkTheme();
         
-        LineRendersCache = new Cache<List<LineRender>>(new List<LineRender>(), UpdateLineRenders);
-        ShowLineRendersCache = new Cache<List<LineRender>>(new List<LineRender>(), UpdateShowLineRenders);
+        SubLinesCache = new Cache<List<SubLine>>(new List<SubLine>(), UpdateSubLines);
+        VisibleSubLinesCache = new Cache<List<SubLine>>(new List<SubLine>(), UpdateVisibleSubLines);
         FoldingListCache = new Cache<List<Folding>>(new List<Folding>(), UpdateFoldingList);
     }
 }

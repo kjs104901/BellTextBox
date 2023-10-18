@@ -256,10 +256,12 @@ public partial class TextBox
         {
             if (MouseAction.Click == mouseInput.LeftAction)
             {
-                var folding = LineRenders[textCoordinates.Row].Folding;
+                var folding = SubLines[textCoordinates.Row].Folding;
                 if (null != folding)
                 {
                     folding.Folded = !folding.Folded;
+                    SingleCaret(textCoordinates);
+                    VisibleSubLinesCache.SetDirty();
                     return;
                 }
             }
@@ -361,7 +363,7 @@ public partial class TextBox
 
         if (_textStart != textStart || _textEnd != textEnd)
         {
-            ShowLineRendersCache.SetDirty();
+            VisibleSubLinesCache.SetDirty();
             
             _textStart = textStart;
             _textEnd = textEnd;
@@ -371,6 +373,6 @@ public partial class TextBox
         {
             PageSize.X = viewInput.W;
         }
-        PageSize.Y = LineRenders.Count * GetFontHeight();
+        PageSize.Y = SubLines.Count * GetFontHeight();
     }
 }

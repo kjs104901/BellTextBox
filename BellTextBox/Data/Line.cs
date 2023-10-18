@@ -24,8 +24,8 @@ public class Line
     public HashSet<int> Cutoffs => CutoffsCache.Get();
     public readonly Cache<HashSet<int>> CutoffsCache;
 
-    public List<LineRender> LineRenders => LineRendersCache.Get();
-    public readonly Cache<List<LineRender>> LineRendersCache;
+    public List<SubLine> SubLines => SubLinesCache.Get();
+    public readonly Cache<List<SubLine>> SubLinesCache;
 
     public Line(TextBox textBox, int index)
     {
@@ -36,7 +36,7 @@ public class Line
         CutoffsCache = new(new(), UpdateCutoff);
         FoldableCache = new(false, UpdateFoldable);
         StringCache = new(string.Empty, UpdateString);
-        LineRendersCache = new(new List<LineRender>(), UpdateLineRenders);
+        SubLinesCache = new(new List<SubLine>(), UpdateSubLines);
     }
 
     public void SetString(string line)
@@ -48,7 +48,7 @@ public class Line
         CutoffsCache.SetDirty();
         FoldableCache.SetDirty();
         StringCache.SetDirty();
-        LineRendersCache.SetDirty();
+        SubLinesCache.SetDirty();
     }
 
     private Dictionary<int, ColorStyle> UpdateColors(Dictionary<int, ColorStyle> colors)
@@ -138,14 +138,14 @@ public class Line
         return _textBox.StringBuilder.ToString();
     }
 
-    private List<LineRender> UpdateLineRenders(List<LineRender> lineRenders)
+    private List<SubLine> UpdateSubLines(List<SubLine> subLines)
     {
-        lineRenders.Clear();
+        subLines.Clear();
 
         float tabWidth = _textBox.CountTabStart(String) * _textBox.GetTabRenderSize(); // TODO Cache
 
-        int wrapIndex = 0;
-        LineRender lineRender = new LineRender(Index, wrapIndex, 0.0f);
+        int subIndex = 0;
+        SubLine subLine = new SubLine(Index, subIndex, 0.0f);
 
         bool isFirstCharInLine = true;
         ColorStyle renderGroupColor = _textBox.Theme.DefaultFontColor;
@@ -159,11 +159,11 @@ public class Line
             char c = Chars[i];
             float cWidth = _textBox.GetFontWidth(c);
 
-            lineRender.CharWidths.Add(cWidth);
+            subLine.CharWidths.Add(cWidth);
             
             if (_textBox.ShowingWhitespace && char.IsWhiteSpace(c))
             {
-                lineRender.WhiteSpaceRenders.Add(new() { C = c, PosX = posX + bufferWidth });
+                subLine.WhiteSpaceRenders.Add(new() { C = c, PosX = posX + bufferWidth });
             }
             
             if (isFirstCharInLine)
@@ -187,7 +187,7 @@ public class Line
 
             if (renderGroupColor != color) // need new render group
             {
-                lineRender.TextBlockRenders.Add(new()
+                subLine.TextBlockRenders.Add(new()
                 {
                     Text = String.Concat(_buffers), ColorStyle = renderGroupColor, Width = bufferWidth, PosX = posX
                 });
@@ -203,14 +203,14 @@ public class Line
 
             if (Cutoffs.Contains(i)) // need new line
             {
-                lineRender.TextBlockRenders.Add(new()
+                subLine.TextBlockRenders.Add(new()
                 {
                     Text = String.Concat(_buffers), ColorStyle = renderGroupColor, Width = bufferWidth, PosX = posX
                 });
-                lineRenders.Add(lineRender);
+                subLines.Add(subLine);
 
-                wrapIndex++;
-                lineRender = new LineRender(Index, wrapIndex, tabWidth);
+                subIndex++;
+                subLine = new SubLine(Index, subIndex, tabWidth);
 
                 isFirstCharInLine = true;
                 renderGroupColor = _textBox.Theme.DefaultFontColor;
@@ -222,14 +222,14 @@ public class Line
         }
 
         // Add remains
-        if (_buffers.Count > 0 || wrapIndex == 0)
-            lineRender.TextBlockRenders.Add(new()
+        if (_buffers.Count > 0 || subIndex == 0)
+            subLine.TextBlockRenders.Add(new()
                 { Text = String.Concat(_buffers), ColorStyle = renderGroupColor, Width = bufferWidth, PosX = posX });
 
-        if (lineRender.TextBlockRenders.Count > 0)
-            lineRenders.Add(lineRender);
+        if (subLine.TextBlockRenders.Count > 0)
+            subLines.Add(subLine);
 
-        return lineRenders;
+        return subLines;
     }
 
     public int CountSubstrings(string findText)

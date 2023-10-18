@@ -6,11 +6,11 @@ public partial class TextBox
 {
     public List<Line> Lines = new();
     
-    public List<LineRender> LineRenders => LineRendersCache.Get();
-    public readonly Cache<List<LineRender>> LineRendersCache;
+    public List<SubLine> SubLines => SubLinesCache.Get();
+    public readonly Cache<List<SubLine>> SubLinesCache;
     
-    public List<LineRender> ShowLineRenders => ShowLineRendersCache.Get();
-    public readonly Cache<List<LineRender>> ShowLineRendersCache;
+    public List<SubLine> VisibleSubLines => VisibleSubLinesCache.Get();
+    public readonly Cache<List<SubLine>> VisibleSubLinesCache;
     
     public void SetText(string text)
     {
@@ -23,12 +23,12 @@ public partial class TextBox
             Lines.Add(line);
         }
         
-        LineRendersCache.SetDirty();
+        SubLinesCache.SetDirty();
     }
     
-    private List<LineRender> UpdateLineRenders(List<LineRender> lineRenders)
+    private List<SubLine> UpdateSubLines(List<SubLine> subLines)
     {
-        lineRenders.Clear();
+        subLines.Clear();
 
         int row = 0;
 
@@ -65,20 +65,20 @@ public partial class TextBox
             
             if (visible)
             {
-                foreach (LineRender lineRender in line.LineRenders)
+                foreach (SubLine subLine in line.SubLines)
                 {
-                    lineRender.Row = row++;
-                    lineRender.Folding = lineFolding;
-                    lineRenders.Add(lineRender);
+                    subLine.Row = row++;
+                    subLine.Folding = lineFolding;
+                    subLines.Add(subLine);
                 }
             }
         }
-        return lineRenders;
+        return subLines;
     }
     
-    private List<LineRender> UpdateShowLineRenders(List<LineRender> lineRenders)
+    private List<SubLine> UpdateVisibleSubLines(List<SubLine> subLines)
     {
-        lineRenders.Clear();
+        subLines.Clear();
 
         var pageStart = ViewToPage(ViewStart);
         var pageEnd = ViewToPage(ViewEnd);
@@ -88,11 +88,11 @@ public partial class TextBox
 
         for (int i = textStart.Row; i <= textEnd.Row; i++)
         {
-            if (LineRenders.Count > i)
-                lineRenders.Add(LineRenders[i]);
+            if (SubLines.Count > i)
+                subLines.Add(SubLines[i]);
         }
 
-        return lineRenders;
+        return subLines;
     }
 
     public override string ToString()
