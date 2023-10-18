@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using Bell.Languages;
+using Bell.Utils;
 
 namespace Bell.Data;
 
@@ -15,8 +16,8 @@ public class Line
     public string String => StringCache.Get();
     public readonly Cache<string> StringCache;
 
-    public Dictionary<int, ColorStyle> Colors => ColorsCache.Get();
-    public readonly Cache<Dictionary<int, ColorStyle>> ColorsCache;
+    public List<ColorStyle> Colors => ColorsCache.Get();
+    public readonly Cache<List<ColorStyle>> ColorsCache;
 
     public bool Foldable => FoldableCache.Get();
     public readonly Cache<bool> FoldableCache;
@@ -51,7 +52,7 @@ public class Line
         SubLinesCache.SetDirty();
     }
 
-    private Dictionary<int, ColorStyle> UpdateColors(Dictionary<int, ColorStyle> colors)
+    private List<ColorStyle> UpdateColors(List<ColorStyle> colors)
     {
         colors.Clear();
         if (_textBox.SyntaxHighlightEnabled == false)
@@ -59,14 +60,20 @@ public class Line
 
         for (int i = 0; i < Chars.Count; i++)
         {
+            ColorStyle colorStyle;
             if (char.IsLower(Chars[i]))
             {
-                colors[i] = _textBox.Theme.BlockCommentFontColor;
+                colorStyle = _textBox.Theme.BlockCommentFontColor;
             }
             else if (false == char.IsAscii(Chars[i]))
             {
-                colors[i] = _textBox.Theme.LineCommentFontColor;
+                colorStyle = _textBox.Theme.LineCommentFontColor;
             }
+            else
+            {
+                colorStyle = _textBox.Theme.DefaultFontColor;
+            }
+            colors.Add(colorStyle);
         }
 
         return colors;
@@ -168,24 +175,16 @@ public class Line
             
             if (isFirstCharInLine)
             {
-                if (Colors.TryGetValue(i, out var firstColor))
-                {
-                    renderGroupColor = firstColor;
-                }
-
+                renderGroupColor = Colors[i];
+                
                 _buffers.Add(c);
                 bufferWidth += cWidth;
 
                 isFirstCharInLine = false;
                 continue;
             }
-
-            if (false == Colors.TryGetValue(i, out ColorStyle color))
-            {
-                color = _textBox.Theme.DefaultFontColor;
-            }
-
-            if (renderGroupColor != color) // need new render group
+            
+            if (renderGroupColor != Colors[i]) // need new render group
             {
                 subLine.TextBlockRenders.Add(new()
                 {
@@ -193,7 +192,7 @@ public class Line
                 });
                 posX += bufferWidth;
 
-                renderGroupColor = color;
+                renderGroupColor = Colors[i];
                 _buffers.Clear();
                 bufferWidth = 0.0f;
             }

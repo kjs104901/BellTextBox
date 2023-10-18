@@ -9,7 +9,8 @@ public partial class TextBox
     public void UpdateReferenceSize()
     {
         var fontSize = GetFontSize();
-        _sizeCacheDictionary.TryAdd(fontSize, new Dictionary<char, float>());
+        if (false == _sizeCacheDictionary.ContainsKey(fontSize))
+            _sizeCacheDictionary.TryAdd(fontSize, new Dictionary<char, float>());
         _sizeWidthCache = _sizeCacheDictionary[fontSize];
     }
 

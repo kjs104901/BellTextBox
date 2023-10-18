@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using Bell.Data;
 using Bell.Inputs;
+using Bell.Utils;
 
 namespace Bell;
 
@@ -14,60 +15,74 @@ public partial class TextBox
     public Vector2 ViewEnd;
     public Vector2 PageSize;
 
-    private bool _shiftPressed;
-    private bool _altPressed;
-    
     private string _imeComposition;
-    
+
     private TextCoordinates _textStart;
     private TextCoordinates _textEnd;
-    
+
     private Vector2 _mouseDragStartPage;
     private TextCoordinates _mouseDragStartText;
 
-    protected void InputStart()
+    protected KeyboardInput KeyboardInput = new KeyboardInput() { Chars = new List<char>() };
+    protected MouseInput MouseInput = new MouseInput();
+    protected ViewInput ViewInput = new ViewInput();
+    private bool _shiftPressed;
+    private bool _altPressed;
+
+    protected void ClearKeyboardInput()
     {
-        //KeyboardInput.HotKeys = HotKeys.None;
-        //KeyboardInput.Chars.Clear();
-        //KeyboardInput.ImeComposition = string.Empty;
-//
-        //MouseInput.Position.X = 0.0f;
-        //MouseInput.Position.Y = 0.0f;
-        //MouseInput.LeftAction = MouseAction.None;
-        //MouseInput.MiddleAction = MouseAction.None;
+        KeyboardInput.HotKeys = HotKeys.None;
+        KeyboardInput.Chars?.Clear();
+        KeyboardInput.ImeComposition = string.Empty;
     }
 
-    protected void ProcessKeyboardInput(KeyboardInput keyboardInput)
+    protected void ClearMouseInput()
+    {
+        MouseInput.Position.X = 0.0f;
+        MouseInput.Position.Y = 0.0f;
+        MouseInput.LeftAction = MouseAction.None;
+        MouseInput.MiddleAction = MouseAction.None;
+    }
+
+    protected void ClearViewInput()
+    {
+        ViewInput.X = 0.0f;
+        ViewInput.Y = 0.0f;
+        ViewInput.W = 0.0f;
+        ViewInput.H = 0.0f;
+    }
+
+    protected void ProcessKeyboardInput()
     {
         _caretChanged = false;
 
-        var hk = keyboardInput.HotKeys;
+        var hk = KeyboardInput.HotKeys;
 
-        _shiftPressed |= hk.HasFlag(HotKeys.Shift);
-        _altPressed |= hk.HasFlag(HotKeys.Alt);
-        _imeComposition = keyboardInput.ImeComposition;
+        _shiftPressed |= EnumFlag.Has(hk, HotKeys.Shift);
+        _altPressed |= EnumFlag.Has(hk, HotKeys.Alt);
+        _imeComposition = KeyboardInput.ImeComposition;
 
-        if (hk.HasFlag(HotKeys.Ctrl | HotKeys.Z)) // UndoAction
+        if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.Z)) // UndoAction
             UndoAction();
-        else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.Y)) // RedoAction
+        else if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.Y)) // RedoAction
             RedoAction();
-        else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.C)) // TODO Copy
+        else if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.C)) // TODO Copy
             CopyClipboard();
-        else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.V)) // TODO Paste
+        else if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.V)) // TODO Paste
             PasteClipboard();
-        else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.X)) // Cut
+        else if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.X)) // Cut
         {
             CopyClipboard();
             DoAction(new DeleteSelection(this));
         }
-        else if (hk.HasFlag(HotKeys.Ctrl | HotKeys.A)) // Select All
+        else if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.A)) // Select All
         {
             MoveCaretsSelection(CaretMove.StartOfFile);
             MoveCaretsPosition(CaretMove.EndOfFile);
         }
-        else if (hk.HasFlag(HotKeys.Delete)) // Delete
+        else if (EnumFlag.Has(hk, HotKeys.Delete)) // Delete
         {
-            if (hk.HasFlag(HotKeys.Shift))
+            if (EnumFlag.Has(hk, HotKeys.Shift))
             {
                 MoveCaretsSelection(CaretMove.StartOfFile);
                 MoveCaretsPosition(CaretMove.EndOfFile);
@@ -79,9 +94,9 @@ public partial class TextBox
                 DoAction(new DeleteCharAction(this, EditDirection.Forward));
             }
         }
-        else if (hk.HasFlag(HotKeys.Backspace)) // Backspace
+        else if (EnumFlag.Has(hk, HotKeys.Backspace)) // Backspace
         {
-            if (hk.HasFlag(HotKeys.Alt))
+            if (EnumFlag.Has(hk, HotKeys.Alt))
             {
                 UndoAction();
             }
@@ -91,21 +106,21 @@ public partial class TextBox
                 DoAction(new DeleteCharAction(this, EditDirection.Backward));
             }
         }
-        else if (hk.HasFlag(HotKeys.Enter)) // Enter
+        else if (EnumFlag.Has(hk, HotKeys.Enter)) // Enter
         {
             DoAction(new DeleteSelection(this));
             DoAction(new EnterAction(this));
         }
-        else if (hk.HasFlag(HotKeys.Tab)) // Tab
+        else if (EnumFlag.Has(hk, HotKeys.Tab)) // Tab
         {
-            if (hk.HasFlag(HotKeys.Shift))
+            if (EnumFlag.Has(hk, HotKeys.Shift))
                 DoAction(new UnTabAction(this));
             else
                 DoAction(new TabAction(this));
         }
-        else if (hk.HasFlag(HotKeys.UpArrow)) // Move Up
+        else if (EnumFlag.Has(hk, HotKeys.UpArrow)) // Move Up
         {
-            if (hk.HasFlag(HotKeys.Shift))
+            if (EnumFlag.Has(hk, HotKeys.Shift))
             {
                 MoveCaretsSelection(CaretMove.Up);
             }
@@ -115,9 +130,9 @@ public partial class TextBox
                 MoveCaretsSelection(CaretMove.Position);
             }
         }
-        else if (hk.HasFlag(HotKeys.DownArrow)) // Move Down
+        else if (EnumFlag.Has(hk, HotKeys.DownArrow)) // Move Down
         {
-            if (hk.HasFlag(HotKeys.Shift))
+            if (EnumFlag.Has(hk, HotKeys.Shift))
             {
                 MoveCaretsSelection(CaretMove.Down);
             }
@@ -127,9 +142,9 @@ public partial class TextBox
                 MoveCaretsSelection(CaretMove.Position);
             }
         }
-        else if (hk.HasFlag(HotKeys.LeftArrow)) // Move Left
+        else if (EnumFlag.Has(hk, HotKeys.LeftArrow)) // Move Left
         {
-            if (hk.HasFlag(HotKeys.Shift))
+            if (EnumFlag.Has(hk, HotKeys.Shift))
             {
                 MoveCaretsSelection(CaretMove.Left);
             }
@@ -139,9 +154,9 @@ public partial class TextBox
                 MoveCaretsSelection(CaretMove.Position);
             }
         }
-        else if (hk.HasFlag(HotKeys.RightArrow)) // Move Right
+        else if (EnumFlag.Has(hk, HotKeys.RightArrow)) // Move Right
         {
-            if (hk.HasFlag(HotKeys.Shift))
+            if (EnumFlag.Has(hk, HotKeys.Shift))
             {
                 MoveCaretsSelection(CaretMove.Right);
             }
@@ -151,9 +166,9 @@ public partial class TextBox
                 MoveCaretsSelection(CaretMove.Position);
             }
         }
-        else if (hk.HasFlag(HotKeys.PageUp)) // Move PageUp
+        else if (EnumFlag.Has(hk, HotKeys.PageUp)) // Move PageUp
         {
-            if (hk.HasFlag(HotKeys.Shift))
+            if (EnumFlag.Has(hk, HotKeys.Shift))
             {
                 MoveCaretsSelection(CaretMove.PageUp);
             }
@@ -163,9 +178,9 @@ public partial class TextBox
                 MoveCaretsSelection(CaretMove.Position);
             }
         }
-        else if (hk.HasFlag(HotKeys.PageDown)) // Move PageDown
+        else if (EnumFlag.Has(hk, HotKeys.PageDown)) // Move PageDown
         {
-            if (hk.HasFlag(HotKeys.Shift))
+            if (EnumFlag.Has(hk, HotKeys.Shift))
             {
                 MoveCaretsSelection(CaretMove.PageDown);
             }
@@ -175,46 +190,46 @@ public partial class TextBox
                 MoveCaretsSelection(CaretMove.Position);
             }
         }
-        else if (hk.HasFlag(HotKeys.Home))
+        else if (EnumFlag.Has(hk, HotKeys.Home))
         {
-            if (hk.HasFlag(HotKeys.Shift))
+            if (EnumFlag.Has(hk, HotKeys.Shift))
             {
                 MoveCaretsSelection(
-                    hk.HasFlag(HotKeys.Ctrl) ? CaretMove.StartOfFile : CaretMove.StartOfLine);
+                    EnumFlag.Has(hk, HotKeys.Ctrl) ? CaretMove.StartOfFile : CaretMove.StartOfLine);
             }
             else
             {
                 MoveCaretsPosition(
-                    hk.HasFlag(HotKeys.Ctrl) ? CaretMove.StartOfFile : CaretMove.StartOfLine);
-                
+                    EnumFlag.Has(hk, HotKeys.Ctrl) ? CaretMove.StartOfFile : CaretMove.StartOfLine);
+
                 MoveCaretsSelection(CaretMove.Position);
             }
         }
-        else if (hk.HasFlag(HotKeys.End))
+        else if (EnumFlag.Has(hk, HotKeys.End))
         {
-            if (hk.HasFlag(HotKeys.Shift))
+            if (EnumFlag.Has(hk, HotKeys.Shift))
             {
                 MoveCaretsSelection(
-                    hk.HasFlag(HotKeys.Ctrl) ? CaretMove.EndOfFile : CaretMove.EndOfLine);
+                    EnumFlag.Has(hk, HotKeys.Ctrl) ? CaretMove.EndOfFile : CaretMove.EndOfLine);
             }
             else
             {
                 MoveCaretsPosition(
-                    hk.HasFlag(HotKeys.Ctrl) ? CaretMove.EndOfFile : CaretMove.EndOfLine);
-                
+                    EnumFlag.Has(hk, HotKeys.Ctrl) ? CaretMove.EndOfFile : CaretMove.EndOfLine);
+
                 MoveCaretsSelection(CaretMove.Position);
             }
         }
-        else if (hk.HasFlag(HotKeys.Insert))
+        else if (EnumFlag.Has(hk, HotKeys.Insert))
         {
             Overwrite = !Overwrite;
         }
-        
+
         // Chars
         bool selectionDeleted = false;
-        if (null != keyboardInput.Chars)
+        if (null != KeyboardInput.Chars)
         {
-            foreach (char keyboardInputChar in keyboardInput.Chars)
+            foreach (char keyboardInputChar in KeyboardInput.Chars)
             {
                 if (keyboardInputChar == 0)
                     continue;
@@ -227,7 +242,7 @@ public partial class TextBox
 
                 if (keyboardInputChar == '\t')
                 {
-                    if (hk.HasFlag(HotKeys.Shift))
+                    if (EnumFlag.Has(hk, HotKeys.Shift))
                         DoAction(new UnTabAction(this));
                     else
                         DoAction(new TabAction(this));
@@ -242,33 +257,36 @@ public partial class TextBox
                     DoAction(new DeleteSelection(this));
                     selectionDeleted = true;
                 }
+
                 DoAction(new InputCharAction(this, EditDirection.Forward)); // keyboardInputChar
             }
         }
     }
 
-    protected void ProcessMouseInput(MouseInput mouseInput)
+    protected void ProcessMouseInput()
     {
-        Vector2 pageCoordinates = ViewToPage(mouseInput.Position);
+        Vector2 pageCoordinates = ViewToPage(MouseInput.Position);
         TextCoordinates textCoordinates = PageToText(pageCoordinates);
 
         if (textCoordinates.IsFold)
         {
-            if (MouseAction.Click == mouseInput.LeftAction)
+            if (MouseAction.Click == MouseInput.LeftAction)
             {
                 var folding = SubLines[textCoordinates.Row].Folding;
                 if (null != folding)
                 {
                     folding.Folded = !folding.Folded;
                     SingleCaret(textCoordinates);
+
+                    SubLinesCache.SetDirty();
                     VisibleSubLinesCache.SetDirty();
                     return;
                 }
             }
         }
 
-        if (mouseInput.Position.X > ViewStart.X && mouseInput.Position.X < ViewEnd.X &&
-            mouseInput.Position.Y > ViewStart.Y && mouseInput.Position.Y < ViewEnd.Y)
+        if (MouseInput.Position.X > ViewStart.X && MouseInput.Position.X < ViewEnd.X &&
+            MouseInput.Position.Y > ViewStart.Y && MouseInput.Position.Y < ViewEnd.Y)
         {
             if (textCoordinates.IsFold)
             {
@@ -283,14 +301,14 @@ public partial class TextBox
             }
         }
 
-        if (MouseAction.Click == mouseInput.LeftAction ||
-            MouseAction.Click == mouseInput.MiddleAction)
+        if (MouseAction.Click == MouseInput.LeftAction ||
+            MouseAction.Click == MouseInput.MiddleAction)
         {
             _mouseDragStartPage = pageCoordinates;
             _mouseDragStartText = textCoordinates;
         }
 
-        if (MouseAction.Click == mouseInput.LeftAction)
+        if (MouseAction.Click == MouseInput.LeftAction)
         {
             if (_shiftPressed)
             {
@@ -305,7 +323,7 @@ public partial class TextBox
                 SingleCaret(textCoordinates);
             }
         }
-        else if (MouseAction.DoubleClick == mouseInput.LeftAction)
+        else if (MouseAction.DoubleClick == MouseInput.LeftAction)
         {
             SingleCaret(textCoordinates);
 
@@ -322,7 +340,7 @@ public partial class TextBox
                 MoveCaretsSelection(CaretMove.StartOfWord);
             }
         }
-        else if (MouseAction.Dragging == mouseInput.LeftAction)
+        else if (MouseAction.Dragging == MouseInput.LeftAction)
         {
             if (_altPressed)
             {
@@ -333,7 +351,7 @@ public partial class TextBox
                 SingleCaret(_mouseDragStartText).Position = textCoordinates;
             }
         }
-        else if (MouseAction.Dragging == mouseInput.MiddleAction)
+        else if (MouseAction.Dragging == MouseInput.MiddleAction)
         {
             SelectRectangle(_mouseDragStartPage, pageCoordinates);
         }
@@ -342,19 +360,19 @@ public partial class TextBox
         _altPressed = false;
     }
 
-    protected void ProcessViewInput(ViewInput viewInput)
+    protected void ProcessViewInput()
     {
         ViewStart = new Vector2()
         {
-            X = viewInput.X,
-            Y = viewInput.Y
+            X = ViewInput.X,
+            Y = ViewInput.Y
         };
         ViewEnd = new Vector2()
         {
-            X = viewInput.X + viewInput.W,
-            Y = viewInput.Y + viewInput.H
+            X = ViewInput.X + ViewInput.W,
+            Y = ViewInput.Y + ViewInput.H
         };
-        
+
         var pageStart = ViewToPage(ViewStart);
         var pageEnd = ViewToPage(ViewEnd);
 
@@ -364,15 +382,16 @@ public partial class TextBox
         if (_textStart != textStart || _textEnd != textEnd)
         {
             VisibleSubLinesCache.SetDirty();
-            
+
             _textStart = textStart;
             _textEnd = textEnd;
         }
-        
+
         if (WrapMode.Word == WrapMode || WrapMode.BreakWord == WrapMode)
         {
-            PageSize.X = viewInput.W;
+            PageSize.X = ViewInput.W;
         }
+
         PageSize.Y = SubLines.Count * GetFontHeight();
     }
 }

@@ -2,6 +2,7 @@
 using Bell.Data;
 using Bell.Inputs;
 using Bell.Languages;
+using Bell.Utils;
 
 namespace Bell;
 
@@ -28,8 +29,6 @@ public abstract partial class TextBox
             {
                 subLine.SetCarets(Carets);
             }
-
-            var a = FoldingList;
 
             var lineY = subLine.Row * GetFontHeight();
             var lineTextStartY = lineY + GetFontHeightOffset();
@@ -77,7 +76,9 @@ public abstract partial class TextBox
             if (subLine.SubIndex == 0)
             {
                 float lineNumberWidth = 0.0f;
-                foreach (char c in subLine.LineIndex.ToString())
+                string lineIndex = StringPool<int>.Get(subLine.LineIndex);
+
+                foreach (char c in lineIndex)
                 {
                     lineNumberWidth += GetFontWidth(c);
                 }
@@ -85,10 +86,10 @@ public abstract partial class TextBox
                 lineNumberWidthMax = Math.Max(lineNumberWidthMax, lineNumberWidth);
 
                 RenderText(new Vector2(LineNumberWidth - lineNumberWidth, lineTextStartY),
-                    subLine.LineIndex.ToString(),
+                    lineIndex,
                     Theme.DefaultFontColor.ToVector());
             }
-            
+
             if (subLine.Folding != null)
             {
                 RenderText(new Vector2(LineNumberWidth, lineTextStartY),

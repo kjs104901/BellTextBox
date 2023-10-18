@@ -98,6 +98,7 @@ public class FontStyle : IComparable<FontStyle>
         imGuiRenderer.RecreateFontDeviceTexture(graphicsDevice);
 
         var imGuiBellTextBox = new ImGuiBellTextBox();
+        imGuiBellTextBox.SetText(textInput);
         
         while (sdl2Window.Exists)
         {
@@ -120,7 +121,6 @@ public class FontStyle : IComparable<FontStyle>
             
             ImGui.InputTextMultiline("Test", ref textInput, 1024, new Vector2(-1, 300));
 
-            imGuiBellTextBox.SetText(textInput);
             imGuiBellTextBox.Update(new Vector2(-1, -1));
 
             ImGui.PopFont();

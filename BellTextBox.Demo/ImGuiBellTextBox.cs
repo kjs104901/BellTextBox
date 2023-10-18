@@ -74,68 +74,67 @@ public class ImGuiBellTextBox : TextBox
         _drawList = ImGui.GetWindowDrawList();
         _drawPos = ImGui.GetCursorScreenPos();
 
-        InputStart();
         _drawList.AddText(_drawPos, ImGui.ColorConvertFloat4ToU32(new Vector4(0.2f, 0.1f, 0.1f, 1.0f)),
             ImGui.IsWindowFocused().ToString());
-
-        KeyboardInput keyboardInput = new KeyboardInput();
-        MouseInput mouseInput = new MouseInput();
-        ViewInput viewInput = new ViewInput();
         
         ImGui.Text(ImGui.IsWindowFocused().ToString());
         if (ImGui.IsWindowFocused() ||
             (ImGui.IsWindowHovered() && ImGui.IsMouseClicked(0)))
         {
+            ClearKeyboardInput();
+            ClearMouseInput();
+            
             var io = ImGui.GetIO();
             if (io.KeyShift)
-                keyboardInput.HotKeys |= HotKeys.Shift;
+                KeyboardInput.HotKeys |= HotKeys.Shift;
             if (io.KeyCtrl)
-                keyboardInput.HotKeys |= HotKeys.Ctrl;
+                KeyboardInput.HotKeys |= HotKeys.Ctrl;
             if (io.KeyAlt)
-                keyboardInput.HotKeys |= HotKeys.Alt;
+                KeyboardInput.HotKeys |= HotKeys.Alt;
             foreach (var keyMap in _keyboardMapping)
             {
                 if (ImGui.IsKeyPressed(ImGui.GetKeyIndex(keyMap.Item1)))
-                    keyboardInput.HotKeys |= keyMap.Item2;
+                    KeyboardInput.HotKeys |= keyMap.Item2;
             }
 
             if (io.InputQueueCharacters.Size > 0)
             {
-                keyboardInput.Chars = new List<char>();
+                KeyboardInput.Chars = new List<char>();
                 for (int i = 0; i < io.InputQueueCharacters.Size; i++)
                 {
-                    keyboardInput.Chars.Add((char)io.InputQueueCharacters[i]);
+                    KeyboardInput.Chars.Add((char)io.InputQueueCharacters[i]);
                 }
             }
-            keyboardInput.ImeComposition = ImeHandler.GetCompositionString();
+            KeyboardInput.ImeComposition = ImeHandler.GetCompositionString();
             
-            ProcessKeyboardInput(keyboardInput);
+            ProcessKeyboardInput();
             
             if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
-                mouseInput.LeftAction = MouseAction.Click;
+                MouseInput.LeftAction = MouseAction.Click;
             if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
-                mouseInput.LeftAction = MouseAction.DoubleClick;
+                MouseInput.LeftAction = MouseAction.DoubleClick;
             if (ImGui.IsMouseDragging(ImGuiMouseButton.Left) && ImGui.IsMouseDown(ImGuiMouseButton.Left))
-                mouseInput.LeftAction = MouseAction.Dragging;
+                MouseInput.LeftAction = MouseAction.Dragging;
 
             if (ImGui.IsMouseClicked(ImGuiMouseButton.Middle))
-                mouseInput.MiddleAction = MouseAction.Click;
+                MouseInput.MiddleAction = MouseAction.Click;
             if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Middle))
-                mouseInput.MiddleAction = MouseAction.DoubleClick;
+                MouseInput.MiddleAction = MouseAction.DoubleClick;
             if (ImGui.IsMouseDragging(ImGuiMouseButton.Middle) && ImGui.IsMouseDown(ImGuiMouseButton.Middle))
-                mouseInput.MiddleAction = MouseAction.Dragging;
+                MouseInput.MiddleAction = MouseAction.Dragging;
         }
 
         var mouse = ImGui.GetMousePos();
-        mouseInput.Position.X = mouse.X - _drawPos.X;
-        mouseInput.Position.Y = mouse.Y - _drawPos.Y;
-        ProcessMouseInput(mouseInput);
+        MouseInput.Position.X = mouse.X - _drawPos.X;
+        MouseInput.Position.Y = mouse.Y - _drawPos.Y;
+        ProcessMouseInput();
 
-        viewInput.X = scroll.X;
-        viewInput.Y = scroll.Y;
-        viewInput.W = contentSize.X - ImGui.GetStyle().ScrollbarSize;;
-        viewInput.H = contentSize.Y;
-        ProcessViewInput(viewInput);
+        ClearViewInput();
+        ViewInput.X = scroll.X;
+        ViewInput.Y = scroll.Y;
+        ViewInput.W = contentSize.X - ImGui.GetStyle().ScrollbarSize;;
+        ViewInput.H = contentSize.Y;
+        ProcessViewInput();
 
         Render();
 
