@@ -87,7 +87,18 @@ public partial class TextBox
 
     internal string GetActionDebugString()
     {
-        // TODO debug string
-        throw new System.NotImplementedException();
+        string result = "";
+        result += "History:\n";
+        foreach (var action in _history)
+        {
+            result += action.GetDebugString() + "\n";
+        }
+
+        result += "Redo History:\n";
+        foreach (var action in _redoHistory)
+        {
+            result += action.GetDebugString() + "\n";
+        }
+        return result;
     }
 }

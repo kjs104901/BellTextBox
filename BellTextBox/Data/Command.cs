@@ -4,6 +4,7 @@ internal abstract class Command
 {
     public abstract void Do();
     public abstract void Undo();
+    public abstract string GetDebugString();
 }
 
 
@@ -32,6 +33,11 @@ internal class InputCharCommand : Command
     public override void Undo()
     {
     }
+
+    public override string GetDebugString()
+    {
+        throw new NotImplementedException();
+    }
 }
 
 internal class DeleteCharCommand : Command
@@ -52,6 +58,11 @@ internal class DeleteCharCommand : Command
     public override void Undo()
     {
     }
+
+    public override string GetDebugString()
+    {
+        throw new NotImplementedException();
+    }
 }
 
 internal class SplitLine : Command
@@ -69,6 +80,11 @@ internal class SplitLine : Command
 
     public override void Undo()
     {
+    }
+
+    public override string GetDebugString()
+    {
+        throw new NotImplementedException();
     }
 }
 
@@ -88,6 +104,11 @@ internal class MergeLine : Command
     public override void Undo()
     {
     }
+
+    public override string GetDebugString()
+    {
+        throw new NotImplementedException();
+    }
 }
 
 internal class IndentSelection : Command
@@ -99,6 +120,11 @@ internal class IndentSelection : Command
     public override void Undo()
     {
     }
+
+    public override string GetDebugString()
+    {
+        throw new NotImplementedException();
+    }
 }
 
 internal class UnindentSelection : Command
@@ -109,5 +135,10 @@ internal class UnindentSelection : Command
 
     public override void Undo()
     {
+    }
+
+    public override string GetDebugString()
+    {
+        throw new NotImplementedException();
     }
 }

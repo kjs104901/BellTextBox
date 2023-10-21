@@ -67,7 +67,17 @@ internal abstract class Action
     
     public string GetDebugString()
     {
-        return string.Join(",", _caretsCommands.Select(a => a.GetType().ToString()));
+        string result = "";
+        for (int i = 0; i < _caretsCommands.Count; i++)
+        {
+            result += $"\tCaret {i}: {_caretsCommands[i].Count} commands\n";
+
+            foreach (var command in _caretsCommands[i])
+            {
+                result += $"\t\t{command.GetDebugString()}\n";
+            }
+        }
+        return result;
     }
 }
 
