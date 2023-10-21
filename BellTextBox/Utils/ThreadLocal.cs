@@ -11,8 +11,4 @@ public static class ThreadLocal
         get => ThreadLocalTextBox.Value ?? throw new Exception("No TextBox set");
         set => ThreadLocalTextBox.Value = value;
     }
-
-    private static readonly ThreadLocal<StringBuilder> ThreadLocalStringBuilder = new(() => new StringBuilder());
-
-    public static StringBuilder StringBuilder => ThreadLocalStringBuilder.Value ?? throw new InvalidOperationException();
 }

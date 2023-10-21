@@ -1,4 +1,5 @@
-﻿using Bell.Data;
+﻿using System.Text;
+using Bell.Data;
 using Bell.Utils;
 
 namespace Bell;
@@ -6,24 +7,42 @@ namespace Bell;
 public partial class TextBox
 {
     public List<Line> Lines = new();
-    
+
     public List<SubLine> Rows => RowsCache.Get();
     public readonly Cache<List<SubLine>> RowsCache;
-    
+
     public void SetText(string text)
     {
+        text = ReplaceTab(text);
+        text = ReplaceEol(text);
+
         Lines.Clear();
         int i = 0;
-        foreach (string lineText in text.Split("\n"))
+        foreach (string lineText in text.Split('\n'))
         {
             Line line = new Line(i++);
             line.SetString(lineText.Trim('\r'));
             Lines.Add(line);
         }
-        
+
         RowsCache.SetDirty();
     }
-    
+
+
+    private readonly StringBuilder _sb = new();
+
+    public string GetText()
+    {
+        _sb.Clear();
+        foreach (Line line in Lines)
+        {
+            _sb.Append(line.String);
+            _sb.Append(GetEolString());
+        }
+
+        return _sb.ToString();
+    }
+
     private List<SubLine> UpdateRows(List<SubLine> rows)
     {
         rows.Clear();
@@ -33,16 +52,16 @@ public partial class TextBox
         foreach (Line line in Lines)
         {
             bool visible = true;
-            
+
             Folding? lineFolding = null;
-            
+
             foreach (Folding folding in FoldingList)
             {
                 if (folding.End == line.Index)
                 {
                     foldingCount--;
                 }
-                
+
                 if (folding.Start < line.Index && line.Index < folding.End)
                 {
                     if (folding.Folded)
@@ -51,15 +70,14 @@ public partial class TextBox
                         break;
                     }
                 }
-                
+
                 if (folding.Start == line.Index)
                 {
                     lineFolding = folding;
                     foldingCount++;
                 }
-
             }
-            
+
             if (visible)
             {
                 foreach (SubLine subLine in line.SubLines)
@@ -70,6 +88,7 @@ public partial class TextBox
                 }
             }
         }
+
         return rows;
     }
 

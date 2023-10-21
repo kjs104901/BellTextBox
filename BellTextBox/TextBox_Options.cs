@@ -81,4 +81,24 @@ public partial class TextBox
             return new string(' ', TabSize);
         return "\t";
     }
+
+    public string ReplaceEol(string text)
+    {
+        return text.Replace("\r\n", "\n")
+            .Replace("\r", "\n");
+    }
+    
+    public string GetEolString()
+    {
+        switch (EolMode)
+        {
+            case EolMode.CRLF:
+                return "\r\n";
+            case EolMode.LF:
+                return "\n";
+            case EolMode.CR:
+                return "\r";
+        }
+        return "\n";
+    }
 }

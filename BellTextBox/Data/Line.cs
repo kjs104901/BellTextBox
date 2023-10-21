@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using System.Text;
 using Bell.Utils;
 
 namespace Bell.Data;
@@ -10,6 +11,7 @@ public class Line
     public List<char> Chars = new();
     private List<char> _buffers = new();
 
+    private readonly StringBuilder _sb = new();
     public string String => StringCache.Get();
     public readonly Cache<string> StringCache;
 
@@ -136,9 +138,9 @@ public class Line
 
     private string UpdateString(string _)
     {
-        ThreadLocal.StringBuilder.Clear();
-        ThreadLocal.StringBuilder.Append(CollectionsMarshal.AsSpan(Chars));
-        return ThreadLocal.StringBuilder.ToString();
+        _sb.Clear();
+        _sb.Append(CollectionsMarshal.AsSpan(Chars));
+        return _sb.ToString();
     }
 
     private List<SubLine> UpdateSubLines(List<SubLine> subLines)
