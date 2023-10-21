@@ -2,8 +2,8 @@
 
 public class Caret
 {
-    public TextCoordinates Selection;
-    public TextCoordinates Position;
+    public PageCoordinates Selection;
+    public PageCoordinates Position;
 
     public bool HasSelection => Selection != Position;
 

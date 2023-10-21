@@ -25,7 +25,7 @@ public partial class TextBox
         float lineNumberWidthMax = 0.0f;
         foreach (SubLine subLine in VisibleSubLines)
         {
-            if (_caretChanged || subLine.CaretSet == false)
+            if (subLine.CaretDirty)
             {
                 subLine.SetCarets(Carets);
             }

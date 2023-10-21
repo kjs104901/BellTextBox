@@ -84,10 +84,7 @@ public partial class TextBox
         var pageStart = ViewToPage(_viewPos);
         var pageEnd = ViewToPage(_viewPos + _viewSize);
 
-        var textStart = PageToText(pageStart, -3);
-        var textEnd = PageToText(pageEnd, 3);
-
-        for (int i = textStart.Row; i <= textEnd.Row; i++)
+        for (int i = pageStart.Row; i <= pageEnd.Row; i++)
         {
             if (SubLines.Count > i)
                 subLines.Add(SubLines[i]);

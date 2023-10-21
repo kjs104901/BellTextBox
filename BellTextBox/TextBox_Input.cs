@@ -12,11 +12,10 @@ public partial class TextBox
 
     public Vector2 PageSize;
 
-    private TextCoordinates _textStart;
-    private TextCoordinates _textEnd;
+    private PageCoordinates _pageStart;
+    private PageCoordinates _pageEnd;
 
-    private Vector2 _mouseDragStartPage;
-    private TextCoordinates _mouseDragStartText;
+    private PageCoordinates _mouseDragStartPage;
 
     private bool _shiftPressed;
     private bool _altPressed;
@@ -34,8 +33,6 @@ public partial class TextBox
 
     private void ProcessKeyboardInput()
     {
-        _caretChanged = false;
-
         KeyboardInput keyboardInput = _backend.GetKeyboardInput();
 
         var hk = keyboardInput.HotKeys;
@@ -245,22 +242,23 @@ public partial class TextBox
     private void ProcessMouseInput()
     {
         MouseInput mouseInput = _backend.GetMouseInput();
+        
+        PageCoordinates pageCoordinates = ViewToPage(mouseInput.Position);
 
-        Vector2 pageCoordinates = ViewToPage(mouseInput.Position);
-        TextCoordinates textCoordinates = PageToText(pageCoordinates);
-
-        if (textCoordinates.IsFold)
+        if (pageCoordinates.IsFold)
         {
             if (MouseAction.Click == mouseInput.LeftAction)
             {
-                var folding = SubLines[textCoordinates.Row].Folding;
+                var folding = SubLines[pageCoordinates.Row].Folding;
                 if (null != folding)
                 {
                     folding.Folded = !folding.Folded;
-                    SingleCaret(textCoordinates);
 
                     SubLinesCache.SetDirty();
                     VisibleSubLinesCache.SetDirty();
+                        
+                    SingleCaret(pageCoordinates);
+                    
                     return;
                 }
             }
@@ -269,11 +267,11 @@ public partial class TextBox
         if (mouseInput.Position.X > _viewPos.X && mouseInput.Position.X < _viewPos.X + _viewSize.X &&
             mouseInput.Position.Y > _viewPos.Y && mouseInput.Position.Y < _viewPos.Y + _viewSize.Y)
         {
-            if (textCoordinates.IsFold)
+            if (pageCoordinates.IsFold)
             {
                 _backend.SetMouseCursor(MouseCursor.Hand);
             }
-            else if (textCoordinates.IsLineNumber)
+            else if (pageCoordinates.IsLineNumber)
             {
             }
             else
@@ -286,27 +284,26 @@ public partial class TextBox
             MouseAction.Click == mouseInput.MiddleAction)
         {
             _mouseDragStartPage = pageCoordinates;
-            _mouseDragStartText = textCoordinates;
         }
 
         if (MouseAction.Click == mouseInput.LeftAction)
         {
             if (_shiftPressed)
             {
-                SingleCaret().Selection = textCoordinates;
+                SingleCaret().Selection = pageCoordinates;
             }
             else if (_altPressed)
             {
-                AddCaret(textCoordinates);
+                AddCaret(pageCoordinates);
             }
             else
             {
-                SingleCaret(textCoordinates);
+                SingleCaret(pageCoordinates);
             }
         }
         else if (MouseAction.DoubleClick == mouseInput.LeftAction)
         {
-            SingleCaret(textCoordinates);
+            SingleCaret(pageCoordinates);
 
             if (_shiftPressed)
             {
@@ -329,7 +326,7 @@ public partial class TextBox
             }
             else
             {
-                SingleCaret(_mouseDragStartText).Position = textCoordinates;
+                SingleCaret(_mouseDragStartPage).Position = pageCoordinates;
             }
         }
         else if (MouseAction.Dragging == mouseInput.MiddleAction)
@@ -343,18 +340,15 @@ public partial class TextBox
 
     protected void ProcessViewInput()
     {
-        var pageStart = ViewToPage(_viewPos);
-        var pageEnd = ViewToPage(_viewPos + _viewSize);
+        PageCoordinates pageStart = ViewToPage(_viewPos, -3);
+        PageCoordinates pageEnd = ViewToPage(_viewPos + _viewSize, 3);
 
-        TextCoordinates textStart = PageToText(pageStart, -3);
-        TextCoordinates textEnd = PageToText(pageEnd, 3);
-
-        if (_textStart != textStart || _textEnd != textEnd)
+        if (_pageStart != pageStart || _pageEnd != pageEnd)
         {
             VisibleSubLinesCache.SetDirty();
 
-            _textStart = textStart;
-            _textEnd = textEnd;
+            _pageStart = pageStart;
+            _pageEnd = pageEnd;
         }
 
         if (WrapMode.Word == WrapMode || WrapMode.BreakWord == WrapMode)

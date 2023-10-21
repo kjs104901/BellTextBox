@@ -15,7 +15,7 @@ public class SubLine
     
     public readonly List<float> CharWidths = new();
 
-    public bool CaretSet { get; private set; }
+    public bool CaretDirty = true;
     
     public bool Selected { get; private set; }
     public float SelectionStart { get; private set; }
@@ -46,7 +46,7 @@ public class SubLine
     
     public void SetCarets(List<Caret> carets)
     {
-        CaretSet = true;
+        CaretDirty = false;
         
         Selected = false;
         SelectionStart = 0.0f;
@@ -61,8 +61,8 @@ public class SubLine
         {
             if (caret.HasSelection)
             {
-                TextCoordinates start;
-                TextCoordinates end;
+                PageCoordinates start;
+                PageCoordinates end;
                 if (caret.Selection < caret.Position)
                 {
                     start = caret.Selection;
