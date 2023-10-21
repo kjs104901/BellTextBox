@@ -105,7 +105,7 @@ public class SubLine
                         lineSelection.SelectionEnd = CharWidths.Sum();
                         if (lineSelection.SelectionEnd < 1.0f)
                         {
-                            lineSelection.SelectionEnd = ThreadLocal.TextBox.GetFontWidth(' ');
+                            lineSelection.SelectionEnd = ThreadLocal.TextBox.GetFontWhiteSpaceWidth();
                             fakeSelected = true;
                         }
 
@@ -126,7 +126,7 @@ public class SubLine
                         lineSelection.SelectionEnd = CharWidths.Sum();
                         if (lineSelection.SelectionEnd < 1.0f)
                         {
-                            lineSelection.SelectionEnd = ThreadLocal.TextBox.GetFontWidth(' ');
+                            lineSelection.SelectionEnd = ThreadLocal.TextBox.GetFontWhiteSpaceWidth();
                             fakeSelected = true;
                         }
 
@@ -147,7 +147,7 @@ public class SubLine
                 lineSelection.HasCaretAnchor = true;
                 lineSelection.CaretAnchorPosition = anchorPosition;
                 if (caret.AnchorPosition == end && fakeSelected && lineSelection.CaretAnchorPosition < 1.0f)
-                    lineSelection.CaretAnchorPosition = ThreadLocal.TextBox.GetFontWidth(' ');
+                    lineSelection.CaretAnchorPosition = ThreadLocal.TextBox.GetFontWhiteSpaceWidth();
             }
             
             if (IsSameSubLine(caret.Position, out float caretPosition))
@@ -155,7 +155,7 @@ public class SubLine
                 lineSelection.HasCaret = true;
                 lineSelection.CaretPosition = caretPosition;
                 if (caret.Position == end && fakeSelected && lineSelection.CaretPosition < 1.0f)
-                    lineSelection.CaretPosition = ThreadLocal.TextBox.GetFontWidth(' ');
+                    lineSelection.CaretPosition = ThreadLocal.TextBox.GetFontWhiteSpaceWidth();
             }
         }
 

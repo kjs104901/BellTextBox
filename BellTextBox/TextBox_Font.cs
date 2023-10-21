@@ -18,6 +18,11 @@ public partial class TextBox
     {
         return GetFontWidth('#');
     }
+    
+    public float GetFontWhiteSpaceWidth()
+    {
+        return GetFontWidth(' ');
+    }
 
     public float GetFontWidth(char c)
     {

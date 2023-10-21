@@ -60,7 +60,7 @@ public partial class TextBox
 
     public float GetTabRenderSize()
     {
-        return _backend.GetCharWidth(' ') * TabSize;
+        return GetFontWhiteSpaceWidth() * TabSize;
     }
 
     public string ReplaceTab(string text)

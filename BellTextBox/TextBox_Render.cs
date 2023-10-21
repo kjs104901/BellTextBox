@@ -18,9 +18,8 @@ public partial class TextBox
         FoldWidth = GetFontReferenceWidth() * 2;
 
         _backend.RenderPage(PageSize, new Vector4(0.2f, 0.1f, 0.1f, 1.0f)); // TODO background color
-
-
-        float lineNumberWidthMax = 0.0f;
+        
+        LineNumberWidth = StringPool<int>.Get(Lines.Count).Sum(GetFontWidth) + GetFontReferenceWidth();
 
         for (int i = _pageStart.RowIndex; i <= _pageEnd.RowIndex; i++)
         {
@@ -76,17 +75,10 @@ public partial class TextBox
 
             if (subLine.WrapIndex == 0)
             {
-                float lineNumberWidth = 0.0f;
                 string lineIndex = StringPool<int>.Get(subLine.LineIndex);
+                float lineIndexWidth = lineIndex.Sum(GetFontWidth);
 
-                foreach (char c in lineIndex)
-                {
-                    lineNumberWidth += GetFontWidth(c);
-                }
-
-                lineNumberWidthMax = Math.Max(lineNumberWidthMax, lineNumberWidth);
-
-                _backend.RenderText(new Vector2(LineNumberWidth - lineNumberWidth, lineTextStartY),
+                _backend.RenderText(new Vector2(LineNumberWidth - lineIndexWidth, lineTextStartY),
                     lineIndex,
                     Theme.DefaultFontColor.ToVector());
             }
@@ -130,7 +122,5 @@ public partial class TextBox
                     2.0f);
             }
         }
-
-        LineNumberWidth = lineNumberWidthMax + 30.0f; // TODO setting padding option
     }
 }
