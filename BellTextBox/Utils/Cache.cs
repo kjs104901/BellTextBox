@@ -16,15 +16,19 @@ public class Cache<T>
     public T Get()
     {
         if (_isDirty)
-        {
-            _value = _updateFunc(_value);
-            _isDirty = false;
-        }
+            Update();
+        
         return _value;
     }
 
     public void SetDirty() // TODO add time threshold
     {
         _isDirty = true;
+    }
+
+    private void Update()
+    {
+        _value = _updateFunc(_value);
+        _isDirty = false;
     }
 }

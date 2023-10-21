@@ -4,10 +4,13 @@ namespace Bell.Data;
 
 public class SubLine
 {
-    public int LineIndex;
-    public int SubIndex;
-
     public int Row;
+    
+    public int LineIndex;
+    public int WrapIndex;
+
+    public int StartCharIndex;
+
     public Folding? Folding;
 
     public float TabWidth;
@@ -15,81 +18,101 @@ public class SubLine
     public readonly List<TextBlockRender> TextBlockRenders = new();
     public readonly List<WhiteSpaceRender> WhiteSpaceRenders = new();
 
+    public readonly List<char> Chars = new();
     public readonly List<float> CharWidths = new();
 
     public LineSelection LineSelection => LineSelectionCache.Get();
-    public Cache<LineSelection> LineSelectionCache;
+    public readonly Cache<LineSelection> LineSelectionCache;
 
-    public SubLine(int lineIndex, int subIndex, float tabWidth)
+    public SubLine(int lineIndex, int wrapIndex, int startCharIndex, float tabWidth)
     {
         LineIndex = lineIndex;
-        SubIndex = subIndex;
+        WrapIndex = wrapIndex;
+        StartCharIndex = startCharIndex;
 
         TabWidth = tabWidth;
 
         LineSelectionCache = new Cache<LineSelection>(new(), UpdateLineSelection);
     }
 
-    private float GetRenderPosition(int charIndex)
+    private bool IsSameSubLine(TextCoordinates coordinates, out float position)
     {
-        var position = 0.0f;
-        for (var i = 0; i < charIndex; i++)
+        position = 0.0f;
+        
+        if (coordinates.LineIndex != LineIndex)
+            return false;
+        
+        var index = coordinates.CharIndex - StartCharIndex;
+        if (index < 0 || index >= CharWidths.Count)
+            return false;
+        
+        position = 0.0f;
+        for (var i = 0; i < index; i++)
         {
             position += CharWidths[i];
         }
-
-        return position;
+        return true;
     }
 
+    private int CompareSubLine(TextCoordinates coordinates)
+    {
+        if (coordinates.LineIndex < LineIndex)
+            return 1;
+
+        if (coordinates.LineIndex > LineIndex)
+            return -1;
+        
+        var index = coordinates.CharIndex - StartCharIndex;
+        if (index < 0)
+            return 1;
+
+        if (index >= CharWidths.Count)
+            return -1;
+
+        return 0;
+    }
+    
     private LineSelection UpdateLineSelection(LineSelection lineSelection)
     {
         lineSelection.Selected = false;
         lineSelection.SelectionStart = 0.0f;
         lineSelection.SelectionEnd = 0.0f;
 
-        lineSelection.CaretSelection = false;
-        lineSelection.CaretSelectionPosition = 0.0f;
-        lineSelection.CaretPosition = false;
-        lineSelection.CaretPositionPosition = 0.0f;
+        lineSelection.HasCaretAnchor = false;
+        lineSelection.CaretAnchorPosition = 0.0f;
+        lineSelection.HasCaret = false;
+        lineSelection.CaretPosition = 0.0f;
         
         foreach (Caret caret in ThreadLocal.TextBox.Carets)
         {
             if (caret.HasSelection)
             {
-                TextCoordinates start;
-                TextCoordinates end;
-                if (caret.Selection < caret.Position)
-                {
-                    start = caret.Selection;
-                    end = caret.Position;
-                }
-                else
-                {
-                    start = caret.Position;
-                    end = caret.Selection;
-                }
+                caret.GetSortedSelection(out var start, out var end);
 
-                if (start.LineIndex == LineIndex)
+                float startPosition;
+                float endPosition;
+
+                if (IsSameSubLine(start, out startPosition))
                 {
-                    if (end.LineIndex > LineIndex)
+                    if (CompareSubLine(end) < 0)
                     {
-                        lineSelection.SelectionStart = GetRenderPosition(start.Column);
+                        lineSelection.SelectionStart = startPosition;
                         lineSelection.SelectionEnd = CharWidths.Sum();
                         if (lineSelection.SelectionEnd < 1.0f)
                             lineSelection.SelectionEnd = 5.0f; //TODO get width of ' '
 
                         lineSelection.Selected = true;
                     }
-                    else if (end.LineIndex == LineIndex)
+                    else if (IsSameSubLine(end, out endPosition))
                     {
-                        lineSelection.SelectionStart = GetRenderPosition(start.Column);
-                        lineSelection.SelectionEnd = GetRenderPosition(end.Column);
+                        lineSelection.SelectionStart = startPosition;
+                        lineSelection.SelectionEnd = endPosition;
                         lineSelection.Selected = true;
                     }
                 }
-                else if (start.LineIndex < LineIndex)
+                else if (CompareSubLine(start) > 0)
                 {
-                    if (end.LineIndex > LineIndex)
+                    if (CompareSubLine(end) < 0)
                     {
                         lineSelection.SelectionStart = 0.0f;
                         lineSelection.SelectionEnd = CharWidths.Sum();
@@ -98,25 +121,26 @@ public class SubLine
 
                         lineSelection.Selected = true;
                     }
-                    else if (end.LineIndex == LineIndex)
+                    else if (IsSameSubLine(end, out endPosition))
                     {
                         lineSelection.SelectionStart = 0.0f;
-                        lineSelection.SelectionEnd = GetRenderPosition(end.Column);
+                        lineSelection.SelectionEnd = endPosition;
                         lineSelection.Selected = true;
                     }
                 }
             }
-
-            if (caret.Selection.LineIndex == LineIndex)
+            
+            
+            if (IsSameSubLine(caret.AnchorPosition, out float anchorPosition))
             {
-                lineSelection.CaretSelection = true;
-                lineSelection.CaretSelectionPosition = GetRenderPosition(caret.Selection.Column);
+                lineSelection.HasCaretAnchor = true;
+                lineSelection.CaretAnchorPosition = anchorPosition;
             }
-
-            if (caret.Position.LineIndex == LineIndex)
+            
+            if (IsSameSubLine(caret.Position, out float caretPosition))
             {
-                lineSelection.CaretPosition = true;
-                lineSelection.CaretPositionPosition = GetRenderPosition(caret.Position.Column);
+                lineSelection.HasCaret = true;
+                lineSelection.CaretPosition = caretPosition;
             }
         }
 
@@ -130,10 +154,10 @@ public struct LineSelection
     public float SelectionStart;
     public float SelectionEnd;
 
-    public bool CaretSelection;
-    public float CaretSelectionPosition;
-    public bool CaretPosition;
-    public float CaretPositionPosition;
+    public bool HasCaretAnchor;
+    public float CaretAnchorPosition;
+    public bool HasCaret;
+    public float CaretPosition;
 }
 
 public struct TextBlockRender

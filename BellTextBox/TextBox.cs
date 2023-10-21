@@ -17,7 +17,7 @@ public partial class TextBox
 
         Theme = new DarkTheme();
         
-        SubLinesCache = new Cache<List<SubLine>>(new List<SubLine>(), UpdateSubLines);
+        RowsCache = new Cache<List<SubLine>>(new List<SubLine>(), UpdateRows);
         FoldingListCache = new Cache<List<Folding>>(new List<Folding>(), UpdateFoldingList);
     }
 }

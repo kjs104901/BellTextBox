@@ -37,8 +37,6 @@ internal abstract class Action
 
     public void UndoCommands()
     {
-        Debug.Assert(_endCarets.Count == _caretsCommands.Count);
-        
         ThreadLocal.TextBox.Carets.Clear();
         ThreadLocal.TextBox.Carets.AddRange(_endCarets);
         
@@ -83,13 +81,25 @@ internal abstract class Action
 
 internal class DeleteSelection : Action
 {
-    public DeleteSelection()
-    {
-    }
-
     protected override List<Command> CreateCommands(Caret caret)
     {
-        throw new NotImplementedException();
+        var commands = new List<Command>();
+        if (caret.HasSelection)
+            return commands;
+        
+        caret.GetSortedSelection(out TextCoordinates start, out TextCoordinates end);
+        //if (ThreadLocal.TextBox.Rows.Count <= start.Row || ThreadLocal.TextBox.Rows.Count <= end.Row)
+        //    return commands;
+        //
+        //SubLine startLine = ThreadLocal.TextBox.Rows[start.Row];
+        //SubLine endLine = ThreadLocal.TextBox.Rows[end.Row];
+
+        //startLine.LineIndex;
+        
+        
+        //commands.Add(new DeleteCharCommand(EditDirection.Forward, ));
+        
+        return commands;
     }
 }
 

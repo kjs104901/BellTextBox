@@ -32,7 +32,7 @@ public partial class TextBox
     
     public void SetCaretDirty()
     {
-        foreach (SubLine subLine in SubLines)
+        foreach (SubLine subLine in Rows)
         {
             subLine.LineSelectionCache.SetDirty();
         }
@@ -46,11 +46,11 @@ public partial class TextBox
         if (Carets.Count > 0)
         {
             Carets[0].Position = textCoordinates;
-            Carets[0].Selection = textCoordinates;
+            Carets[0].AnchorPosition = textCoordinates;
         }
         else
         {
-            Carets.Add(new Caret() { Position = textCoordinates, Selection = textCoordinates });
+            Carets.Add(new Caret() { Position = textCoordinates, AnchorPosition = textCoordinates });
         }
 
         SetCaretDirty();
@@ -59,7 +59,7 @@ public partial class TextBox
 
     public void AddCaret(TextCoordinates textCoordinates)
     {
-        Carets.Add(new Caret() { Position = textCoordinates, Selection = textCoordinates });
+        Carets.Add(new Caret() { Position = textCoordinates, AnchorPosition = textCoordinates });
         SetCaretDirty();
     }
 

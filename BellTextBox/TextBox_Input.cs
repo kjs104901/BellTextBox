@@ -10,10 +10,13 @@ public partial class TextBox
     private Vector2 _viewPos;
     private Vector2 _viewSize;
 
-    public Vector2 PageSize;
+    private PageCoordinates _pageStart;
+    private PageCoordinates _pageEnd;
 
     private TextCoordinates _textStart;
     private TextCoordinates _textEnd;
+
+    public Vector2 PageSize;
 
     private TextCoordinates _mouseDragStartText;
 
@@ -22,12 +25,11 @@ public partial class TextBox
 
     private string _imeComposition = "";
 
-    private void ProcessInput()
+    private void ProcessInput(Vector2 viewPos, Vector2 viewSize)
     {
         ProcessKeyboardInput();
         ProcessMouseInput();
-        ProcessViewInput();
-
+        ProcessViewInput(viewPos, viewSize);
         _backend.OnInputEnd();
     }
 
@@ -82,7 +84,7 @@ public partial class TextBox
             else
             {
                 DoAction(new DeleteSelection());
-                DoAction(new DeleteCharAction( EditDirection.Backward));
+                DoAction(new DeleteCharAction(EditDirection.Backward));
             }
         }
         else if (EnumFlag.Has(hk, HotKeys.Enter)) // Enter
@@ -242,21 +244,23 @@ public partial class TextBox
     private void ProcessMouseInput()
     {
         MouseInput mouseInput = _backend.GetMouseInput();
-        
-        TextCoordinates textCoordinates = ViewToText(mouseInput.Position);
+
+        ConvertCoordinates(mouseInput.Position,
+            out PageCoordinates pageCoordinates,
+            out TextCoordinates textCoordinates);
 
         if (textCoordinates.IsFold)
         {
             if (MouseAction.Click == mouseInput.LeftAction)
             {
-                var folding = SubLines[textCoordinates.Row].Folding;
+                var folding = Rows[pageCoordinates.RowIndex].Folding;
                 if (null != folding)
                 {
                     folding.Folded = !folding.Folded;
 
-                    SubLinesCache.SetDirty();
+                    RowsCache.SetDirty();
                     SetCaretDirty();
-                    
+
                     return;
                 }
             }
@@ -288,7 +292,7 @@ public partial class TextBox
         {
             if (_shiftPressed)
             {
-                SingleCaret().Selection = textCoordinates;
+                SingleCaret().AnchorPosition = textCoordinates;
             }
             else if (_altPressed)
             {
@@ -336,15 +340,25 @@ public partial class TextBox
         _altPressed = false;
     }
 
-    protected void ProcessViewInput()
+    protected void ProcessViewInput(Vector2 viewPos, Vector2 viewSize)
     {
-        TextCoordinates textStart = ViewToText(_viewPos, -3);
-        TextCoordinates textEnd = ViewToText(_viewPos + _viewSize, 3);
-
-        if (_textStart != textStart || _textEnd != textEnd)
+        if (MathHelper.IsNotSame(viewPos.X, _viewPos.X) ||
+            MathHelper.IsNotSame(viewPos.Y, _viewPos.Y) ||
+            MathHelper.IsNotSame(viewSize.X, _viewSize.X) ||
+            MathHelper.IsNotSame(viewSize.Y, _viewSize.Y))
         {
-            _textStart = textStart;
-            _textEnd = textEnd;
+            _viewPos = viewPos;
+            _viewSize = viewSize;
+
+            ConvertCoordinates(_viewPos, out _pageStart, out _textStart, -3);
+            ConvertCoordinates(_viewPos + _viewSize, out _pageEnd, out _textEnd, 3);
+
+            foreach (Line line in Lines)
+            {
+                line.CutoffsCache.SetDirty();
+                line.SubLinesCache.SetDirty();
+            }
+            RowsCache.SetDirty();
         }
 
         if (WrapMode.Word == WrapMode || WrapMode.BreakWord == WrapMode)
@@ -352,6 +366,6 @@ public partial class TextBox
             PageSize.X = _viewSize.X;
         }
 
-        PageSize.Y = SubLines.Count * GetFontHeight();
+        PageSize.Y = Rows.Count * GetFontHeight();
     }
 }

@@ -12,10 +12,7 @@ public partial class TextBox
     public void Render(Vector2 viewPos, Vector2 viewSize)
     {
         ThreadLocal.TextBox = this;
-        
-        _viewPos = viewPos;
-        _viewSize = viewSize;
-        ProcessInput();
+        ProcessInput(viewPos, viewSize);
         
         UpdateReferenceSize();
         FoldWidth = GetFontReferenceWidth() * 2;
@@ -25,15 +22,12 @@ public partial class TextBox
         
         float lineNumberWidthMax = 0.0f;
         
-        var pageStart = ViewToText(_viewPos);
-        var pageEnd = ViewToText(_viewPos + _viewSize);
-        
-        for (int i = pageStart.Row; i <= pageEnd.Row; i++)
+        for (int i = _pageStart.RowIndex; i <= _pageEnd.RowIndex; i++)
         {
-            if (SubLines.Count <= i)
+            if (Rows.Count <= i)
                 break;
             
-            SubLine subLine = SubLines[i];
+            SubLine subLine = Rows[i];
 
             var lineY = subLine.Row * GetFontHeight();
             var lineTextStartY = lineY + GetFontHeightOffset();
@@ -78,7 +72,7 @@ public partial class TextBox
                 }
             }
 
-            if (subLine.SubIndex == 0)
+            if (subLine.WrapIndex == 0)
             {
                 float lineNumberWidth = 0.0f;
                 string lineIndex = StringPool<int>.Get(subLine.LineIndex);
@@ -103,27 +97,27 @@ public partial class TextBox
             }
 
 
-            if (subLine.LineSelection.CaretPosition)
+            if (subLine.LineSelection.HasCaret)
             {
                 _backend.RenderLine(
                     new Vector2(
-                        lineStartX + subLine.LineSelection.CaretPositionPosition - 1.0f,
+                        lineStartX + subLine.LineSelection.CaretPosition - 1.0f,
                         lineTextStartY),
                     new Vector2(
-                        lineStartX + subLine.LineSelection.CaretPositionPosition - 1.0f,
+                        lineStartX + subLine.LineSelection.CaretPosition - 1.0f,
                         lineTextEndY),
                     Theme.DefaultFontColor.ToVector(),
                     2.0f);
             }
 
-            if (subLine.LineSelection.CaretSelection)
+            if (subLine.LineSelection.HasCaretAnchor)
             {
                 _backend.RenderLine(
                     new Vector2(
-                        lineStartX + subLine.LineSelection.CaretSelectionPosition - 1.0f,
+                        lineStartX + subLine.LineSelection.CaretAnchorPosition - 1.0f,
                         lineTextStartY),
                     new Vector2(
-                        lineStartX + subLine.LineSelection.CaretSelectionPosition - 1.0f,
+                        lineStartX + subLine.LineSelection.CaretAnchorPosition - 1.0f,
                         lineTextEndY),
                     Theme.LineCommentFontColor.ToVector(),
                     2.0f);

@@ -147,8 +147,8 @@ public class Line
 
         float tabWidth = ThreadLocal.TextBox.CountTabStart(String) * ThreadLocal.TextBox.GetTabRenderSize(); // TODO Cache
 
-        int subIndex = 0;
-        SubLine subLine = new SubLine(Index, subIndex, 0.0f);
+        int wrapIndex = 0;
+        SubLine subLine = new SubLine(Index, wrapIndex, 0, 0.0f);
 
         bool isFirstCharInLine = true;
         ColorStyle renderGroupColor = ThreadLocal.TextBox.Theme.DefaultFontColor;
@@ -162,6 +162,7 @@ public class Line
             char c = Chars[i];
             float cWidth = ThreadLocal.TextBox.GetFontWidth(c);
 
+            subLine.Chars.Add(c);
             subLine.CharWidths.Add(cWidth);
             
             if (ThreadLocal.TextBox.ShowingWhitespace && char.IsWhiteSpace(c))
@@ -204,8 +205,8 @@ public class Line
                 });
                 subLines.Add(subLine);
 
-                subIndex++;
-                subLine = new SubLine(Index, subIndex, tabWidth);
+                wrapIndex++;
+                subLine = new SubLine(Index, wrapIndex, i, tabWidth);
 
                 isFirstCharInLine = true;
                 renderGroupColor = ThreadLocal.TextBox.Theme.DefaultFontColor;
@@ -217,7 +218,7 @@ public class Line
         }
 
         // Add remains
-        if (_buffers.Count > 0 || subIndex == 0)
+        if (_buffers.Count > 0 || wrapIndex == 0)
             subLine.TextBlockRenders.Add(new()
                 { Text = String.Concat(_buffers), ColorStyle = renderGroupColor, Width = bufferWidth, PosX = posX });
 

@@ -7,8 +7,8 @@ public partial class TextBox
 {
     public List<Line> Lines = new();
     
-    public List<SubLine> SubLines => SubLinesCache.Get();
-    public readonly Cache<List<SubLine>> SubLinesCache;
+    public List<SubLine> Rows => RowsCache.Get();
+    public readonly Cache<List<SubLine>> RowsCache;
     
     public void SetText(string text)
     {
@@ -21,15 +21,14 @@ public partial class TextBox
             Lines.Add(line);
         }
         
-        SubLinesCache.SetDirty();
+        RowsCache.SetDirty();
     }
     
-    private List<SubLine> UpdateSubLines(List<SubLine> subLines)
+    private List<SubLine> UpdateRows(List<SubLine> rows)
     {
-        subLines.Clear();
+        rows.Clear();
 
         int row = 0;
-
         int foldingCount = 0;
         foreach (Line line in Lines)
         {
@@ -67,11 +66,11 @@ public partial class TextBox
                 {
                     subLine.Row = row++;
                     subLine.Folding = lineFolding;
-                    subLines.Add(subLine);
+                    rows.Add(subLine);
                 }
             }
         }
-        return subLines;
+        return rows;
     }
 
     public override string ToString()
