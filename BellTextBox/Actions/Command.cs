@@ -1,4 +1,6 @@
-﻿namespace Bell.Data;
+﻿using Bell.Data;
+
+namespace Bell.Actions;
 
 internal abstract class Command
 {

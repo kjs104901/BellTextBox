@@ -82,14 +82,17 @@ public partial class TextBox
                     lineIndex,
                     Theme.DefaultFontColor.ToVector());
             }
-
-            if (subLine.Folding != null)
+            
+            if (Lines.Count > subLine.LineIndex)
             {
-                _backend.RenderText(new Vector2(LineNumberWidth, lineTextStartY),
-                    subLine.Folding.Folded ? " >" : " V",
-                    Theme.DefaultFontColor.ToVector());
+                Line line = Lines[subLine.LineIndex];
+                if (line.Folding != null)
+                {
+                    _backend.RenderText(new Vector2(LineNumberWidth, lineTextStartY),
+                        line.Folding.Folded ? " >" : " V",
+                        Theme.DefaultFontColor.ToVector());
+                }
             }
-
 
             if (subLine.LineSelection.HasCaret)
             {

@@ -1,6 +1,7 @@
 ﻿using System.Text;
+using Bell.Actions;
 using Bell.Data;
-using Action = Bell.Data.Action;
+using Action = Bell.Actions.Action;
 
 namespace Bell;
 
@@ -60,8 +61,8 @@ public partial class TextBox
             return;
 
         var firstAction = _actionRedoHistory.First.Value;
-        firstAction.DoCommands();
-        _actionRedoHistory.RemoveLast();
+        firstAction.RedoCommands();
+        _actionRedoHistory.RemoveFirst();
         _actionHistory.AddLast(firstAction);
 
         if (firstAction.IsAllSame<InputCharCommand>())
@@ -80,7 +81,7 @@ public partial class TextBox
                _actionRedoHistory.First.Value.IsAllSame<T>())
         {
             var firstAction = _actionRedoHistory.First.Value;
-            firstAction.DoCommands();
+            firstAction.RedoCommands();
             _actionRedoHistory.RemoveFirst();
             _actionHistory.AddLast(firstAction);
         }

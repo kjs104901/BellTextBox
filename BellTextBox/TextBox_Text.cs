@@ -52,8 +52,7 @@ public partial class TextBox
         {
             bool visible = true;
 
-            Folding? lineFolding = null;
-
+            line.Folding = null;
             foreach (Folding folding in FoldingList)
             {
                 if (folding.End == line.Index)
@@ -72,7 +71,7 @@ public partial class TextBox
 
                 if (folding.Start == line.Index)
                 {
-                    lineFolding = folding;
+                    line.Folding = folding;
                     foldingCount++;
                 }
             }
@@ -82,7 +81,6 @@ public partial class TextBox
                 foreach (SubLine subLine in line.SubLines)
                 {
                     subLine.Row = row++;
-                    subLine.Folding = lineFolding;
                     rows.Add(subLine);
                 }
             }

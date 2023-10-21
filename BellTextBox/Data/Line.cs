@@ -18,9 +18,9 @@ public class Line
     public List<ColorStyle> Colors => ColorsCache.Get();
     public readonly Cache<List<ColorStyle>> ColorsCache;
 
-    public bool Foldable => FoldableCache.Get();
-    public readonly Cache<bool> FoldableCache;
 
+    public Folding? Folding;
+    
     public HashSet<int> Cutoffs => CutoffsCache.Get();
     public readonly Cache<HashSet<int>> CutoffsCache;
 
@@ -33,7 +33,6 @@ public class Line
 
         ColorsCache = new(new(), UpdateColors);
         CutoffsCache = new(new(), UpdateCutoff);
-        FoldableCache = new(false, UpdateFoldable);
         StringCache = new(string.Empty, UpdateString);
         SubLinesCache = new(new List<SubLine>(), UpdateSubLines);
     }
@@ -45,7 +44,6 @@ public class Line
 
         ColorsCache.SetDirty();
         CutoffsCache.SetDirty();
-        FoldableCache.SetDirty();
         StringCache.SetDirty();
         SubLinesCache.SetDirty();
     }
@@ -122,18 +120,6 @@ public class Line
         }
 
         return cutoffs;
-    }
-
-    private bool UpdateFoldable(bool _)
-    {
-        var trimmedString = String.TrimStart();
-        foreach (ValueTuple<string, string> folding in ThreadLocal.TextBox.Language.Foldings)
-        {
-            if (trimmedString.StartsWith(folding.Item1))
-                return true;
-        }
-
-        return false;
     }
 
     private string UpdateString(string _)

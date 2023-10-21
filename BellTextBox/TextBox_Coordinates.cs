@@ -32,11 +32,19 @@ public partial class TextBox
         if (Rows.Count > row)
         {
             SubLine subLine = Rows[row];
+            textCoordinates.LineIndex = subLine.LineIndex;
 
-            if (x < -FoldWidth * 0.2 && subLine.Folding != null)
+            if (x < - GetFontWhiteSpaceWidth())
             {
-                textCoordinates.IsFold = true;
-                return;
+                if (Lines.Count > subLine.LineIndex)
+                {
+                    Line line = Lines[subLine.LineIndex];
+                    if (line.Folding != null)
+                    {
+                        textCoordinates.IsFold = true;
+                        return;
+                    }
+                }
             }
 
             int column = 0;
@@ -64,7 +72,6 @@ public partial class TextBox
             }
 
             pageCoordinates.ColumnIndex = column;
-            textCoordinates.LineIndex = subLine.LineIndex;
             
             textCoordinates.CharIndex = 0;
             if (Lines.Count > subLine.LineIndex)

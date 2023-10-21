@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using Bell.Actions;
 using Bell.Data;
 using Bell.Inputs;
 using Bell.Utils;
@@ -52,7 +53,9 @@ public partial class TextBox
             }
         }
 
-        if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.Z)) // UndoAction
+        if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.Shift | HotKeys.Z)) // RedoAction
+            RedoAction();
+        else if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.Z)) // UndoAction
             UndoAction();
         else if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.Y)) // RedoAction
             RedoAction();
@@ -278,7 +281,7 @@ public partial class TextBox
         {
             if (MouseAction.Click == mouseInput.LeftAction)
             {
-                var folding = Rows[pageCoordinates.RowIndex].Folding;
+                var folding = Lines[textCoordinates.LineIndex].Folding;
                 if (null != folding)
                 {
                     folding.Folded = !folding.Folded;

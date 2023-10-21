@@ -1,8 +1,8 @@
-﻿using System.Diagnostics;
-using System.Text;
+﻿using System.Text;
+using Bell.Data;
 using Bell.Utils;
 
-namespace Bell.Data;
+namespace Bell.Actions;
 
 internal abstract class Action
 {
@@ -35,6 +35,27 @@ internal abstract class Action
             _endCarets.Add(caret.Clone());
         }
     }
+    
+    public void RedoCommands()
+    {
+        ThreadLocal.TextBox.Carets.Clear();
+        ThreadLocal.TextBox.Carets.AddRange(_startCarets);
+
+        for (int i = 0; i < _caretsCommands.Count; i++)
+        {
+            List<Command> commands = _caretsCommands[i];
+            Caret caret = ThreadLocal.TextBox.Carets[i];
+
+            foreach (Command command in commands)
+            {
+                command.Do(caret);
+            }
+        }
+
+        ThreadLocal.TextBox.Carets.Clear();
+        ThreadLocal.TextBox.Carets.AddRange(_endCarets);
+        ThreadLocal.TextBox.SetCaretDirty();
+    }
 
     public void UndoCommands()
     {
@@ -55,6 +76,7 @@ internal abstract class Action
 
         ThreadLocal.TextBox.Carets.Clear();
         ThreadLocal.TextBox.Carets.AddRange(_startCarets);
+        ThreadLocal.TextBox.SetCaretDirty();
     }
 
     public bool IsAllSame<T>()

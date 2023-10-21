@@ -11,8 +11,6 @@ public class SubLine
 
     public int StartCharIndex;
 
-    public Folding? Folding;
-
     public float WrapIndentWidth;
 
     public readonly List<TextBlockRender> TextBlockRenders = new();
