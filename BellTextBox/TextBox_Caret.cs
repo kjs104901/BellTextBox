@@ -78,6 +78,16 @@ public partial class TextBox
         SetCaretDirty();
     }
 
+    public bool HasCaretsSelection()
+    {
+        foreach (Caret caret in Carets)
+        {
+            if (caret.HasSelection)
+                return true;
+        }
+        return false;
+    }
+
     public void RemoveCaretsSelection()
     {
         foreach (Caret caret in Carets)

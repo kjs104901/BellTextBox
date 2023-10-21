@@ -43,6 +43,15 @@ public partial class TextBox
         _altPressed |= EnumFlag.Has(hk, HotKeys.Alt);
         _imeComposition = keyboardInput.ImeComposition;
 
+        if (false == string.IsNullOrEmpty(_imeComposition))
+        {
+            if (HasCaretsSelection())
+            {
+                DoAction(new DeleteSelection());
+                RemoveCaretsSelection();
+            }
+        }
+
         if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.Z)) // UndoAction
             UndoAction();
         else if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.Y)) // RedoAction
@@ -74,6 +83,7 @@ public partial class TextBox
             else
             {
                 DoAction(new DeleteSelection());
+                RemoveCaretsSelection();
                 DoAction(new DeleteCharAction(EditDirection.Forward));
             }
         }
@@ -86,12 +96,14 @@ public partial class TextBox
             else
             {
                 DoAction(new DeleteSelection());
+                RemoveCaretsSelection();
                 DoAction(new DeleteCharAction(EditDirection.Backward));
             }
         }
         else if (EnumFlag.Has(hk, HotKeys.Enter)) // Enter
         {
             DoAction(new DeleteSelection());
+            RemoveCaretsSelection();
             DoAction(new EnterAction());
         }
         else if (EnumFlag.Has(hk, HotKeys.Tab)) // Tab
@@ -236,6 +248,7 @@ public partial class TextBox
             if (false == selectionDeleted)
             {
                 DoAction(new DeleteSelection());
+                RemoveCaretsSelection();
                 selectionDeleted = true;
             }
 

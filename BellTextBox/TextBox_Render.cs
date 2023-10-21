@@ -13,20 +13,20 @@ public partial class TextBox
     {
         ThreadLocal.TextBox = this;
         ProcessInput(viewPos, viewSize);
-        
+
         UpdateReferenceSize();
         FoldWidth = GetFontReferenceWidth() * 2;
 
         _backend.RenderPage(PageSize, new Vector4(0.2f, 0.1f, 0.1f, 1.0f)); // TODO background color
-        
-        
+
+
         float lineNumberWidthMax = 0.0f;
-        
+
         for (int i = _pageStart.RowIndex; i <= _pageEnd.RowIndex; i++)
         {
             if (Rows.Count <= i)
                 break;
-            
+
             SubLine subLine = Rows[i];
 
             var lineY = subLine.Row * GetFontHeight();
@@ -65,7 +65,9 @@ public partial class TextBox
                     _backend.RenderLine(
                         new Vector2(lineStartX + whiteSpaceRender.PosX,
                             lineTextStartY),
-                        new Vector2(lineStartX + whiteSpaceRender.PosX + _backend.GetCharWidth(' ') * 4, // TODO setting tab size
+                        new Vector2(
+                            lineStartX + whiteSpaceRender.PosX +
+                            _backend.GetCharWidth(' ') * 4, // TODO setting tab size
                             lineTextStartY),
                         Theme.LineWhiteSpaceFontColor.ToVector(),
                         1.0f);
@@ -108,6 +110,11 @@ public partial class TextBox
                         lineTextEndY),
                     Theme.DefaultFontColor.ToVector(),
                     2.0f);
+
+                _backend.RenderText(new Vector2(
+                        lineStartX + subLine.LineSelection.CaretPosition,
+                        lineTextStartY),
+                    _imeComposition, Theme.DefaultFontColor.ToVector());
             }
 
             if (subLine.LineSelection.HasCaretAnchor)
@@ -125,26 +132,5 @@ public partial class TextBox
         }
 
         LineNumberWidth = lineNumberWidthMax + 30.0f; // TODO setting padding option
-
-        foreach (Caret caret in Carets)
-        {
-            Vector2 caretInPage = TextToPage(caret.Position);
-            Vector2 caretInView = PageToView(caretInPage);
-
-            RenderLine(new Vector2(caretInView.X - 1, caretInView.Y + GetFontHeightOffset()),
-                new Vector2(caretInView.X - 1, caretInView.Y + GetFontHeight() - GetFontHeightOffset()),
-                Theme.DefaultFontColor.ToVector(),
-                2.0f);
-
-            Vector2 selectionInPage = TextToPage(caret.Selection);
-            Vector2 selectionInView = PageToView(selectionInPage);
-
-            RenderLine(new Vector2(selectionInView.X - 1, selectionInView.Y + GetFontHeightOffset()),
-                new Vector2(selectionInView.X - 1, selectionInView.Y + GetFontHeight() - GetFontHeightOffset()),
-                Theme.LineCommentFontColor.ToVector(),
-                2.0f);
-
-            RenderText(caretInView, _imeComposition, Theme.DefaultFontColor.ToVector());
-        }
     }
 }

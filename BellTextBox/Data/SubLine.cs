@@ -43,11 +43,14 @@ public class SubLine
             return false;
         
         var index = coordinates.CharIndex - StartCharIndex;
-        if (index < 0 || index >= CharWidths.Count)
+        if (index < 0 || index > CharWidths.Count)
             return false;
+
+        if (index == CharWidths.Count)
+            index--;
         
         position = 0.0f;
-        for (var i = 0; i < index; i++)
+        for (var i = 0; i <= index; i++)
         {
             position += CharWidths[i];
         }
@@ -82,13 +85,15 @@ public class SubLine
         lineSelection.CaretAnchorPosition = 0.0f;
         lineSelection.HasCaret = false;
         lineSelection.CaretPosition = 0.0f;
+
+        bool fakeSelected = false;
         
         foreach (Caret caret in ThreadLocal.TextBox.Carets)
         {
+            caret.GetSortedSelection(out var start, out var end);
+
             if (caret.HasSelection)
             {
-                caret.GetSortedSelection(out var start, out var end);
-
                 float startPosition;
                 float endPosition;
 
@@ -99,7 +104,10 @@ public class SubLine
                         lineSelection.SelectionStart = startPosition;
                         lineSelection.SelectionEnd = CharWidths.Sum();
                         if (lineSelection.SelectionEnd < 1.0f)
-                            lineSelection.SelectionEnd = 5.0f; //TODO get width of ' '
+                        {
+                            lineSelection.SelectionEnd = ThreadLocal.TextBox.GetFontWidth(' ');
+                            fakeSelected = true;
+                        }
 
                         lineSelection.Selected = true;
                     }
@@ -117,7 +125,10 @@ public class SubLine
                         lineSelection.SelectionStart = 0.0f;
                         lineSelection.SelectionEnd = CharWidths.Sum();
                         if (lineSelection.SelectionEnd < 1.0f)
-                            lineSelection.SelectionEnd = 5.0f; //TODO get width of ' '
+                        {
+                            lineSelection.SelectionEnd = ThreadLocal.TextBox.GetFontWidth(' ');
+                            fakeSelected = true;
+                        }
 
                         lineSelection.Selected = true;
                     }
@@ -135,12 +146,16 @@ public class SubLine
             {
                 lineSelection.HasCaretAnchor = true;
                 lineSelection.CaretAnchorPosition = anchorPosition;
+                if (caret.AnchorPosition == end && fakeSelected && lineSelection.CaretAnchorPosition < 1.0f)
+                    lineSelection.CaretAnchorPosition = ThreadLocal.TextBox.GetFontWidth(' ');
             }
             
             if (IsSameSubLine(caret.Position, out float caretPosition))
             {
                 lineSelection.HasCaret = true;
                 lineSelection.CaretPosition = caretPosition;
+                if (caret.Position == end && fakeSelected && lineSelection.CaretPosition < 1.0f)
+                    lineSelection.CaretPosition = ThreadLocal.TextBox.GetFontWidth(' ');
             }
         }
 
