@@ -115,12 +115,6 @@ public class FontStyle : IComparable<FontStyle>
             ImGui.Begin("Demo", ImGuiWindowFlags.NoResize);
             ImGui.PushFont(imFontPtr);
 
-            if (ImGui.Button("Reset"))
-            {
-            }
-            
-            ImGui.InputTextMultiline("Test", ref textInput, 1024, new Vector2(-1, 300));
-
             imGuiBellTextBox.Render(new Vector2(-1, -1));
 
             ImGui.PopFont();
