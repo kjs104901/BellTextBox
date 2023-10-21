@@ -281,15 +281,17 @@ public partial class TextBox
         {
             if (MouseAction.Click == mouseInput.LeftAction)
             {
-                var folding = Lines[textCoordinates.LineIndex].Folding;
-                if (null != folding)
+                if (GetLine(textCoordinates.LineIndex, out Line? line))
                 {
-                    folding.Folded = !folding.Folded;
+                    if (null != line?.Folding)
+                    {
+                        line.Folding.Folded = !line.Folding.Folded;
 
-                    RowsCache.SetDirty();
-                    SetCaretDirty();
+                        RowsCache.SetDirty();
+                        SetCaretDirty();
 
-                    return;
+                        return;
+                    }
                 }
             }
         }
@@ -386,6 +388,7 @@ public partial class TextBox
                 line.CutoffsCache.SetDirty();
                 line.SubLinesCache.SetDirty();
             }
+
             RowsCache.SetDirty();
         }
 

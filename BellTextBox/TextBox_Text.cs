@@ -88,9 +88,16 @@ public partial class TextBox
 
         return rows;
     }
-
-    public override string ToString()
+    
+    public bool GetLine(int lineIndex, out Line? line)
     {
-        return string.Empty;
+        if (0 <= lineIndex && lineIndex < Lines.Count)
+        {
+            line = Lines[lineIndex];
+            return true;
+        }
+
+        line = null;
+        return false;
     }
 }

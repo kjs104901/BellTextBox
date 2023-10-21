@@ -29,6 +29,7 @@ public partial class TextBox
             return;
         }
         
+        Line? line = null;
         if (Rows.Count > row)
         {
             SubLine subLine = Rows[row];
@@ -36,10 +37,9 @@ public partial class TextBox
 
             if (x < - GetFontWhiteSpaceWidth())
             {
-                if (Lines.Count > subLine.LineIndex)
+                if (GetLine(subLine.LineIndex, out line))
                 {
-                    Line line = Lines[subLine.LineIndex];
-                    if (line.Folding != null)
+                    if (line!.Folding != null)
                     {
                         textCoordinates.IsFold = true;
                         return;
@@ -74,10 +74,9 @@ public partial class TextBox
             pageCoordinates.ColumnIndex = column;
             
             textCoordinates.CharIndex = 0;
-            if (Lines.Count > subLine.LineIndex)
+            if (GetLine(subLine.LineIndex, out line))
             {
-                Line line = Lines[subLine.LineIndex];
-                foreach (SubLine lineSubLine in line.SubLines)
+                foreach (SubLine lineSubLine in line!.SubLines)
                 {
                     if (subLine.WrapIndex <= lineSubLine.WrapIndex)
                         break;
