@@ -1,13 +1,10 @@
 ﻿using System.Runtime.InteropServices;
-using Bell.Languages;
 using Bell.Utils;
 
 namespace Bell.Data;
 
 public class Line
 {
-    private readonly TextBox _textBox;
-    
     public readonly int Index = 0;
 
     public List<char> Chars = new();
@@ -28,9 +25,8 @@ public class Line
     public List<SubLine> SubLines => SubLinesCache.Get();
     public readonly Cache<List<SubLine>> SubLinesCache;
 
-    public Line(TextBox textBox, int index)
+    public Line(int index)
     {
-        _textBox = textBox;
         Index = index;
 
         ColorsCache = new(new(), UpdateColors);
@@ -55,7 +51,7 @@ public class Line
     private List<ColorStyle> UpdateColors(List<ColorStyle> colors)
     {
         colors.Clear();
-        if (_textBox.SyntaxHighlightEnabled == false)
+        if (ThreadLocal.TextBox.SyntaxHighlightEnabled == false)
             return colors;
 
         for (int i = 0; i < Chars.Count; i++)
@@ -63,15 +59,15 @@ public class Line
             ColorStyle colorStyle;
             if (char.IsLower(Chars[i]))
             {
-                colorStyle = _textBox.Theme.BlockCommentFontColor;
+                colorStyle = ThreadLocal.TextBox.Theme.BlockCommentFontColor;
             }
             else if (false == char.IsAscii(Chars[i]))
             {
-                colorStyle = _textBox.Theme.LineCommentFontColor;
+                colorStyle = ThreadLocal.TextBox.Theme.LineCommentFontColor;
             }
             else
             {
-                colorStyle = _textBox.Theme.DefaultFontColor;
+                colorStyle = ThreadLocal.TextBox.Theme.DefaultFontColor;
             }
             colors.Add(colorStyle);
         }
@@ -82,10 +78,10 @@ public class Line
     private HashSet<int> UpdateCutoff(HashSet<int> cutoffs)
     {
         cutoffs.Clear();
-        if (WrapMode.None == _textBox.WrapMode)
+        if (WrapMode.None == ThreadLocal.TextBox.WrapMode)
             return cutoffs;
 
-        var lineWidth = _textBox.PageSize.X - _textBox.LineNumberWidth - _textBox.FoldWidth;
+        var lineWidth = ThreadLocal.TextBox.PageSize.X - ThreadLocal.TextBox.LineNumberWidth - ThreadLocal.TextBox.FoldWidth;
         if (lineWidth < 1.0f)
             return cutoffs;
 
@@ -93,15 +89,15 @@ public class Line
 
         for (int i = 0; i < Chars.Count; i++)
         {
-            widthAccumulated += _textBox.GetFontWidth(Chars[i]);
-            if (widthAccumulated + _textBox.GetFontReferenceWidth() > lineWidth)
+            widthAccumulated += ThreadLocal.TextBox.GetFontWidth(Chars[i]);
+            if (widthAccumulated + ThreadLocal.TextBox.GetFontReferenceWidth() > lineWidth)
             {
-                if (_textBox.WrapMode == WrapMode.BreakWord)
+                if (ThreadLocal.TextBox.WrapMode == WrapMode.BreakWord)
                 {
                     cutoffs.Add(i);
                     widthAccumulated = 0;
                 }
-                else if (_textBox.WrapMode == WrapMode.Word)
+                else if (ThreadLocal.TextBox.WrapMode == WrapMode.Word)
                 {
                     // go back to the start of word
                     float backWidth = 0.0f;
@@ -110,8 +106,8 @@ public class Line
                         if (char.IsWhiteSpace(Chars[i]))
                             break;
 
-                        backWidth += _textBox.GetFontWidth(Chars[i]);
-                        if (backWidth + _textBox.GetFontReferenceWidth() * 10 > lineWidth)
+                        backWidth += ThreadLocal.TextBox.GetFontWidth(Chars[i]);
+                        if (backWidth + ThreadLocal.TextBox.GetFontReferenceWidth() * 10 > lineWidth)
                             break; // Give up on word wrap. break word.
 
                         i--;
@@ -129,7 +125,7 @@ public class Line
     private bool UpdateFoldable(bool _)
     {
         var trimmedString = String.TrimStart();
-        foreach (ValueTuple<string, string> folding in _textBox.Language.Foldings)
+        foreach (ValueTuple<string, string> folding in ThreadLocal.TextBox.Language.Foldings)
         {
             if (trimmedString.StartsWith(folding.Item1))
                 return true;
@@ -140,22 +136,22 @@ public class Line
 
     private string UpdateString(string _)
     {
-        _textBox.StringBuilder.Clear();
-        _textBox.StringBuilder.Append(CollectionsMarshal.AsSpan(Chars));
-        return _textBox.StringBuilder.ToString();
+        ThreadLocal.StringBuilder.Clear();
+        ThreadLocal.StringBuilder.Append(CollectionsMarshal.AsSpan(Chars));
+        return ThreadLocal.StringBuilder.ToString();
     }
 
     private List<SubLine> UpdateSubLines(List<SubLine> subLines)
     {
         subLines.Clear();
 
-        float tabWidth = _textBox.CountTabStart(String) * _textBox.GetTabRenderSize(); // TODO Cache
+        float tabWidth = ThreadLocal.TextBox.CountTabStart(String) * ThreadLocal.TextBox.GetTabRenderSize(); // TODO Cache
 
         int subIndex = 0;
-        SubLine subLine = new SubLine(_textBox, Index, subIndex, 0.0f);
+        SubLine subLine = new SubLine(Index, subIndex, 0.0f);
 
         bool isFirstCharInLine = true;
-        ColorStyle renderGroupColor = _textBox.Theme.DefaultFontColor;
+        ColorStyle renderGroupColor = ThreadLocal.TextBox.Theme.DefaultFontColor;
 
         _buffers.Clear();
         float bufferWidth = 0.0f;
@@ -164,11 +160,11 @@ public class Line
         for (int i = 0; i < Chars.Count; i++)
         {
             char c = Chars[i];
-            float cWidth = _textBox.GetFontWidth(c);
+            float cWidth = ThreadLocal.TextBox.GetFontWidth(c);
 
             subLine.CharWidths.Add(cWidth);
             
-            if (_textBox.ShowingWhitespace && char.IsWhiteSpace(c))
+            if (ThreadLocal.TextBox.ShowingWhitespace && char.IsWhiteSpace(c))
             {
                 subLine.WhiteSpaceRenders.Add(new() { C = c, PosX = posX + bufferWidth });
             }
@@ -209,10 +205,10 @@ public class Line
                 subLines.Add(subLine);
 
                 subIndex++;
-                subLine = new SubLine(_textBox, Index, subIndex, tabWidth);
+                subLine = new SubLine(Index, subIndex, tabWidth);
 
                 isFirstCharInLine = true;
-                renderGroupColor = _textBox.Theme.DefaultFontColor;
+                renderGroupColor = ThreadLocal.TextBox.Theme.DefaultFontColor;
                 _buffers.Clear();
 
                 posX = 0.0f;

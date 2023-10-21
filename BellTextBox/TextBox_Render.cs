@@ -1,7 +1,5 @@
 ﻿using System.Numerics;
 using Bell.Data;
-using Bell.Inputs;
-using Bell.Languages;
 using Bell.Utils;
 
 namespace Bell;
@@ -13,7 +11,7 @@ public partial class TextBox
 
     public void Render(Vector2 viewPos, Vector2 viewSize)
     {
-        Set(this);
+        ThreadLocal.TextBox = this;
         
         _viewPos = viewPos;
         _viewSize = viewSize;

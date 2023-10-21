@@ -52,7 +52,7 @@ public partial class TextBox
         else if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.X)) // Cut
         {
             CopyClipboard();
-            DoAction(new DeleteSelection(this));
+            DoAction(new DeleteSelection());
         }
         else if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.A)) // Select All
         {
@@ -65,12 +65,12 @@ public partial class TextBox
             {
                 MoveCaretsSelection(CaretMove.StartOfFile);
                 MoveCaretsPosition(CaretMove.EndOfFile);
-                DoAction(new DeleteSelection(this));
+                DoAction(new DeleteSelection());
             }
             else
             {
-                DoAction(new DeleteSelection(this));
-                DoAction(new DeleteCharAction(this, EditDirection.Forward));
+                DoAction(new DeleteSelection());
+                DoAction(new DeleteCharAction(EditDirection.Forward));
             }
         }
         else if (EnumFlag.Has(hk, HotKeys.Backspace)) // Backspace
@@ -81,21 +81,21 @@ public partial class TextBox
             }
             else
             {
-                DoAction(new DeleteSelection(this));
-                DoAction(new DeleteCharAction(this, EditDirection.Backward));
+                DoAction(new DeleteSelection());
+                DoAction(new DeleteCharAction( EditDirection.Backward));
             }
         }
         else if (EnumFlag.Has(hk, HotKeys.Enter)) // Enter
         {
-            DoAction(new DeleteSelection(this));
-            DoAction(new EnterAction(this));
+            DoAction(new DeleteSelection());
+            DoAction(new EnterAction());
         }
         else if (EnumFlag.Has(hk, HotKeys.Tab)) // Tab
         {
             if (EnumFlag.Has(hk, HotKeys.Shift))
-                DoAction(new UnTabAction(this));
+                DoAction(new UnTabAction());
             else
-                DoAction(new TabAction(this));
+                DoAction(new TabAction());
         }
         else if (EnumFlag.Has(hk, HotKeys.UpArrow)) // Move Up
         {
@@ -213,16 +213,16 @@ public partial class TextBox
 
             if (keyboardInputChar == '\n')
             {
-                DoAction(new EnterAction(this));
+                DoAction(new EnterAction());
                 continue;
             }
 
             if (keyboardInputChar == '\t')
             {
                 if (EnumFlag.Has(hk, HotKeys.Shift))
-                    DoAction(new UnTabAction(this));
+                    DoAction(new UnTabAction());
                 else
-                    DoAction(new TabAction(this));
+                    DoAction(new TabAction());
                 continue;
             }
 
@@ -231,11 +231,11 @@ public partial class TextBox
 
             if (false == selectionDeleted)
             {
-                DoAction(new DeleteSelection(this));
+                DoAction(new DeleteSelection());
                 selectionDeleted = true;
             }
 
-            DoAction(new InputCharAction(this, EditDirection.Forward)); // keyboardInputChar
+            DoAction(new InputCharAction(EditDirection.Forward)); // keyboardInputChar
         }
     }
 

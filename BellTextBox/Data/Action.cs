@@ -1,20 +1,14 @@
 ﻿using System.Diagnostics;
+using Bell.Utils;
 
 namespace Bell.Data;
 
 internal abstract class Action
 {
-    private readonly TextBox _textBox;
-    
     private readonly List<List<Command>> _caretsCommands = new();
 
     private readonly List<Caret> _startCarets = new();
     private readonly List<Caret> _endCarets = new();
-
-    protected Action(TextBox textBox)
-    {
-        _textBox = textBox;
-    }
 
     protected abstract List<Command> CreateCommands(Caret caret);
     
@@ -25,7 +19,7 @@ internal abstract class Action
         _startCarets.Clear();
         _endCarets.Clear();
         
-        foreach (Caret caret in _textBox.Carets)
+        foreach (Caret caret in ThreadLocal.TextBox.Carets)
         {
             _startCarets.Add(caret.Clone());
 
@@ -34,7 +28,7 @@ internal abstract class Action
 
             foreach (Command command in commands)
             {
-                // command.DoAction(caret);
+                command.Do();
             }
             
             _endCarets.Add(caret.Clone());
@@ -45,13 +39,13 @@ internal abstract class Action
     {
         Debug.Assert(_endCarets.Count == _caretsCommands.Count);
         
-        _textBox.Carets.Clear();
-        _textBox.Carets.AddRange(_endCarets);
+        ThreadLocal.TextBox.Carets.Clear();
+        ThreadLocal.TextBox.Carets.AddRange(_endCarets);
         
         for (int i = _caretsCommands.Count - 1; i >= 0; i--)
         {
             List<Command> commands = _caretsCommands[i];
-            Caret caret = _textBox.Carets[i];
+            Caret caret = ThreadLocal.TextBox.Carets[i];
             
             for (int j = commands.Count - 1; j >= 0; j--)
             {
@@ -60,8 +54,15 @@ internal abstract class Action
             }
         }
         
-        _textBox.Carets.Clear();
-        _textBox.Carets.AddRange(_startCarets);
+        ThreadLocal.TextBox.Carets.Clear();
+        ThreadLocal.TextBox.Carets.AddRange(_startCarets);
+    }
+
+    public bool IsAllSame<T>()
+    {
+        return _caretsCommands
+            .SelectMany(commands => commands)
+            .All(command => command is T);
     }
     
     public string GetDebugString()
@@ -72,7 +73,7 @@ internal abstract class Action
 
 internal class DeleteSelection : Action
 {
-    public DeleteSelection(TextBox textBox) : base(textBox)
+    public DeleteSelection()
     {
     }
 
@@ -84,7 +85,7 @@ internal class DeleteSelection : Action
 
 internal class InputCharAction : Action
 {
-    public InputCharAction(TextBox textBox, EditDirection direction) : base(textBox)
+    public InputCharAction(EditDirection direction)
     {
     }
 
@@ -96,7 +97,7 @@ internal class InputCharAction : Action
 
 internal class DeleteCharAction : Action
 {
-    public DeleteCharAction(TextBox textBox, EditDirection direction) : base(textBox)
+    public DeleteCharAction(EditDirection direction)
     {
     }
 
@@ -107,7 +108,7 @@ internal class DeleteCharAction : Action
 }
 internal class EnterAction : Action
 {
-    public EnterAction(TextBox textBox) : base(textBox)
+    public EnterAction()
     {
     }
 
@@ -119,7 +120,7 @@ internal class EnterAction : Action
 
 internal class TabAction : Action
 {
-    public TabAction(TextBox textBox) : base(textBox)
+    public TabAction()
     {
     }
 
@@ -131,7 +132,7 @@ internal class TabAction : Action
 
 internal class UnTabAction : Action
 {
-    public UnTabAction(TextBox textBox) : base(textBox)
+    public UnTabAction()
     {
     }
 

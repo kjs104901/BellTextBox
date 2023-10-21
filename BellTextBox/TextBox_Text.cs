@@ -16,7 +16,7 @@ public partial class TextBox
         int i = 0;
         foreach (string lineText in text.Split("\n"))
         {
-            Line line = new Line(this, i++);
+            Line line = new Line(i++);
             line.SetString(lineText.Trim('\r'));
             Lines.Add(line);
         }

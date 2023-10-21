@@ -2,8 +2,8 @@
 
 internal abstract class Command
 {
-    public abstract void Do(TextBox textBox);
-    public abstract void Undo(TextBox textBox);
+    public abstract void Do();
+    public abstract void Undo();
 }
 
 
@@ -25,11 +25,11 @@ internal class InputCharCommand : Command
         _chars = chars;
     }
     
-    public override void Do(TextBox textBox)
+    public override void Do()
     {
     }
 
-    public override void Undo(TextBox textBox)
+    public override void Undo()
     {
     }
 }
@@ -45,11 +45,11 @@ internal class DeleteCharCommand : Command
         _count = count;
     }
     
-    public override void Do(TextBox textBox)
+    public override void Do()
     {
     }
 
-    public override void Undo(TextBox textBox)
+    public override void Undo()
     {
     }
 }
@@ -63,11 +63,11 @@ internal class SplitLine : Command
         _direction = direction;
     }
     
-    public override void Do(TextBox textBox)
+    public override void Do()
     {
     }
 
-    public override void Undo(TextBox textBox)
+    public override void Undo()
     {
     }
 }
@@ -81,33 +81,33 @@ internal class MergeLine : Command
         _direction = direction;
     }
     
-    public override void Do(TextBox textBox)
+    public override void Do()
     {
     }
 
-    public override void Undo(TextBox textBox)
+    public override void Undo()
     {
     }
 }
 
 internal class IndentSelection : Command
 {
-    public override void Do(TextBox textBox)
+    public override void Do()
     {
     }
 
-    public override void Undo(TextBox textBox)
+    public override void Undo()
     {
     }
 }
 
 internal class UnindentSelection : Command
 {
-    public override void Do(TextBox textBox)
+    public override void Do()
     {
     }
 
-    public override void Undo(TextBox textBox)
+    public override void Undo()
     {
     }
 }

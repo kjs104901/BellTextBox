@@ -120,7 +120,7 @@ public partial class TextBox
         // if caret number is same as text line number, paste to each line
 
 
-        ActionManager.DoAction(new PasteAction(this, text));
+        ActionManager.DoAction(new PasteAction(text));
         */
     }
 }

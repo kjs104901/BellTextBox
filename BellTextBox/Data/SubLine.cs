@@ -4,8 +4,6 @@ namespace Bell.Data;
 
 public class SubLine
 {
-    private TextBox _textBox;
-
     public int LineIndex;
     public int SubIndex;
 
@@ -22,10 +20,8 @@ public class SubLine
     public LineSelection LineSelection => LineSelectionCache.Get();
     public Cache<LineSelection> LineSelectionCache;
 
-    public SubLine(TextBox textBox, int lineIndex, int subIndex, float tabWidth)
+    public SubLine(int lineIndex, int subIndex, float tabWidth)
     {
-        _textBox = textBox;
-
         LineIndex = lineIndex;
         SubIndex = subIndex;
 
@@ -56,7 +52,7 @@ public class SubLine
         lineSelection.CaretPosition = false;
         lineSelection.CaretPositionPosition = 0.0f;
         
-        foreach (Caret caret in TextBox.Get().Carets)
+        foreach (Caret caret in ThreadLocal.TextBox.Carets)
         {
             if (caret.HasSelection)
             {
