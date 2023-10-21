@@ -10,9 +10,6 @@ public partial class TextBox
     public List<SubLine> SubLines => SubLinesCache.Get();
     public readonly Cache<List<SubLine>> SubLinesCache;
     
-    public List<SubLine> VisibleSubLines => VisibleSubLinesCache.Get();
-    public readonly Cache<List<SubLine>> VisibleSubLinesCache;
-    
     public void SetText(string text)
     {
         Lines.Clear();
@@ -74,22 +71,6 @@ public partial class TextBox
                 }
             }
         }
-        return subLines;
-    }
-    
-    private List<SubLine> UpdateVisibleSubLines(List<SubLine> subLines)
-    {
-        subLines.Clear();
-
-        var pageStart = ViewToPage(_viewPos);
-        var pageEnd = ViewToPage(_viewPos + _viewSize);
-
-        for (int i = pageStart.Row; i <= pageEnd.Row; i++)
-        {
-            if (SubLines.Count > i)
-                subLines.Add(SubLines[i]);
-        }
-
         return subLines;
     }
 

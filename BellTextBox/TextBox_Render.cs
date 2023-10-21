@@ -22,13 +22,18 @@ public partial class TextBox
 
         _backend.RenderPage(PageSize, new Vector4(0.2f, 0.1f, 0.1f, 1.0f)); // TODO background color
         
+        
         float lineNumberWidthMax = 0.0f;
-        foreach (SubLine subLine in VisibleSubLines)
+        
+        var pageStart = ViewToPage(_viewPos);
+        var pageEnd = ViewToPage(_viewPos + _viewSize);
+        
+        for (int i = pageStart.Row; i <= pageEnd.Row; i++)
         {
-            if (subLine.CaretDirty)
-            {
-                subLine.SetCarets(Carets);
-            }
+            if (SubLines.Count <= i)
+                break;
+            
+            SubLine subLine = SubLines[i];
 
             var lineY = subLine.Row * GetFontHeight();
             var lineTextStartY = lineY + GetFontHeightOffset();
@@ -37,14 +42,14 @@ public partial class TextBox
 
             var lineStartX = LineNumberWidth + FoldWidth + subLine.TabWidth;
 
-            if (subLine.Selected)
+            if (subLine.LineSelection.Selected)
             {
-                _backend.RenderRectangle(new Vector2(lineStartX + subLine.SelectionStart, lineTextStartY),
-                    new Vector2(lineStartX + subLine.SelectionEnd, lineTextEndY),
+                _backend.RenderRectangle(new Vector2(lineStartX + subLine.LineSelection.SelectionStart, lineTextStartY),
+                    new Vector2(lineStartX + subLine.LineSelection.SelectionEnd, lineTextEndY),
                     Theme.LineSelectedBackgroundColor.ToVector());
             }
 
-            foreach (TextBlockRender textBlockRender in subLine.TextBlockRenders)
+            foreach (var textBlockRender in subLine.TextBlockRenders)
             {
                 _backend.RenderText(
                     new Vector2(lineStartX + textBlockRender.PosX, lineTextStartY),
@@ -52,7 +57,7 @@ public partial class TextBox
                     textBlockRender.ColorStyle.ToVector());
             }
 
-            foreach (WhiteSpaceRender whiteSpaceRender in subLine.WhiteSpaceRenders)
+            foreach (var whiteSpaceRender in subLine.WhiteSpaceRenders)
             {
                 if (whiteSpaceRender.C == ' ')
                 {
@@ -98,27 +103,27 @@ public partial class TextBox
             }
 
 
-            if (subLine.CaretPosition)
+            if (subLine.LineSelection.CaretPosition)
             {
                 _backend.RenderLine(
                     new Vector2(
-                        lineStartX + subLine.CaretPositionPosition - 1.0f,
+                        lineStartX + subLine.LineSelection.CaretPositionPosition - 1.0f,
                         lineTextStartY),
                     new Vector2(
-                        lineStartX + subLine.CaretPositionPosition - 1.0f,
+                        lineStartX + subLine.LineSelection.CaretPositionPosition - 1.0f,
                         lineTextEndY),
                     Theme.DefaultFontColor.ToVector(),
                     2.0f);
             }
 
-            if (subLine.CaretSelection)
+            if (subLine.LineSelection.CaretSelection)
             {
                 _backend.RenderLine(
                     new Vector2(
-                        lineStartX + subLine.CaretSelectionPosition - 1.0f,
+                        lineStartX + subLine.LineSelection.CaretSelectionPosition - 1.0f,
                         lineTextStartY),
                     new Vector2(
-                        lineStartX + subLine.CaretSelectionPosition - 1.0f,
+                        lineStartX + subLine.LineSelection.CaretSelectionPosition - 1.0f,
                         lineTextEndY),
                     Theme.LineCommentFontColor.ToVector(),
                     2.0f);

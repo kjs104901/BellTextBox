@@ -255,9 +255,7 @@ public partial class TextBox
                     folding.Folded = !folding.Folded;
 
                     SubLinesCache.SetDirty();
-                    VisibleSubLinesCache.SetDirty();
-                        
-                    SingleCaret(pageCoordinates);
+                    SetCaretDirty();
                     
                     return;
                 }
@@ -345,8 +343,6 @@ public partial class TextBox
 
         if (_pageStart != pageStart || _pageEnd != pageEnd)
         {
-            VisibleSubLinesCache.SetDirty();
-
             _pageStart = pageStart;
             _pageEnd = pageEnd;
         }

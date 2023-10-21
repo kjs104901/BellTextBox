@@ -1,37 +1,37 @@
-﻿namespace Bell.Data;
+﻿using Bell.Utils;
+
+namespace Bell.Data;
 
 public class SubLine
 {
+    private TextBox _textBox;
+
     public int LineIndex;
     public int SubIndex;
-    
+
     public int Row;
     public Folding? Folding;
-    
+
     public float TabWidth;
 
     public readonly List<TextBlockRender> TextBlockRenders = new();
     public readonly List<WhiteSpaceRender> WhiteSpaceRenders = new();
-    
+
     public readonly List<float> CharWidths = new();
 
-    public bool CaretDirty = true;
-    
-    public bool Selected { get; private set; }
-    public float SelectionStart { get; private set; }
-    public float SelectionEnd { get; private set; }
-    
-    public bool CaretSelection { get; private set; }
-    public float CaretSelectionPosition { get; private set; }
-    public bool CaretPosition { get; private set; }
-    public float CaretPositionPosition { get; private set; }
-    
-    public SubLine(int lineIndex, int subIndex, float tabWidth)
+    public LineSelection LineSelection => LineSelectionCache.Get();
+    public Cache<LineSelection> LineSelectionCache;
+
+    public SubLine(TextBox textBox, int lineIndex, int subIndex, float tabWidth)
     {
+        _textBox = textBox;
+
         LineIndex = lineIndex;
         SubIndex = subIndex;
-        
+
         TabWidth = tabWidth;
+
+        LineSelectionCache = new Cache<LineSelection>(new(), UpdateLineSelection);
     }
 
     private float GetRenderPosition(int charIndex)
@@ -41,23 +41,22 @@ public class SubLine
         {
             position += CharWidths[i];
         }
+
         return position;
     }
-    
-    public void SetCarets(List<Caret> carets)
-    {
-        CaretDirty = false;
-        
-        Selected = false;
-        SelectionStart = 0.0f;
-        SelectionEnd = 0.0f;
 
-        CaretSelection = false;
-        CaretSelectionPosition = 0.0f;
-        CaretPosition = false;
-        CaretPositionPosition = 0.0f;
-        
-        foreach (Caret caret in carets)
+    private LineSelection UpdateLineSelection(LineSelection lineSelection)
+    {
+        lineSelection.Selected = false;
+        lineSelection.SelectionStart = 0.0f;
+        lineSelection.SelectionEnd = 0.0f;
+
+        lineSelection.CaretSelection = false;
+        lineSelection.CaretSelectionPosition = 0.0f;
+        lineSelection.CaretPosition = false;
+        lineSelection.CaretPositionPosition = 0.0f;
+
+        foreach (Caret caret in _textBox.Carets)
         {
             if (caret.HasSelection)
             {
@@ -73,58 +72,72 @@ public class SubLine
                     start = caret.Position;
                     end = caret.Selection;
                 }
-                
-                if (start.Row == Row)
+
+                if (start.LineIndex == LineIndex)
                 {
-                    if (end.Row > Row)
+                    if (end.LineIndex > LineIndex)
                     {
-                        SelectionStart = GetRenderPosition(start.Column);
-                        SelectionEnd = CharWidths.Sum();
-                        if (SelectionEnd < 1.0f)
-                            SelectionEnd = 5.0f; //TODO get width of ' '
-                        
-                        Selected = true;
+                        lineSelection.SelectionStart = GetRenderPosition(start.Column);
+                        lineSelection.SelectionEnd = CharWidths.Sum();
+                        if (lineSelection.SelectionEnd < 1.0f)
+                            lineSelection.SelectionEnd = 5.0f; //TODO get width of ' '
+
+                        lineSelection.Selected = true;
                     }
-                    else if (end.Row == Row)
+                    else if (end.LineIndex == LineIndex)
                     {
-                        SelectionStart = GetRenderPosition(start.Column);
-                        SelectionEnd = GetRenderPosition(end.Column);
-                        Selected = true;
+                        lineSelection.SelectionStart = GetRenderPosition(start.Column);
+                        lineSelection.SelectionEnd = GetRenderPosition(end.Column);
+                        lineSelection.Selected = true;
                     }
                 }
-                else if (start.Row < Row)
+                else if (start.LineIndex < LineIndex)
                 {
-                    if (end.Row > Row)
+                    if (end.LineIndex > LineIndex)
                     {
-                        SelectionStart = 0.0f;
-                        SelectionEnd = CharWidths.Sum();
-                        if (SelectionEnd < 1.0f)
-                            SelectionEnd = 5.0f; //TODO get width of ' '
-                        
-                        Selected = true;
+                        lineSelection.SelectionStart = 0.0f;
+                        lineSelection.SelectionEnd = CharWidths.Sum();
+                        if (lineSelection.SelectionEnd < 1.0f)
+                            lineSelection.SelectionEnd = 5.0f; //TODO get width of ' '
+
+                        lineSelection.Selected = true;
                     }
-                    else if (end.Row == Row)
+                    else if (end.LineIndex == LineIndex)
                     {
-                        SelectionStart = 0.0f;
-                        SelectionEnd = GetRenderPosition(end.Column);
-                        Selected = true;
+                        lineSelection.SelectionStart = 0.0f;
+                        lineSelection.SelectionEnd = GetRenderPosition(end.Column);
+                        lineSelection.Selected = true;
                     }
                 }
             }
-            
-            if (caret.Selection.Row == Row)
+
+            if (caret.Selection.LineIndex == LineIndex)
             {
-                CaretSelection = true;
-                CaretSelectionPosition = GetRenderPosition(caret.Selection.Column);
+                lineSelection.CaretSelection = true;
+                lineSelection.CaretSelectionPosition = GetRenderPosition(caret.Selection.Column);
             }
-            
-            if (caret.Position.Row == Row)
+
+            if (caret.Position.LineIndex == LineIndex)
             {
-                CaretPosition = true;
-                CaretPositionPosition = GetRenderPosition(caret.Position.Column);
+                lineSelection.CaretPosition = true;
+                lineSelection.CaretPositionPosition = GetRenderPosition(caret.Position.Column);
             }
         }
+
+        return lineSelection;
     }
+}
+
+public struct LineSelection
+{
+    public bool Selected;
+    public float SelectionStart;
+    public float SelectionEnd;
+
+    public bool CaretSelection;
+    public float CaretSelectionPosition;
+    public bool CaretPosition;
+    public float CaretPositionPosition;
 }
 
 public struct TextBlockRender

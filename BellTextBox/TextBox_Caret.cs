@@ -30,11 +30,11 @@ public partial class TextBox
 {
     public readonly List<Caret> Carets = new();
     
-    private void SetCaretDirty()
+    public void SetCaretDirty()
     {
         foreach (SubLine subLine in SubLines)
         {
-            subLine.CaretDirty = true;
+            subLine.LineSelectionCache.SetDirty();
         }
     }
 

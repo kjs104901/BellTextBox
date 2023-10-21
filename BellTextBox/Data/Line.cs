@@ -6,9 +6,9 @@ namespace Bell.Data;
 
 public class Line
 {
-    private TextBox _textBox;
-
-    public int Index = 0;
+    private readonly TextBox _textBox;
+    
+    public readonly int Index = 0;
 
     public List<char> Chars = new();
     private List<char> _buffers = new();
@@ -152,7 +152,7 @@ public class Line
         float tabWidth = _textBox.CountTabStart(String) * _textBox.GetTabRenderSize(); // TODO Cache
 
         int subIndex = 0;
-        SubLine subLine = new SubLine(Index, subIndex, 0.0f);
+        SubLine subLine = new SubLine(_textBox, Index, subIndex, 0.0f);
 
         bool isFirstCharInLine = true;
         ColorStyle renderGroupColor = _textBox.Theme.DefaultFontColor;
@@ -209,7 +209,7 @@ public class Line
                 subLines.Add(subLine);
 
                 subIndex++;
-                subLine = new SubLine(Index, subIndex, tabWidth);
+                subLine = new SubLine(_textBox, Index, subIndex, tabWidth);
 
                 isFirstCharInLine = true;
                 renderGroupColor = _textBox.Theme.DefaultFontColor;

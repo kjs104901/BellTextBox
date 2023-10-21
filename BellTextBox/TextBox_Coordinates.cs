@@ -59,21 +59,13 @@ public partial class TextBox
                 }
                 pageCoordinates.Column = column;
             }
+
+            pageCoordinates.LineIndex = subLine.LineIndex;
         }
 
         pageCoordinates.Row = row;
 
         return pageCoordinates;
-    }
-
-    public TextCoordinates PageToText(PageCoordinates pageCoordinates)
-    {
-        throw new NotImplementedException();
-    }
-    
-    public PageCoordinates TextToPage(TextCoordinates textCoordinates)
-    {
-        throw new NotImplementedException();
     }
 
     public Vector2 PageToView(PageCoordinates pageCoordinates)

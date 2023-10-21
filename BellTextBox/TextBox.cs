@@ -20,7 +20,6 @@ public partial class TextBox
         Theme = new DarkTheme();
         
         SubLinesCache = new Cache<List<SubLine>>(new List<SubLine>(), UpdateSubLines);
-        VisibleSubLinesCache = new Cache<List<SubLine>>(new List<SubLine>(), UpdateVisibleSubLines);
         FoldingListCache = new Cache<List<Folding>>(new List<Folding>(), UpdateFoldingList);
     }
 }
