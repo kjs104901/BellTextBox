@@ -15,8 +15,8 @@ internal enum EditDirection
 
 internal class InputCharCommand : Command
 {
-    private EditDirection _direction;
-    private char[] _chars;
+    private readonly EditDirection _direction;
+    private readonly char[] _chars;
 
     public InputCharCommand(EditDirection direction, char[] chars)
     {
@@ -34,14 +34,14 @@ internal class InputCharCommand : Command
 
     public override string GetDebugString()
     {
-        throw new NotImplementedException();
+        return string.Join(' ', _chars);
     }
 }
 
 internal class DeleteCharCommand : Command
 {
-    private EditDirection _direction;
-    private int _count;
+    private readonly EditDirection _direction;
+    private readonly int _count;
 
     public DeleteCharCommand(EditDirection direction, int count)
     {
@@ -59,7 +59,7 @@ internal class DeleteCharCommand : Command
 
     public override string GetDebugString()
     {
-        throw new NotImplementedException();
+        return $"Delete Char {_count} {_direction}";
     }
 }
 
@@ -82,7 +82,7 @@ internal class SplitLineCommand : Command
 
     public override string GetDebugString()
     {
-        throw new NotImplementedException();
+        return $"Split Line {_direction}";
     }
 }
 
@@ -105,7 +105,7 @@ internal class MergeLineCommand : Command
 
     public override string GetDebugString()
     {
-        throw new NotImplementedException();
+        return $"Merge Line {_direction}";
     }
 }
 
@@ -121,7 +121,7 @@ internal class IndentSelectionCommand : Command
 
     public override string GetDebugString()
     {
-        throw new NotImplementedException();
+        return "Indent Selection";
     }
 }
 
@@ -137,6 +137,6 @@ internal class UnindentSelectionCommand : Command
 
     public override string GetDebugString()
     {
-        throw new NotImplementedException();
+        return "Unindent Selection";
     }
 }

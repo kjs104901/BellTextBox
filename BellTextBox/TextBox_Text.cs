@@ -10,6 +10,8 @@ public partial class TextBox
 
     public List<SubLine> Rows => RowsCache.Get();
     public readonly Cache<List<SubLine>> RowsCache;
+    
+    private readonly StringBuilder _sb = new();
 
     public void SetText(string text)
     {
@@ -27,9 +29,6 @@ public partial class TextBox
 
         RowsCache.SetDirty();
     }
-
-
-    private readonly StringBuilder _sb = new();
 
     public string GetText()
     {

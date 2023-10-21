@@ -74,17 +74,18 @@ public class FontStyle : IComparable<FontStyle>
     }
 }
 --- END ---";
-    
+
         VeldridStartup.CreateWindowAndGraphicsDevice(
             new WindowCreateInfo(50, 50, 1280, 720, WindowState.Normal, "ImGui.NET Sample Program"),
             new GraphicsDeviceOptions(true, null, true, ResourceBindingModel.Improved, true, true),
             out var sdl2Window,
             out var graphicsDevice);
-        
+
         var commandList = graphicsDevice.ResourceFactory.CreateCommandList();
-        var imGuiRenderer = new ImGuiRenderer(graphicsDevice, graphicsDevice.MainSwapchain.Framebuffer.OutputDescription, sdl2Window.Width,
+        var imGuiRenderer = new ImGuiRenderer(graphicsDevice,
+            graphicsDevice.MainSwapchain.Framebuffer.OutputDescription, sdl2Window.Width,
             sdl2Window.Height);
-        
+
         sdl2Window.Resized += () =>
         {
             graphicsDevice.MainSwapchain.Resize((uint)sdl2Window.Width, (uint)sdl2Window.Height);
@@ -98,8 +99,8 @@ public class FontStyle : IComparable<FontStyle>
         imGuiRenderer.RecreateFontDeviceTexture(graphicsDevice);
 
         var imGuiBellTextBox = new ImGuiTextBox();
-        imGuiBellTextBox.SetText(textInput);
-        
+        imGuiBellTextBox.Text = textInput;
+
         while (sdl2Window.Exists)
         {
             var deltaTime = stopwatch.ElapsedTicks / (float)Stopwatch.Frequency;
@@ -113,11 +114,27 @@ public class FontStyle : IComparable<FontStyle>
             ImGui.SetNextWindowPos(new Vector2(0, 0));
             ImGui.SetNextWindowSize(new Vector2(sdl2Window.Width, sdl2Window.Height));
             ImGui.Begin("Demo", ImGuiWindowFlags.NoResize);
-            ImGui.PushFont(imFontPtr);
 
-            imGuiBellTextBox.Render(new Vector2(-1, -1));
+            if (ImGui.BeginTable("table2", 2, ImGuiTableFlags.Resizable))
+            {
+                ImGui.TableSetupColumn("C1", ImGuiTableColumnFlags.None, 100);
+                ImGui.TableSetupColumn("C2", ImGuiTableColumnFlags.None, 200);
 
-            ImGui.PopFont();
+                ImGui.TableNextRow();
+
+                ImGui.TableNextColumn();
+                string debugString = imGuiBellTextBox.DebugString;
+                ImGui.InputTextMultiline("##Debug", ref debugString, (uint)debugString.Length, new Vector2(-1, -1));
+
+                ImGui.TableNextColumn();
+                
+                ImGui.PushFont(imFontPtr);
+                imGuiBellTextBox.Render(new Vector2(-1, -1));
+                ImGui.PopFont();
+
+                ImGui.EndTable();
+            }
+            
             ImGui.End();
 
             commandList.Begin();

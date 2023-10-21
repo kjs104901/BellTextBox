@@ -6,12 +6,15 @@ namespace Bell.ImGuiNet;
 public class ImGuiTextBox
 {
     private readonly TextBox _textBox = new(new ImGuiBackend());
-    
-    public void SetText(string text)
+
+    public string Text
     {
-        _textBox.SetText(text);
+        get => _textBox.GetText();
+        set => _textBox.SetText(value);
     }
-    
+
+    public string DebugString => _textBox.GetDebugString();
+
     public void Render(Vector2 size)
     {
         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, new Vector2(0, 0));

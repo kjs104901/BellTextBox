@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text;
 using Bell.Utils;
 
 namespace Bell.Data;
@@ -65,18 +66,16 @@ internal abstract class Action
 
     public string GetDebugString()
     {
-        string result = "";
+        var sb = new StringBuilder();
         for (int i = 0; i < _caretsCommands.Count; i++)
         {
-            result += $"\tCaret {i}: {_caretsCommands[i].Count} commands\n";
-
+            sb.AppendLine($"\tCaret {i}: {_caretsCommands[i].Count} commands");
             foreach (var command in _caretsCommands[i])
             {
-                result += $"\t\t{command.GetDebugString()}\n";
+                sb.AppendLine($"\t\t{command.GetDebugString()}");
             }
         }
-
-        return result;
+        return sb.ToString();
     }
 }
 

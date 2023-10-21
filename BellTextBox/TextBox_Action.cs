@@ -6,30 +6,30 @@ namespace Bell;
 public partial class TextBox
 {
     private const int HistoryCapacity = 1000;
-    private readonly LinkedList<Action> _history = new();
-    private readonly LinkedList<Action> _redoHistory = new();
+    private readonly LinkedList<Action> _actionHistory = new();
+    private readonly LinkedList<Action> _actionRedoHistory = new();
 
     private void DoAction(Action action)
     {
         action.DoCommands();
         
-        _history.AddLast(action);
-        if (_history.Count > HistoryCapacity)
+        _actionHistory.AddLast(action);
+        if (_actionHistory.Count > HistoryCapacity)
         {
-            _history.RemoveFirst();
+            _actionHistory.RemoveFirst();
         }
-        _redoHistory.Clear();
+        _actionRedoHistory.Clear();
     }
 
     private void UndoAction()
     {
-        if (_history.Last == null)
+        if (_actionHistory.Last == null)
             return;
 
-        var lastAction = _history.Last.Value;
+        var lastAction = _actionHistory.Last.Value;
         lastAction.UndoCommands();
-        _history.RemoveLast();
-        _redoHistory.AddFirst(lastAction);
+        _actionHistory.RemoveLast();
+        _actionRedoHistory.AddFirst(lastAction);
 
         if (lastAction.IsAllSame<InputCharCommand>())
         {
@@ -43,25 +43,25 @@ public partial class TextBox
     
     private void UndoActionSequence<T>()
     {
-        while (_history.Last != null &&
-               _history.Last.Value.IsAllSame<T>())
+        while (_actionHistory.Last != null &&
+               _actionHistory.Last.Value.IsAllSame<T>())
         {
-            var lastAction = _history.Last.Value;
+            var lastAction = _actionHistory.Last.Value;
             lastAction.UndoCommands();
-            _history.RemoveLast();
-            _redoHistory.AddFirst(lastAction);
+            _actionHistory.RemoveLast();
+            _actionRedoHistory.AddFirst(lastAction);
         }
     }
 
     private void RedoAction()
     {
-        if (_redoHistory.First == null)
+        if (_actionRedoHistory.First == null)
             return;
 
-        var firstAction = _redoHistory.First.Value;
+        var firstAction = _actionRedoHistory.First.Value;
         firstAction.DoCommands();
-        _redoHistory.RemoveLast();
-        _history.AddLast(firstAction);
+        _actionRedoHistory.RemoveLast();
+        _actionHistory.AddLast(firstAction);
 
         if (firstAction.IsAllSame<InputCharCommand>())
         {
@@ -75,13 +75,13 @@ public partial class TextBox
     
     private void RedoActionSequence<T>()
     {
-        while (_redoHistory.First != null &&
-               _redoHistory.First.Value.IsAllSame<T>())
+        while (_actionRedoHistory.First != null &&
+               _actionRedoHistory.First.Value.IsAllSame<T>())
         {
-            var firstAction = _redoHistory.First.Value;
+            var firstAction = _actionRedoHistory.First.Value;
             firstAction.DoCommands();
-            _redoHistory.RemoveFirst();
-            _history.AddLast(firstAction);
+            _actionRedoHistory.RemoveFirst();
+            _actionHistory.AddLast(firstAction);
         }
     }
 
@@ -89,13 +89,13 @@ public partial class TextBox
     {
         string result = "";
         result += "History:\n";
-        foreach (var action in _history)
+        foreach (var action in _actionHistory)
         {
             result += action.GetDebugString() + "\n";
         }
 
         result += "Redo History:\n";
-        foreach (var action in _redoHistory)
+        foreach (var action in _actionRedoHistory)
         {
             result += action.GetDebugString() + "\n";
         }
