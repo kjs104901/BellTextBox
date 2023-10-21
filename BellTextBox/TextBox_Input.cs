@@ -12,10 +12,10 @@ public partial class TextBox
 
     public Vector2 PageSize;
 
-    private PageCoordinates _pageStart;
-    private PageCoordinates _pageEnd;
+    private TextCoordinates _textStart;
+    private TextCoordinates _textEnd;
 
-    private PageCoordinates _mouseDragStartPage;
+    private TextCoordinates _mouseDragStartText;
 
     private bool _shiftPressed;
     private bool _altPressed;
@@ -243,13 +243,13 @@ public partial class TextBox
     {
         MouseInput mouseInput = _backend.GetMouseInput();
         
-        PageCoordinates pageCoordinates = ViewToPage(mouseInput.Position);
+        TextCoordinates textCoordinates = ViewToText(mouseInput.Position);
 
-        if (pageCoordinates.IsFold)
+        if (textCoordinates.IsFold)
         {
             if (MouseAction.Click == mouseInput.LeftAction)
             {
-                var folding = SubLines[pageCoordinates.Row].Folding;
+                var folding = SubLines[textCoordinates.Row].Folding;
                 if (null != folding)
                 {
                     folding.Folded = !folding.Folded;
@@ -265,11 +265,11 @@ public partial class TextBox
         if (mouseInput.Position.X > _viewPos.X && mouseInput.Position.X < _viewPos.X + _viewSize.X &&
             mouseInput.Position.Y > _viewPos.Y && mouseInput.Position.Y < _viewPos.Y + _viewSize.Y)
         {
-            if (pageCoordinates.IsFold)
+            if (textCoordinates.IsFold)
             {
                 _backend.SetMouseCursor(MouseCursor.Hand);
             }
-            else if (pageCoordinates.IsLineNumber)
+            else if (textCoordinates.IsLineNumber)
             {
             }
             else
@@ -281,27 +281,27 @@ public partial class TextBox
         if (MouseAction.Click == mouseInput.LeftAction ||
             MouseAction.Click == mouseInput.MiddleAction)
         {
-            _mouseDragStartPage = pageCoordinates;
+            _mouseDragStartText = textCoordinates;
         }
 
         if (MouseAction.Click == mouseInput.LeftAction)
         {
             if (_shiftPressed)
             {
-                SingleCaret().Selection = pageCoordinates;
+                SingleCaret().Selection = textCoordinates;
             }
             else if (_altPressed)
             {
-                AddCaret(pageCoordinates);
+                AddCaret(textCoordinates);
             }
             else
             {
-                SingleCaret(pageCoordinates);
+                SingleCaret(textCoordinates);
             }
         }
         else if (MouseAction.DoubleClick == mouseInput.LeftAction)
         {
-            SingleCaret(pageCoordinates);
+            SingleCaret(textCoordinates);
 
             if (_shiftPressed)
             {
@@ -320,16 +320,16 @@ public partial class TextBox
         {
             if (_altPressed)
             {
-                SelectRectangle(_mouseDragStartPage, pageCoordinates);
+                SelectRectangle(_mouseDragStartText, textCoordinates);
             }
             else
             {
-                SingleCaret(_mouseDragStartPage).Position = pageCoordinates;
+                SingleCaret(_mouseDragStartText).Position = textCoordinates;
             }
         }
         else if (MouseAction.Dragging == mouseInput.MiddleAction)
         {
-            SelectRectangle(_mouseDragStartPage, pageCoordinates);
+            SelectRectangle(_mouseDragStartText, textCoordinates);
         }
 
         _shiftPressed = false;
@@ -338,13 +338,13 @@ public partial class TextBox
 
     protected void ProcessViewInput()
     {
-        PageCoordinates pageStart = ViewToPage(_viewPos, -3);
-        PageCoordinates pageEnd = ViewToPage(_viewPos + _viewSize, 3);
+        TextCoordinates textStart = ViewToText(_viewPos, -3);
+        TextCoordinates textEnd = ViewToText(_viewPos + _viewSize, 3);
 
-        if (_pageStart != pageStart || _pageEnd != pageEnd)
+        if (_textStart != textStart || _textEnd != textEnd)
         {
-            _pageStart = pageStart;
-            _pageEnd = pageEnd;
+            _textStart = textStart;
+            _textEnd = textEnd;
         }
 
         if (WrapMode.Word == WrapMode || WrapMode.BreakWord == WrapMode)

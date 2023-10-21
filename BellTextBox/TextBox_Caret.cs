@@ -38,28 +38,28 @@ public partial class TextBox
         }
     }
 
-    public Caret SingleCaret(PageCoordinates pageCoordinates = new())
+    public Caret SingleCaret(TextCoordinates textCoordinates = new())
     {
         if (Carets.Count > 1)
             Carets.RemoveRange(1, Carets.Count - 1);
 
         if (Carets.Count > 0)
         {
-            Carets[0].Position = pageCoordinates;
-            Carets[0].Selection = pageCoordinates;
+            Carets[0].Position = textCoordinates;
+            Carets[0].Selection = textCoordinates;
         }
         else
         {
-            Carets.Add(new Caret() { Position = pageCoordinates, Selection = pageCoordinates });
+            Carets.Add(new Caret() { Position = textCoordinates, Selection = textCoordinates });
         }
 
         SetCaretDirty();
         return Carets[0];
     }
 
-    public void AddCaret(PageCoordinates pageCoordinates)
+    public void AddCaret(TextCoordinates textCoordinates)
     {
-        Carets.Add(new Caret() { Position = pageCoordinates, Selection = pageCoordinates });
+        Carets.Add(new Caret() { Position = textCoordinates, Selection = textCoordinates });
         SetCaretDirty();
     }
 
@@ -81,7 +81,7 @@ public partial class TextBox
         SetCaretDirty();
     }
 
-    public void SelectRectangle(PageCoordinates startPosition, PageCoordinates endPosition)
+    public void SelectRectangle(TextCoordinates startPosition, TextCoordinates endPosition)
     {
         Carets.Clear();
         // TODO select multiple lines

@@ -55,13 +55,13 @@ public class SubLine
         lineSelection.CaretSelectionPosition = 0.0f;
         lineSelection.CaretPosition = false;
         lineSelection.CaretPositionPosition = 0.0f;
-
-        foreach (Caret caret in _textBox.Carets)
+        
+        foreach (Caret caret in TextBox.Get().Carets)
         {
             if (caret.HasSelection)
             {
-                PageCoordinates start;
-                PageCoordinates end;
+                TextCoordinates start;
+                TextCoordinates end;
                 if (caret.Selection < caret.Position)
                 {
                     start = caret.Selection;

@@ -5,12 +5,12 @@ namespace Bell;
 
 public partial class TextBox
 {
-    public PageCoordinates ViewToPage(Vector2 viewCoordinates, int yOffset = 0)
+    private TextCoordinates ViewToText(Vector2 viewCoordinates, int yOffset = 0)
     {
         float x = viewCoordinates.X - LineNumberWidth - FoldWidth;
         float y = viewCoordinates.Y;
         
-        PageCoordinates pageCoordinates = new();
+        TextCoordinates textCoordinates = new();
 
         int row = (int)(y / GetFontHeight()) + yOffset;
         if (row < 0)
@@ -20,8 +20,8 @@ public partial class TextBox
 
         if (x < -FoldWidth)
         {
-            pageCoordinates.IsLineNumber = true;
-            pageCoordinates.Column = 0;
+            textCoordinates.IsLineNumber = true;
+            textCoordinates.Column = 0;
         }
         else if (SubLines.Count > row)
         {
@@ -29,8 +29,8 @@ public partial class TextBox
             
             if (x < -FoldWidth * 0.2 && subLine.Folding != null)
             {
-                pageCoordinates.IsFold = true;
-                pageCoordinates.Column = 0;
+                textCoordinates.IsFold = true;
+                textCoordinates.Column = 0;
             }
             else
             {
@@ -57,26 +57,26 @@ public partial class TextBox
                     column += textBlockRender.Text.Length;
                     pageX -= textBlockRender.Width;
                 }
-                pageCoordinates.Column = column;
+                textCoordinates.Column = column;
             }
 
-            pageCoordinates.LineIndex = subLine.LineIndex;
+            textCoordinates.LineIndex = subLine.LineIndex;
         }
 
-        pageCoordinates.Row = row;
+        textCoordinates.Row = row;
 
-        return pageCoordinates;
+        return textCoordinates;
     }
 
-    public Vector2 PageToView(PageCoordinates pageCoordinates)
+    private Vector2 PageToView(TextCoordinates textCoordinates)
     {
         var view = new Vector2();
 
-        if (SubLines.Count > pageCoordinates.Row)
+        if (SubLines.Count > textCoordinates.Row)
         {
-            SubLine subLine = SubLines[pageCoordinates.Row];
+            SubLine subLine = SubLines[textCoordinates.Row];
 
-            int column = pageCoordinates.Column;
+            int column = textCoordinates.Column;
             float pageX = 0.0f + subLine.TabWidth;
             foreach (var textBlockRender in subLine.TextBlockRenders)
             {
@@ -102,7 +102,7 @@ public partial class TextBox
         }
 
         view.X += LineNumberWidth + FoldWidth;
-        view.Y = pageCoordinates.Row * GetFontHeight();
+        view.Y = textCoordinates.Row * GetFontHeight();
 
         return view;
     }

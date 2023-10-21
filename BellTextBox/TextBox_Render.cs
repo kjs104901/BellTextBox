@@ -13,6 +13,8 @@ public partial class TextBox
 
     public void Render(Vector2 viewPos, Vector2 viewSize)
     {
+        Set(this);
+        
         _viewPos = viewPos;
         _viewSize = viewSize;
         ProcessInput();
@@ -25,8 +27,8 @@ public partial class TextBox
         
         float lineNumberWidthMax = 0.0f;
         
-        var pageStart = ViewToPage(_viewPos);
-        var pageEnd = ViewToPage(_viewPos + _viewSize);
+        var pageStart = ViewToText(_viewPos);
+        var pageEnd = ViewToText(_viewPos + _viewSize);
         
         for (int i = pageStart.Row; i <= pageEnd.Row; i++)
         {

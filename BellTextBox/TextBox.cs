@@ -12,6 +12,10 @@ public partial class TextBox
     public readonly Theme Theme;
     
     private readonly IBackend _backend;
+    
+    private static readonly ThreadLocal<TextBox> ThreadLocalTextBox = new();
+    public static TextBox Get() => ThreadLocalTextBox.Value ?? throw new Exception("No TextBox set");
+    private static void Set(TextBox textBox) => ThreadLocalTextBox.Value = textBox;
 
     public TextBox(IBackend backend)
     {
