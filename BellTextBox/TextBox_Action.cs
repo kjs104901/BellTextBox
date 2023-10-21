@@ -1,4 +1,5 @@
-﻿using Bell.Data;
+﻿using System.Text;
+using Bell.Data;
 using Action = Bell.Data.Action;
 
 namespace Bell;
@@ -87,18 +88,18 @@ public partial class TextBox
 
     internal string GetActionDebugString()
     {
-        string result = "";
-        result += "History:\n";
+        StringBuilder sb = new ();
+        sb.AppendLine("History:");
         foreach (var action in _actionHistory)
         {
-            result += action.GetDebugString() + "\n";
+            sb.AppendLine(action.GetDebugString());
         }
 
-        result += "Redo History:\n";
+        sb.AppendLine("Redo History:");
         foreach (var action in _actionRedoHistory)
         {
-            result += action.GetDebugString() + "\n";
+            sb.AppendLine(action.GetDebugString());
         }
-        return result;
+        return sb.ToString();
     }
 }

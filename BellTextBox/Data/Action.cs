@@ -84,7 +84,7 @@ internal class DeleteSelection : Action
     protected override List<Command> CreateCommands(Caret caret)
     {
         var commands = new List<Command>();
-        if (caret.HasSelection)
+        if (false == caret.HasSelection)
             return commands;
 
         caret.GetSortedSelection(out TextCoordinates start, out TextCoordinates end);

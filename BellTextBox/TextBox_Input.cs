@@ -82,9 +82,15 @@ public partial class TextBox
             }
             else
             {
-                DoAction(new DeleteSelection());
-                RemoveCaretsSelection();
-                DoAction(new DeleteCharAction(EditDirection.Forward));
+                if (HasCaretsSelection())
+                {
+                    DoAction(new DeleteSelection());
+                    RemoveCaretsSelection();
+                }
+                else
+                {
+                    DoAction(new DeleteCharAction(EditDirection.Forward));
+                }
             }
         }
         else if (EnumFlag.Has(hk, HotKeys.Backspace)) // Backspace
@@ -95,9 +101,15 @@ public partial class TextBox
             }
             else
             {
-                DoAction(new DeleteSelection());
-                RemoveCaretsSelection();
-                DoAction(new DeleteCharAction(EditDirection.Backward));
+                if (HasCaretsSelection())
+                {
+                    DoAction(new DeleteSelection());
+                    RemoveCaretsSelection();
+                }
+                else
+                {
+                    DoAction(new DeleteCharAction(EditDirection.Backward));
+                }
             }
         }
         else if (EnumFlag.Has(hk, HotKeys.Enter)) // Enter
@@ -221,7 +233,6 @@ public partial class TextBox
         }
 
         // Chars
-        bool selectionDeleted = false;
         foreach (char keyboardInputChar in keyboardInput.Chars)
         {
             if (keyboardInputChar == 0)
@@ -245,11 +256,10 @@ public partial class TextBox
             if (keyboardInputChar < 32)
                 continue;
 
-            if (false == selectionDeleted)
+            if (HasCaretsSelection())
             {
                 DoAction(new DeleteSelection());
                 RemoveCaretsSelection();
-                selectionDeleted = true;
             }
 
             DoAction(new InputCharAction(EditDirection.Forward, keyboardInputChar));

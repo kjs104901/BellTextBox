@@ -25,10 +25,7 @@ public partial class TextBox
     public string GetDebugString()
     {
         var sb = new StringBuilder();
-        foreach (Action action in _actionHistory)
-        {
-            sb.AppendLine(action.GetDebugString());
-        }
+        sb.AppendLine(GetActionDebugString());
         return sb.ToString();
     }
 }
