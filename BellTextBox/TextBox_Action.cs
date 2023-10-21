@@ -9,8 +9,6 @@ public partial class TextBox
     private readonly LinkedList<Action> _history = new();
     private readonly LinkedList<Action> _redoHistory = new();
     
-    public abstract void SetClipboard(string text);
-    public abstract string GetClipboard();
     
     internal void DoAction(Action action)
     {

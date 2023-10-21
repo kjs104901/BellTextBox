@@ -81,8 +81,8 @@ public partial class TextBox
     {
         subLines.Clear();
 
-        var pageStart = ViewToPage(ViewStart);
-        var pageEnd = ViewToPage(ViewEnd);
+        var pageStart = ViewToPage(_viewPos);
+        var pageEnd = ViewToPage(_viewPos + _viewSize);
 
         var textStart = PageToText(pageStart, -3);
         var textEnd = PageToText(pageEnd, 3);

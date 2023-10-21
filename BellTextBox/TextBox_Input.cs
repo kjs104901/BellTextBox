@@ -7,15 +7,10 @@ namespace Bell;
 
 public partial class TextBox
 {
-    //protected KeyboardInput KeyboardInput;
-    //protected MouseInput MouseInput;
-    //protected ViewInput ViewInput;
+    private Vector2 _viewPos;
+    private Vector2 _viewSize;
 
-    public Vector2 ViewStart;
-    public Vector2 ViewEnd;
     public Vector2 PageSize;
-
-    private string _imeComposition;
 
     private TextCoordinates _textStart;
     private TextCoordinates _textEnd;
@@ -23,44 +18,31 @@ public partial class TextBox
     private Vector2 _mouseDragStartPage;
     private TextCoordinates _mouseDragStartText;
 
-    protected KeyboardInput KeyboardInput = new KeyboardInput() { Chars = new List<char>() };
-    protected MouseInput MouseInput = new MouseInput();
-    protected ViewInput ViewInput = new ViewInput();
     private bool _shiftPressed;
     private bool _altPressed;
 
-    protected void ClearKeyboardInput()
+    private string _imeComposition = "";
+
+    private void ProcessInput()
     {
-        KeyboardInput.HotKeys = HotKeys.None;
-        KeyboardInput.Chars?.Clear();
-        KeyboardInput.ImeComposition = string.Empty;
+        ProcessKeyboardInput();
+        ProcessMouseInput();
+        ProcessViewInput();
+
+        _backend.OnInputEnd();
     }
 
-    protected void ClearMouseInput()
-    {
-        MouseInput.Position.X = 0.0f;
-        MouseInput.Position.Y = 0.0f;
-        MouseInput.LeftAction = MouseAction.None;
-        MouseInput.MiddleAction = MouseAction.None;
-    }
-
-    protected void ClearViewInput()
-    {
-        ViewInput.X = 0.0f;
-        ViewInput.Y = 0.0f;
-        ViewInput.W = 0.0f;
-        ViewInput.H = 0.0f;
-    }
-
-    protected void ProcessKeyboardInput()
+    private void ProcessKeyboardInput()
     {
         _caretChanged = false;
 
-        var hk = KeyboardInput.HotKeys;
+        KeyboardInput keyboardInput = _backend.GetKeyboardInput();
+
+        var hk = keyboardInput.HotKeys;
 
         _shiftPressed |= EnumFlag.Has(hk, HotKeys.Shift);
         _altPressed |= EnumFlag.Has(hk, HotKeys.Alt);
-        _imeComposition = KeyboardInput.ImeComposition;
+        _imeComposition = keyboardInput.ImeComposition;
 
         if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.Z)) // UndoAction
             UndoAction();
@@ -227,50 +209,49 @@ public partial class TextBox
 
         // Chars
         bool selectionDeleted = false;
-        if (null != KeyboardInput.Chars)
+        foreach (char keyboardInputChar in keyboardInput.Chars)
         {
-            foreach (char keyboardInputChar in KeyboardInput.Chars)
+            if (keyboardInputChar == 0)
+                continue;
+
+            if (keyboardInputChar == '\n')
             {
-                if (keyboardInputChar == 0)
-                    continue;
-
-                if (keyboardInputChar == '\n')
-                {
-                    DoAction(new EnterAction(this));
-                    continue;
-                }
-
-                if (keyboardInputChar == '\t')
-                {
-                    if (EnumFlag.Has(hk, HotKeys.Shift))
-                        DoAction(new UnTabAction(this));
-                    else
-                        DoAction(new TabAction(this));
-                    continue;
-                }
-
-                if (keyboardInputChar < 32)
-                    continue;
-
-                if (false == selectionDeleted)
-                {
-                    DoAction(new DeleteSelection(this));
-                    selectionDeleted = true;
-                }
-
-                DoAction(new InputCharAction(this, EditDirection.Forward)); // keyboardInputChar
+                DoAction(new EnterAction(this));
+                continue;
             }
+
+            if (keyboardInputChar == '\t')
+            {
+                if (EnumFlag.Has(hk, HotKeys.Shift))
+                    DoAction(new UnTabAction(this));
+                else
+                    DoAction(new TabAction(this));
+                continue;
+            }
+
+            if (keyboardInputChar < 32)
+                continue;
+
+            if (false == selectionDeleted)
+            {
+                DoAction(new DeleteSelection(this));
+                selectionDeleted = true;
+            }
+
+            DoAction(new InputCharAction(this, EditDirection.Forward)); // keyboardInputChar
         }
     }
 
-    protected void ProcessMouseInput()
+    private void ProcessMouseInput()
     {
-        Vector2 pageCoordinates = ViewToPage(MouseInput.Position);
+        MouseInput mouseInput = _backend.GetMouseInput();
+
+        Vector2 pageCoordinates = ViewToPage(mouseInput.Position);
         TextCoordinates textCoordinates = PageToText(pageCoordinates);
 
         if (textCoordinates.IsFold)
         {
-            if (MouseAction.Click == MouseInput.LeftAction)
+            if (MouseAction.Click == mouseInput.LeftAction)
             {
                 var folding = SubLines[textCoordinates.Row].Folding;
                 if (null != folding)
@@ -285,30 +266,30 @@ public partial class TextBox
             }
         }
 
-        if (MouseInput.Position.X > ViewStart.X && MouseInput.Position.X < ViewEnd.X &&
-            MouseInput.Position.Y > ViewStart.Y && MouseInput.Position.Y < ViewEnd.Y)
+        if (mouseInput.Position.X > _viewPos.X && mouseInput.Position.X < _viewPos.X + _viewSize.X &&
+            mouseInput.Position.Y > _viewPos.Y && mouseInput.Position.Y < _viewPos.Y + _viewSize.Y)
         {
             if (textCoordinates.IsFold)
             {
-                SetMouseCursor(MouseCursor.Hand);
+                _backend.SetMouseCursor(MouseCursor.Hand);
             }
             else if (textCoordinates.IsLineNumber)
             {
             }
             else
             {
-                SetMouseCursor(MouseCursor.Beam);
+                _backend.SetMouseCursor(MouseCursor.Beam);
             }
         }
 
-        if (MouseAction.Click == MouseInput.LeftAction ||
-            MouseAction.Click == MouseInput.MiddleAction)
+        if (MouseAction.Click == mouseInput.LeftAction ||
+            MouseAction.Click == mouseInput.MiddleAction)
         {
             _mouseDragStartPage = pageCoordinates;
             _mouseDragStartText = textCoordinates;
         }
 
-        if (MouseAction.Click == MouseInput.LeftAction)
+        if (MouseAction.Click == mouseInput.LeftAction)
         {
             if (_shiftPressed)
             {
@@ -323,7 +304,7 @@ public partial class TextBox
                 SingleCaret(textCoordinates);
             }
         }
-        else if (MouseAction.DoubleClick == MouseInput.LeftAction)
+        else if (MouseAction.DoubleClick == mouseInput.LeftAction)
         {
             SingleCaret(textCoordinates);
 
@@ -340,7 +321,7 @@ public partial class TextBox
                 MoveCaretsSelection(CaretMove.StartOfWord);
             }
         }
-        else if (MouseAction.Dragging == MouseInput.LeftAction)
+        else if (MouseAction.Dragging == mouseInput.LeftAction)
         {
             if (_altPressed)
             {
@@ -351,7 +332,7 @@ public partial class TextBox
                 SingleCaret(_mouseDragStartText).Position = textCoordinates;
             }
         }
-        else if (MouseAction.Dragging == MouseInput.MiddleAction)
+        else if (MouseAction.Dragging == mouseInput.MiddleAction)
         {
             SelectRectangle(_mouseDragStartPage, pageCoordinates);
         }
@@ -362,19 +343,8 @@ public partial class TextBox
 
     protected void ProcessViewInput()
     {
-        ViewStart = new Vector2()
-        {
-            X = ViewInput.X,
-            Y = ViewInput.Y
-        };
-        ViewEnd = new Vector2()
-        {
-            X = ViewInput.X + ViewInput.W,
-            Y = ViewInput.Y + ViewInput.H
-        };
-
-        var pageStart = ViewToPage(ViewStart);
-        var pageEnd = ViewToPage(ViewEnd);
+        var pageStart = ViewToPage(_viewPos);
+        var pageEnd = ViewToPage(_viewPos + _viewSize);
 
         TextCoordinates textStart = PageToText(pageStart, -3);
         TextCoordinates textEnd = PageToText(pageEnd, 3);
@@ -389,7 +359,7 @@ public partial class TextBox
 
         if (WrapMode.Word == WrapMode || WrapMode.BreakWord == WrapMode)
         {
-            PageSize.X = ViewInput.W;
+            PageSize.X = _viewSize.X;
         }
 
         PageSize.Y = SubLines.Count * GetFontHeight();

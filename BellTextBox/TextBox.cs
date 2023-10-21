@@ -10,9 +10,13 @@ public partial class TextBox
     public readonly StringBuilder StringBuilder = new();
 
     public readonly Theme Theme;
+    
+    private readonly IBackend _backend;
 
-    protected TextBox()
+    public TextBox(IBackend backend)
     {
+        _backend = backend;
+
         Theme = new DarkTheme();
         
         SubLinesCache = new Cache<List<SubLine>>(new List<SubLine>(), UpdateSubLines);

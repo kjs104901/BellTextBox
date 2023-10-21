@@ -5,7 +5,9 @@ VisualStudioVersion = 17.7.34018.315
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BellTextBox", "BellTextBox\BellTextBox.csproj", "{4D8FB72D-CEA2-4507-A247-D5BC6C7089AB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BellTextBox.Demo", "BellTextBox.Demo\BellTextBox.Demo.csproj", "{D7660EE4-72D9-4403-831D-DA066D3838AA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BellTextBox.Demo", "BellTextBox.Demo\BellTextBox.Demo.csproj", "{D7660EE4-72D9-4403-831D-DA066D3838AA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BellTextBox.ImGuiNet", "BellTextBox.ImGuiNet\BellTextBox.ImGuiNet.csproj", "{068D3D50-F1C9-41C0-B2BB-4F83864490C7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{D7660EE4-72D9-4403-831D-DA066D3838AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D7660EE4-72D9-4403-831D-DA066D3838AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D7660EE4-72D9-4403-831D-DA066D3838AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{068D3D50-F1C9-41C0-B2BB-4F83864490C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{068D3D50-F1C9-41C0-B2BB-4F83864490C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{068D3D50-F1C9-41C0-B2BB-4F83864490C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{068D3D50-F1C9-41C0-B2BB-4F83864490C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

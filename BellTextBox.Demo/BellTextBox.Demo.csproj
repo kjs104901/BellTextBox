@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,18 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <RootNamespace>BellTextBox.Demo</RootNamespace>
+    <RootNamespace>Bell.Demo</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Veldrid" Version="4.9.0" />
     <PackageReference Include="Veldrid.ImGui" Version="5.89.2-ga121087cad" />
     <PackageReference Include="Veldrid.StartupUtilities" Version="4.9.0" />
-  </ItemGroup>
-
-
-  <ItemGroup>
-    <ProjectReference Include="..\BellTextBox\BellTextBox.csproj" />
   </ItemGroup>
 
 
@@ -34,6 +29,14 @@
     <None Update="Fonts\NanumGothic.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+
+
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\BellTextBox.ImGuiNet\BellTextBox.ImGuiNet.csproj" />
   </ItemGroup>
 
 

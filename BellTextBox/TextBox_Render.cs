@@ -6,22 +6,22 @@ using Bell.Utils;
 
 namespace Bell;
 
-public abstract partial class TextBox
+public partial class TextBox
 {
-    protected abstract void RenderText(Vector2 pos, string text, Vector4 color);
-    protected abstract void RenderLine(Vector2 start, Vector2 end, Vector4 color, float thickness);
-    protected abstract void RenderRectangle(Vector2 start, Vector2 end, Vector4 color);
-
-    protected abstract void SetMouseCursor(MouseCursor mouseCursor);
-
     public float LineNumberWidth = 10.0f;
     public float FoldWidth = 10.0f;
 
-    protected void Render()
+    public void Render(Vector2 viewPos, Vector2 viewSize)
     {
+        _viewPos = viewPos;
+        _viewSize = viewSize;
+        ProcessInput();
+        
         UpdateReferenceSize();
         FoldWidth = GetFontReferenceWidth() * 2;
 
+        _backend.RenderPage(PageSize, new Vector4(0.2f, 0.1f, 0.1f, 1.0f)); // TODO background color
+        
         float lineNumberWidthMax = 0.0f;
         foreach (SubLine subLine in VisibleSubLines)
         {
@@ -39,14 +39,14 @@ public abstract partial class TextBox
 
             if (subLine.Selected)
             {
-                RenderRectangle(new Vector2(lineStartX + subLine.SelectionStart, lineTextStartY),
+                _backend.RenderRectangle(new Vector2(lineStartX + subLine.SelectionStart, lineTextStartY),
                     new Vector2(lineStartX + subLine.SelectionEnd, lineTextEndY),
                     Theme.LineSelectedBackgroundColor.ToVector());
             }
 
             foreach (TextBlockRender textBlockRender in subLine.TextBlockRenders)
             {
-                RenderText(
+                _backend.RenderText(
                     new Vector2(lineStartX + textBlockRender.PosX, lineTextStartY),
                     textBlockRender.Text,
                     textBlockRender.ColorStyle.ToVector());
@@ -56,17 +56,17 @@ public abstract partial class TextBox
             {
                 if (whiteSpaceRender.C == ' ')
                 {
-                    RenderText(
+                    _backend.RenderText(
                         new Vector2(lineStartX + whiteSpaceRender.PosX, lineTextStartY),
                         "·",
                         Theme.LineWhiteSpaceFontColor.ToVector());
                 }
                 else if (whiteSpaceRender.C == '\t')
                 {
-                    RenderLine(
+                    _backend.RenderLine(
                         new Vector2(lineStartX + whiteSpaceRender.PosX,
                             lineTextStartY),
-                        new Vector2(lineStartX + whiteSpaceRender.PosX + GetCharWidth(' ') * 4, // TODO setting tab size
+                        new Vector2(lineStartX + whiteSpaceRender.PosX + _backend.GetCharWidth(' ') * 4, // TODO setting tab size
                             lineTextStartY),
                         Theme.LineWhiteSpaceFontColor.ToVector(),
                         1.0f);
@@ -85,14 +85,14 @@ public abstract partial class TextBox
 
                 lineNumberWidthMax = Math.Max(lineNumberWidthMax, lineNumberWidth);
 
-                RenderText(new Vector2(LineNumberWidth - lineNumberWidth, lineTextStartY),
+                _backend.RenderText(new Vector2(LineNumberWidth - lineNumberWidth, lineTextStartY),
                     lineIndex,
                     Theme.DefaultFontColor.ToVector());
             }
 
             if (subLine.Folding != null)
             {
-                RenderText(new Vector2(LineNumberWidth, lineTextStartY),
+                _backend.RenderText(new Vector2(LineNumberWidth, lineTextStartY),
                     subLine.Folding.Folded ? " >" : " V",
                     Theme.DefaultFontColor.ToVector());
             }
@@ -100,7 +100,7 @@ public abstract partial class TextBox
 
             if (subLine.CaretPosition)
             {
-                RenderLine(
+                _backend.RenderLine(
                     new Vector2(
                         lineStartX + subLine.CaretPositionPosition - 1.0f,
                         lineTextStartY),
@@ -113,7 +113,7 @@ public abstract partial class TextBox
 
             if (subLine.CaretSelection)
             {
-                RenderLine(
+                _backend.RenderLine(
                     new Vector2(
                         lineStartX + subLine.CaretSelectionPosition - 1.0f,
                         lineTextStartY),

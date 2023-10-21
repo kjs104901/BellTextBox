@@ -1,11 +1,11 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
-using Bell;
+using Bell.ImGuiNet;
 using ImGuiNET;
 using Veldrid;
 using Veldrid.StartupUtilities;
 
-namespace BellTextBox.Demo;
+namespace Bell.Demo;
 
 class ImGuiDemo
 {
@@ -97,7 +97,7 @@ public class FontStyle : IComparable<FontStyle>
             .AddFontFromFileTTF(@"Fonts\MaruBuri.ttf", 26.0f, null, ImGui.GetIO().Fonts.GetGlyphRangesKorean());
         imGuiRenderer.RecreateFontDeviceTexture(graphicsDevice);
 
-        var imGuiBellTextBox = new ImGuiBellTextBox();
+        var imGuiBellTextBox = new ImGuiTextBox();
         imGuiBellTextBox.SetText(textInput);
         
         while (sdl2Window.Exists)
@@ -121,7 +121,7 @@ public class FontStyle : IComparable<FontStyle>
             
             ImGui.InputTextMultiline("Test", ref textInput, 1024, new Vector2(-1, 300));
 
-            imGuiBellTextBox.Update(new Vector2(-1, -1));
+            imGuiBellTextBox.Render(new Vector2(-1, -1));
 
             ImGui.PopFont();
             ImGui.End();

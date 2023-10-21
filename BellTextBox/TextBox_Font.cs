@@ -5,10 +5,10 @@ public partial class TextBox
     private readonly Dictionary<float, Dictionary<char, float>> _sizeCacheDictionary = new();
 
     private Dictionary<char, float> _sizeWidthCache = new();
-    
+
     public void UpdateReferenceSize()
     {
-        var fontSize = GetFontSize();
+        var fontSize = _backend.GetFontSize();
         if (false == _sizeCacheDictionary.ContainsKey(fontSize))
             _sizeCacheDictionary.TryAdd(fontSize, new Dictionary<char, float>());
         _sizeWidthCache = _sizeCacheDictionary[fontSize];
@@ -22,25 +22,23 @@ public partial class TextBox
     public float GetFontWidth(char c)
     {
         // TODO handle \t width?
-        
+
         if (false == _sizeWidthCache.TryGetValue(c, out float fontWidth))
         {
-            fontWidth = GetCharWidth(c);
+            fontWidth = _backend.GetCharWidth(c);
             _sizeWidthCache[c] = fontWidth;
         }
+
         return fontWidth;
     }
-    
+
     public float GetFontHeight()
     {
-        return GetFontSize() * LeadingHeight;
+        return _backend.GetFontSize() * LeadingHeight;
     }
 
     public float GetFontHeightOffset()
     {
-        return ((GetFontSize() * LeadingHeight) - GetFontSize()) / 2.0f;
+        return ((_backend.GetFontSize() * LeadingHeight) - _backend.GetFontSize()) / 2.0f;
     }
-    
-    public abstract float GetCharWidth(char c);
-    public abstract float GetFontSize();
 }

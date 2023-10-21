@@ -1,4 +1,4 @@
-﻿namespace BellTextBox.Demo;
+﻿namespace Bell.Demo;
 
 internal static class Program
 {

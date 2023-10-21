@@ -61,7 +61,7 @@ public partial class TextBox
     public float GetTabRenderSize()
     {
         if (WordWrapIndent)
-            return GetCharWidth(' ') * TabSize;
+            return _backend.GetCharWidth(' ') * TabSize;
         return 0.0f;
     }
 }
