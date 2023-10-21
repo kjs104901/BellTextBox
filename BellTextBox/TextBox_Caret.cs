@@ -21,9 +21,6 @@ public enum CaretMove
 
     PageUp,
     PageDown,
-
-    Position,
-    Selection
 }
 
 public partial class TextBox
@@ -71,12 +68,21 @@ public partial class TextBox
         }
         SetCaretDirty();
     }
-
-    public void MoveCaretsSelection(CaretMove caretMove)
+    
+    public void MoveCaretsAnchor(CaretMove caretMove)
     {
         foreach (Caret caret in Carets)
         {
             // TODO caret move
+        }
+        SetCaretDirty();
+    }
+
+    public void RemoveCaretsSelection()
+    {
+        foreach (Caret caret in Carets)
+        {
+            caret.AnchorPosition = caret.Position;
         }
         SetCaretDirty();
     }

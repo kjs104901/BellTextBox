@@ -2,12 +2,10 @@
 
 internal abstract class Command
 {
-    public abstract void Do();
-    public abstract void Undo();
+    public abstract void Do(Caret caret);
+    public abstract void Undo(Caret caret);
     public abstract string GetDebugString();
 }
-
-
 
 internal enum EditDirection
 {
@@ -19,18 +17,18 @@ internal class InputCharCommand : Command
 {
     private EditDirection _direction;
     private char[] _chars;
-    
+
     public InputCharCommand(EditDirection direction, char[] chars)
     {
         _direction = direction;
         _chars = chars;
     }
-    
-    public override void Do()
+
+    public override void Do(Caret caret)
     {
     }
 
-    public override void Undo()
+    public override void Undo(Caret caret)
     {
     }
 
@@ -50,12 +48,12 @@ internal class DeleteCharCommand : Command
         _direction = direction;
         _count = count;
     }
-    
-    public override void Do()
+
+    public override void Do(Caret caret)
     {
     }
 
-    public override void Undo()
+    public override void Undo(Caret caret)
     {
     }
 
@@ -65,20 +63,20 @@ internal class DeleteCharCommand : Command
     }
 }
 
-internal class SplitLine : Command
+internal class SplitLineCommand : Command
 {
     private EditDirection _direction;
-    
-    public SplitLine(EditDirection direction)
+
+    public SplitLineCommand(EditDirection direction)
     {
         _direction = direction;
     }
-    
-    public override void Do()
+
+    public override void Do(Caret caret)
     {
     }
 
-    public override void Undo()
+    public override void Undo(Caret caret)
     {
     }
 
@@ -88,36 +86,20 @@ internal class SplitLine : Command
     }
 }
 
-internal class MergeLine : Command
+internal class MergeLineCommand : Command
 {
     private EditDirection _direction;
-    
-    public MergeLine(EditDirection direction)
+
+    public MergeLineCommand(EditDirection direction)
     {
         _direction = direction;
     }
-    
-    public override void Do()
+
+    public override void Do(Caret caret)
     {
     }
 
-    public override void Undo()
-    {
-    }
-
-    public override string GetDebugString()
-    {
-        throw new NotImplementedException();
-    }
-}
-
-internal class IndentSelection : Command
-{
-    public override void Do()
-    {
-    }
-
-    public override void Undo()
+    public override void Undo(Caret caret)
     {
     }
 
@@ -127,13 +109,29 @@ internal class IndentSelection : Command
     }
 }
 
-internal class UnindentSelection : Command
+internal class IndentSelectionCommand : Command
 {
-    public override void Do()
+    public override void Do(Caret caret)
     {
     }
 
-    public override void Undo()
+    public override void Undo(Caret caret)
+    {
+    }
+
+    public override string GetDebugString()
+    {
+        throw new NotImplementedException();
+    }
+}
+
+internal class UnindentSelectionCommand : Command
+{
+    public override void Do(Caret caret)
+    {
+    }
+
+    public override void Undo(Caret caret)
     {
     }
 

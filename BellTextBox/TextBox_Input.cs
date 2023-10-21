@@ -55,19 +55,21 @@ public partial class TextBox
         {
             CopyClipboard();
             DoAction(new DeleteSelection());
+            RemoveCaretsSelection();
         }
         else if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.A)) // Select All
         {
-            MoveCaretsSelection(CaretMove.StartOfFile);
+            MoveCaretsAnchor(CaretMove.StartOfFile);
             MoveCaretsPosition(CaretMove.EndOfFile);
         }
         else if (EnumFlag.Has(hk, HotKeys.Delete)) // Delete
         {
             if (EnumFlag.Has(hk, HotKeys.Shift))
             {
-                MoveCaretsSelection(CaretMove.StartOfFile);
+                MoveCaretsAnchor(CaretMove.StartOfFile);
                 MoveCaretsPosition(CaretMove.EndOfFile);
                 DoAction(new DeleteSelection());
+                RemoveCaretsSelection();
             }
             else
             {
@@ -103,79 +105,79 @@ public partial class TextBox
         {
             if (EnumFlag.Has(hk, HotKeys.Shift))
             {
-                MoveCaretsSelection(CaretMove.Up);
+                MoveCaretsAnchor(CaretMove.Up);
             }
             else
             {
                 MoveCaretsPosition(CaretMove.Up);
-                MoveCaretsSelection(CaretMove.Position);
+                RemoveCaretsSelection();
             }
         }
         else if (EnumFlag.Has(hk, HotKeys.DownArrow)) // Move Down
         {
             if (EnumFlag.Has(hk, HotKeys.Shift))
             {
-                MoveCaretsSelection(CaretMove.Down);
+                MoveCaretsAnchor(CaretMove.Down);
             }
             else
             {
                 MoveCaretsPosition(CaretMove.Down);
-                MoveCaretsSelection(CaretMove.Position);
+                RemoveCaretsSelection();
             }
         }
         else if (EnumFlag.Has(hk, HotKeys.LeftArrow)) // Move Left
         {
             if (EnumFlag.Has(hk, HotKeys.Shift))
             {
-                MoveCaretsSelection(CaretMove.Left);
+                MoveCaretsAnchor(CaretMove.Left);
             }
             else
             {
                 MoveCaretsPosition(CaretMove.Left);
-                MoveCaretsSelection(CaretMove.Position);
+                RemoveCaretsSelection();
             }
         }
         else if (EnumFlag.Has(hk, HotKeys.RightArrow)) // Move Right
         {
             if (EnumFlag.Has(hk, HotKeys.Shift))
             {
-                MoveCaretsSelection(CaretMove.Right);
+                MoveCaretsAnchor(CaretMove.Right);
             }
             else
             {
                 MoveCaretsPosition(CaretMove.Right);
-                MoveCaretsSelection(CaretMove.Position);
+                RemoveCaretsSelection();
             }
         }
         else if (EnumFlag.Has(hk, HotKeys.PageUp)) // Move PageUp
         {
             if (EnumFlag.Has(hk, HotKeys.Shift))
             {
-                MoveCaretsSelection(CaretMove.PageUp);
+                MoveCaretsAnchor(CaretMove.PageUp);
             }
             else
             {
                 MoveCaretsPosition(CaretMove.PageUp);
-                MoveCaretsSelection(CaretMove.Position);
+                RemoveCaretsSelection();
             }
         }
         else if (EnumFlag.Has(hk, HotKeys.PageDown)) // Move PageDown
         {
             if (EnumFlag.Has(hk, HotKeys.Shift))
             {
-                MoveCaretsSelection(CaretMove.PageDown);
+                MoveCaretsAnchor(CaretMove.PageDown);
             }
             else
             {
                 MoveCaretsPosition(CaretMove.PageDown);
-                MoveCaretsSelection(CaretMove.Position);
+                RemoveCaretsSelection();
             }
         }
         else if (EnumFlag.Has(hk, HotKeys.Home))
         {
             if (EnumFlag.Has(hk, HotKeys.Shift))
             {
-                MoveCaretsSelection(
+                MoveCaretsAnchor(
                     EnumFlag.Has(hk, HotKeys.Ctrl) ? CaretMove.StartOfFile : CaretMove.StartOfLine);
             }
             else
@@ -183,14 +185,14 @@ public partial class TextBox
                 MoveCaretsPosition(
                     EnumFlag.Has(hk, HotKeys.Ctrl) ? CaretMove.StartOfFile : CaretMove.StartOfLine);
 
-                MoveCaretsSelection(CaretMove.Position);
+                RemoveCaretsSelection();
             }
         }
         else if (EnumFlag.Has(hk, HotKeys.End))
         {
             if (EnumFlag.Has(hk, HotKeys.Shift))
             {
-                MoveCaretsSelection(
+                MoveCaretsAnchor(
                     EnumFlag.Has(hk, HotKeys.Ctrl) ? CaretMove.EndOfFile : CaretMove.EndOfLine);
             }
             else
@@ -198,7 +200,7 @@ public partial class TextBox
                 MoveCaretsPosition(
                     EnumFlag.Has(hk, HotKeys.Ctrl) ? CaretMove.EndOfFile : CaretMove.EndOfLine);
 
-                MoveCaretsSelection(CaretMove.Position);
+                RemoveCaretsSelection();
             }
         }
         else if (EnumFlag.Has(hk, HotKeys.Insert))
@@ -237,7 +239,7 @@ public partial class TextBox
                 selectionDeleted = true;
             }
 
-            DoAction(new InputCharAction(EditDirection.Forward)); // keyboardInputChar
+            DoAction(new InputCharAction(EditDirection.Forward, keyboardInputChar));
         }
     }
 
@@ -311,13 +313,13 @@ public partial class TextBox
             {
                 // Select Line
                 MoveCaretsPosition(CaretMove.EndOfLine);
-                MoveCaretsSelection(CaretMove.StartOfLine);
+                MoveCaretsAnchor(CaretMove.StartOfLine);
             }
             else
             {
                 // Select word
                 MoveCaretsPosition(CaretMove.EndOfWord);
-                MoveCaretsSelection(CaretMove.StartOfWord);
+                MoveCaretsAnchor(CaretMove.StartOfWord);
             }
         }
         else if (MouseAction.Dragging == mouseInput.LeftAction)

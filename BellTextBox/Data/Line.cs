@@ -144,8 +144,13 @@ public class Line
     private List<SubLine> UpdateSubLines(List<SubLine> subLines)
     {
         subLines.Clear();
-
-        float tabWidth = ThreadLocal.TextBox.CountTabStart(String) * ThreadLocal.TextBox.GetTabRenderSize(); // TODO Cache
+        
+        float wrapIndentWidth = 0.0f;
+        if (ThreadLocal.TextBox.WordWrapIndent)
+        {
+            // TODO Cache
+            wrapIndentWidth = ThreadLocal.TextBox.CountTabStart(String) * ThreadLocal.TextBox.GetTabRenderSize(); 
+        }
 
         int wrapIndex = 0;
         SubLine subLine = new SubLine(Index, wrapIndex, 0, 0.0f);
@@ -206,7 +211,7 @@ public class Line
                 subLines.Add(subLine);
 
                 wrapIndex++;
-                subLine = new SubLine(Index, wrapIndex, i, tabWidth);
+                subLine = new SubLine(Index, wrapIndex, i, wrapIndentWidth);
 
                 isFirstCharInLine = true;
                 renderGroupColor = ThreadLocal.TextBox.Theme.DefaultFontColor;

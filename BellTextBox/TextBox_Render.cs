@@ -34,7 +34,7 @@ public partial class TextBox
             var lineEndY = (subLine.Row + 1) * GetFontHeight();
             var lineTextEndY = lineEndY - GetFontHeightOffset();
 
-            var lineStartX = LineNumberWidth + FoldWidth + subLine.TabWidth;
+            var lineStartX = LineNumberWidth + FoldWidth + subLine.WrapIndentWidth;
 
             if (subLine.LineSelection.Selected)
             {
@@ -126,25 +126,25 @@ public partial class TextBox
 
         LineNumberWidth = lineNumberWidthMax + 30.0f; // TODO setting padding option
 
-        //foreach (Caret caret in Carets)
-        //{
-        //    Vector2 caretInPage = TextToPage(caret.Position);
-        //    Vector2 caretInView = PageToView(caretInPage);
-//
-        //    RenderLine(new Vector2(caretInView.X - 1, caretInView.Y + GetFontHeightOffset()),
-        //        new Vector2(caretInView.X - 1, caretInView.Y + GetFontHeight() - GetFontHeightOffset()),
-        //        Theme.DefaultFontColor.ToVector(),
-        //        2.0f);
-//
-        //    Vector2 selectionInPage = TextToPage(caret.Selection);
-        //    Vector2 selectionInView = PageToView(selectionInPage);
-//
-        //    RenderLine(new Vector2(selectionInView.X - 1, selectionInView.Y + GetFontHeightOffset()),
-        //        new Vector2(selectionInView.X - 1, selectionInView.Y + GetFontHeight() - GetFontHeightOffset()),
-        //        Theme.LineCommentFontColor.ToVector(),
-        //        2.0f);
-//
-        //    RenderText(caretInView, _imeComposition, Theme.DefaultFontColor.ToVector());
-        //}
+        foreach (Caret caret in Carets)
+        {
+            Vector2 caretInPage = TextToPage(caret.Position);
+            Vector2 caretInView = PageToView(caretInPage);
+
+            RenderLine(new Vector2(caretInView.X - 1, caretInView.Y + GetFontHeightOffset()),
+                new Vector2(caretInView.X - 1, caretInView.Y + GetFontHeight() - GetFontHeightOffset()),
+                Theme.DefaultFontColor.ToVector(),
+                2.0f);
+
+            Vector2 selectionInPage = TextToPage(caret.Selection);
+            Vector2 selectionInView = PageToView(selectionInPage);
+
+            RenderLine(new Vector2(selectionInView.X - 1, selectionInView.Y + GetFontHeightOffset()),
+                new Vector2(selectionInView.X - 1, selectionInView.Y + GetFontHeight() - GetFontHeightOffset()),
+                Theme.LineCommentFontColor.ToVector(),
+                2.0f);
+
+            RenderText(caretInView, _imeComposition, Theme.DefaultFontColor.ToVector());
+        }
     }
 }

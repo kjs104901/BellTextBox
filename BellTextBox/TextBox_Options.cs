@@ -47,7 +47,7 @@ public partial class TextBox
 
     public int CountTabStart(string line)
     {
-        string tabString = TabMode.Space == TabMode ? new string(' ', TabSize) : "\t";
+        string tabString = GetTabString();
 
         int count = 0;
         while (line.StartsWith(tabString))
@@ -60,8 +60,25 @@ public partial class TextBox
 
     public float GetTabRenderSize()
     {
-        if (WordWrapIndent)
-            return _backend.GetCharWidth(' ') * TabSize;
-        return 0.0f;
+        return _backend.GetCharWidth(' ') * TabSize;
+    }
+
+    public string ReplaceTab(string text)
+    {
+        switch (TabMode)
+        {
+            case TabMode.Space:
+                return text.Replace("\t", new string(' ', TabSize));
+            case TabMode.Tab:
+                return text.Replace(new string(' ', TabSize), "\t");
+        }
+        return text;
+    }
+    
+    public string GetTabString()
+    {
+        if (TabMode.Space == TabMode)
+            return new string(' ', TabSize);
+        return "\t";
     }
 }

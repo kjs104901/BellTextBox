@@ -13,7 +13,7 @@ public class SubLine
 
     public Folding? Folding;
 
-    public float TabWidth;
+    public float WrapIndentWidth;
 
     public readonly List<TextBlockRender> TextBlockRenders = new();
     public readonly List<WhiteSpaceRender> WhiteSpaceRenders = new();
@@ -24,13 +24,13 @@ public class SubLine
     public LineSelection LineSelection => LineSelectionCache.Get();
     public readonly Cache<LineSelection> LineSelectionCache;
 
-    public SubLine(int lineIndex, int wrapIndex, int startCharIndex, float tabWidth)
+    public SubLine(int lineIndex, int wrapIndex, int startCharIndex, float wrapIndentWidth)
     {
         LineIndex = lineIndex;
         WrapIndex = wrapIndex;
         StartCharIndex = startCharIndex;
 
-        TabWidth = tabWidth;
+        WrapIndentWidth = wrapIndentWidth;
 
         LineSelectionCache = new Cache<LineSelection>(new(), UpdateLineSelection);
     }

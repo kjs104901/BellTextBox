@@ -40,7 +40,7 @@ public partial class TextBox
             }
 
             int column = 0;
-            float pageX = x - subLine.TabWidth;
+            float pageX = x - subLine.WrapIndentWidth;
             foreach (var textBlockRender in subLine.TextBlockRenders)
             {
                 if (pageX < textBlockRender.Width)
