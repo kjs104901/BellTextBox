@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using Bell.Data;
+using Bell.Utils;
 
 namespace Bell;
 
@@ -26,16 +27,16 @@ public enum CaretMove
 public partial class TextBox
 {
     public readonly List<Caret> Carets = new();
-    
-    public void SetCaretDirty()
+
+    private void SetCaretDirty()
     {
-        foreach (SubLine subLine in Rows)
+        foreach (SubLine row in Rows)
         {
-            subLine.LineSelectionCache.SetDirty();
+            row.LineSelectionCache.SetDirty();
         }
     }
 
-    public Caret SingleCaret(TextCoordinates textCoordinates = new())
+    private Caret SingleCaret(TextCoordinates textCoordinates = new())
     {
         if (Carets.Count > 1)
             Carets.RemoveRange(1, Carets.Count - 1);
@@ -54,9 +55,16 @@ public partial class TextBox
         return Carets[0];
     }
 
-    public void AddCaret(TextCoordinates textCoordinates)
+    private void AddCaret(TextCoordinates textCoordinates)
     {
         Carets.Add(new Caret() { Position = textCoordinates, AnchorPosition = textCoordinates });
+        SetCaretDirty();
+    }
+
+    public void SetCarets(List<Caret> carets)
+    {
+        Carets.Clear();
+        Carets.AddRange(carets);
         SetCaretDirty();
     }
 
@@ -64,7 +72,7 @@ public partial class TextBox
     {
         foreach (Caret caret in Carets)
         {
-            // TODO caret move
+            caret.Position = FindCoordinates(caret.Position, caretMove);
         }
         SetCaretDirty();
     }
@@ -73,12 +81,109 @@ public partial class TextBox
     {
         foreach (Caret caret in Carets)
         {
-            // TODO caret move
+            caret.AnchorPosition = FindCoordinates(caret.AnchorPosition, caretMove);
         }
         SetCaretDirty();
     }
+    
+    private TextCoordinates FindCoordinates(TextCoordinates currentCoordinates, CaretMove caretMove)
+    {
+        TextCoordinates newCoordinates = currentCoordinates;
+        
+        if (ThreadLocal.TextBox.GetLine(currentCoordinates.LineIndex, out Line line))
+        {
+            if (CaretMove.Right == caretMove)
+            {
+                // Check end of line
+                if (currentCoordinates.CharIndex < line.Chars.Count)
+                {
+                    newCoordinates.CharIndex++;
+                }
+                else
+                {
+                    // Check end of file
+                    if (currentCoordinates.LineIndex < ThreadLocal.TextBox.Lines.Count - 1)
+                    {
+                        newCoordinates.LineIndex++;
+                        newCoordinates.CharIndex = 0;
+                    }
+                }
+            }
+            else if (CaretMove.Left == caretMove)
+            {
+                // Check start of line
+                if (currentCoordinates.CharIndex > 0)
+                {
+                    newCoordinates.CharIndex--;
+                }
+                else
+                {
+                    // Check start of file
+                    if (currentCoordinates.LineIndex > 0)
+                    {
+                        newCoordinates.LineIndex--;
+                        newCoordinates.CharIndex = ThreadLocal.TextBox.Lines[newCoordinates.LineIndex].Chars.Count;
+                    }
+                }
+            }
+            else if (CaretMove.Up == caretMove)
+            {
+                // Check start of file
+                if (currentCoordinates.LineIndex > 0)
+                {
+                    newCoordinates.LineIndex--;
+                    newCoordinates.CharIndex = Math.Min(currentCoordinates.CharIndex, ThreadLocal.TextBox.Lines[newCoordinates.LineIndex].Chars.Count);
+                }
+            }
+            else if (CaretMove.Down == caretMove)
+            {
+                // Check end of file
+                if (currentCoordinates.LineIndex < ThreadLocal.TextBox.Lines.Count - 1)
+                {
+                    newCoordinates.LineIndex++;
+                    newCoordinates.CharIndex = Math.Min(currentCoordinates.CharIndex, ThreadLocal.TextBox.Lines[newCoordinates.LineIndex].Chars.Count);
+                }
+            }
+            else if (CaretMove.StartOfLine == caretMove)
+            {
+                newCoordinates.CharIndex = 0;
+            }
+            else if (CaretMove.EndOfLine == caretMove)
+            {
+                newCoordinates.CharIndex = line.Chars.Count;
+            }
+            else if (CaretMove.StartOfWord == caretMove)
+            {
+                // TODO
+            }
+            else if (CaretMove.EndOfWord == caretMove)
+            {
+                // TODO
+            }
+            else if (CaretMove.StartOfFile == caretMove)
+            {
+                newCoordinates.LineIndex = 0;
+                newCoordinates.CharIndex = 0;
+            }
+            else if (CaretMove.EndOfFile == caretMove)
+            {
+                newCoordinates.LineIndex = ThreadLocal.TextBox.Lines.Count - 1;
+                newCoordinates.CharIndex = ThreadLocal.TextBox.Lines[newCoordinates.LineIndex].Chars.Count;
+            }
+            else if (CaretMove.PageUp == caretMove)
+            {
+                // TODO
+            }
+            else if (CaretMove.PageDown == caretMove)
+            {
+                // TODO
+            }
+        }
+        
+        return newCoordinates;
+    }
 
-    public bool HasCaretsSelection()
+    private bool HasCaretsSelection()
     {
         foreach (Caret caret in Carets)
         {
@@ -97,14 +202,14 @@ public partial class TextBox
         SetCaretDirty();
     }
 
-    public void SelectRectangle(TextCoordinates startPosition, TextCoordinates endPosition)
+    private void SelectRectangle(TextCoordinates startPosition, TextCoordinates endPosition)
     {
         Carets.Clear();
         // TODO select multiple lines
         SetCaretDirty();
     }
 
-    public void CopyClipboard()
+    private void CopyClipboard()
     {
         /*
         if (CaretManager.Carets.Count == 0)
@@ -123,7 +228,7 @@ public partial class TextBox
         */
     }
 
-    public void PasteClipboard()
+    private void PasteClipboard()
     {
         /*
         if (CaretManager.Carets.Count == 0)

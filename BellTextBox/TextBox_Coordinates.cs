@@ -39,7 +39,7 @@ public partial class TextBox
             {
                 if (GetLine(subLine.LineIndex, out line))
                 {
-                    if (line!.Folding != null)
+                    if (line.Folding != null)
                     {
                         textCoordinates.IsFold = true;
                         return;
@@ -76,7 +76,7 @@ public partial class TextBox
             textCoordinates.CharIndex = 0;
             if (GetLine(subLine.LineIndex, out line))
             {
-                foreach (SubLine lineSubLine in line!.SubLines)
+                foreach (SubLine lineSubLine in line.SubLines)
                 {
                     if (subLine.WrapIndex <= lineSubLine.WrapIndex)
                         break;

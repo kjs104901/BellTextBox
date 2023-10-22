@@ -41,14 +41,10 @@ public class SubLine
             return false;
         
         var index = coordinates.CharIndex - StartCharIndex;
-        if (index < 0 || index > CharWidths.Count)
+        if (index < 0 || index >= CharWidths.Count + 1)
             return false;
 
-        if (index == CharWidths.Count)
-            index--;
-        
-        position = 0.0f;
-        for (var i = 0; i <= index; i++)
+        for (var i = 0; i < index; i++)
         {
             position += CharWidths[i];
         }

@@ -83,9 +83,9 @@ public partial class TextBox
                     Theme.DefaultFontColor.ToVector());
             }
             
-            if (GetLine(subLine.LineIndex, out Line? line))
+            if (GetLine(subLine.LineIndex, out Line line))
             {
-                if (line!.Folding != null)
+                if (line.Folding != null)
                 {
                     _backend.RenderText(new Vector2(LineNumberWidth, lineTextStartY),
                         line.Folding.Folded ? " >" : " V",

@@ -38,9 +38,8 @@ internal abstract class Action
     
     public void RedoCommands()
     {
-        ThreadLocal.TextBox.Carets.Clear();
-        ThreadLocal.TextBox.Carets.AddRange(_startCarets);
-
+        ThreadLocal.TextBox.SetCarets(_startCarets);
+        
         for (int i = 0; i < _caretsCommands.Count; i++)
         {
             List<Command> commands = _caretsCommands[i];
@@ -52,15 +51,12 @@ internal abstract class Action
             }
         }
 
-        ThreadLocal.TextBox.Carets.Clear();
-        ThreadLocal.TextBox.Carets.AddRange(_endCarets);
-        ThreadLocal.TextBox.SetCaretDirty();
+        ThreadLocal.TextBox.SetCarets(_endCarets);
     }
 
     public void UndoCommands()
     {
-        ThreadLocal.TextBox.Carets.Clear();
-        ThreadLocal.TextBox.Carets.AddRange(_endCarets);
+        ThreadLocal.TextBox.SetCarets(_endCarets);
 
         for (int i = _caretsCommands.Count - 1; i >= 0; i--)
         {
@@ -74,9 +70,7 @@ internal abstract class Action
             }
         }
 
-        ThreadLocal.TextBox.Carets.Clear();
-        ThreadLocal.TextBox.Carets.AddRange(_startCarets);
-        ThreadLocal.TextBox.SetCaretDirty();
+        ThreadLocal.TextBox.SetCarets(_startCarets);
     }
 
     public bool IsAllSame<T>()
@@ -119,9 +113,9 @@ internal class DeleteSelection : Action
             // Backward delete
             for (int i = caret.Position.LineIndex; i >= caret.AnchorPosition.LineIndex; i--)
             {
-                if (ThreadLocal.TextBox.GetLine(i, out Line? lineToDelete))
+                if (ThreadLocal.TextBox.GetLine(i, out Line lineToDelete))
                 {
-                    int deleteCount = lineToDelete!.Chars.Count;
+                    int deleteCount = lineToDelete.Chars.Count;
                     if (i == caret.Position.LineIndex)
                     {
                         deleteCount = caret.Position.CharIndex;
@@ -145,9 +139,9 @@ internal class DeleteSelection : Action
             // Forward delete
             for (int i = caret.Position.LineIndex; i <= caret.AnchorPosition.LineIndex; i++)
             {
-                if (ThreadLocal.TextBox.GetLine(i, out Line? lineToDelete))
+                if (ThreadLocal.TextBox.GetLine(i, out Line lineToDelete))
                 {
-                    int deleteCount = lineToDelete!.Chars.Count;
+                    int deleteCount = lineToDelete.Chars.Count;
                     if (i == caret.AnchorPosition.LineIndex)
                     {
                         deleteCount = caret.AnchorPosition.CharIndex;
@@ -214,9 +208,9 @@ internal class DeleteCharAction : Action
         }
 
         // if caret is at the end of the line, merge line (forward)
-        if (ThreadLocal.TextBox.GetLine(caret.Position.LineIndex, out Line? lineToDelete))
+        if (ThreadLocal.TextBox.GetLine(caret.Position.LineIndex, out Line lineToDelete))
         {
-            if (caret.Position.CharIndex == lineToDelete!.Chars.Count - 1 && _direction == EditDirection.Forward)
+            if (caret.Position.CharIndex == lineToDelete.Chars.Count - 1 && _direction == EditDirection.Forward)
             {
                 if (caret.Position.LineIndex == ThreadLocal.TextBox.Lines.Count - 1)
                     return commands;

@@ -6,42 +6,43 @@ namespace Bell.Data;
 
 public class Line
 {
-    public readonly int Index = 0;
+    public int Index = 0;
 
-    public List<char> Chars = new();
-    private List<char> _buffers = new();
-
-    private readonly StringBuilder _sb = new();
+    public readonly List<char> Chars = new();
+    
+    public Folding? Folding;
+    
     public string String => StringCache.Get();
     public readonly Cache<string> StringCache;
 
     public List<ColorStyle> Colors => ColorsCache.Get();
     public readonly Cache<List<ColorStyle>> ColorsCache;
-
-
-    public Folding? Folding;
     
     public HashSet<int> Cutoffs => CutoffsCache.Get();
     public readonly Cache<HashSet<int>> CutoffsCache;
 
     public List<SubLine> SubLines => SubLinesCache.Get();
     public readonly Cache<List<SubLine>> SubLinesCache;
+    
+    // buffer to avoid GC
+    private readonly StringBuilder _sb = new();
+    private readonly List<char> _buffers = new();
+    
+    public static readonly Line Empty = new(0, Array.Empty<char>());
 
-    public Line(int index)
+    public Line(int index, char[] initialChars)
     {
         Index = index;
-
+        Chars.AddRange(initialChars);
+        
         ColorsCache = new(new(), UpdateColors);
         CutoffsCache = new(new(), UpdateCutoff);
         StringCache = new(string.Empty, UpdateString);
         SubLinesCache = new(new List<SubLine>(), UpdateSubLines);
     }
 
-    public void SetString(string line)
+    public void SetCharsDirty()
     {
-        Chars.Clear();
-        Chars.AddRange(line);
-
         ColorsCache.SetDirty();
         CutoffsCache.SetDirty();
         StringCache.SetDirty();
@@ -246,5 +247,10 @@ public class Line
             }
         }
         return count;
+    }
+
+    public struct TextInfo
+    {
+        
     }
 }

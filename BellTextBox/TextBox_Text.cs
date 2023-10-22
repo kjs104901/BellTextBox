@@ -22,8 +22,7 @@ public partial class TextBox
         int i = 0;
         foreach (string lineText in text.Split('\n'))
         {
-            Line line = new Line(i++);
-            line.SetString(lineText.Trim('\r'));
+            Line line = new Line(i++, lineText.ToArray());
             Lines.Add(line);
         }
 
@@ -89,7 +88,7 @@ public partial class TextBox
         return rows;
     }
     
-    public bool GetLine(int lineIndex, out Line? line)
+    public bool GetLine(int lineIndex, out Line line)
     {
         if (0 <= lineIndex && lineIndex < Lines.Count)
         {
@@ -97,7 +96,7 @@ public partial class TextBox
             return true;
         }
 
-        line = null;
+        line = Line.Empty;
         return false;
     }
 }

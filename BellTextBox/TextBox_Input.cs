@@ -281,7 +281,7 @@ public partial class TextBox
         {
             if (MouseAction.Click == mouseInput.LeftAction)
             {
-                if (GetLine(textCoordinates.LineIndex, out Line? line))
+                if (GetLine(textCoordinates.LineIndex, out Line line))
                 {
                     if (null != line?.Folding)
                     {
