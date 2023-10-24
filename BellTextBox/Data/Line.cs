@@ -142,7 +142,7 @@ public class Line
         }
 
         int wrapIndex = 0;
-        SubLine subLine = new SubLine(Index, wrapIndex, 0, 0.0f);
+        SubLine subLine = new SubLine(this, wrapIndex, 0, 0.0f);
 
         bool isFirstCharInLine = true;
         ColorStyle renderGroupColor = ThreadLocal.TextBox.Theme.DefaultFontColor;
@@ -200,7 +200,7 @@ public class Line
                 subLines.Add(subLine);
 
                 wrapIndex++;
-                subLine = new SubLine(Index, wrapIndex, i, wrapIndentWidth);
+                subLine = new SubLine(this, wrapIndex, i, wrapIndentWidth);
 
                 isFirstCharInLine = true;
                 renderGroupColor = ThreadLocal.TextBox.Theme.DefaultFontColor;

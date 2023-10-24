@@ -11,8 +11,8 @@ public partial class TextBox
     private Vector2 _viewPos;
     private Vector2 _viewSize;
 
-    private PageCoordinates _pageStart;
-    private PageCoordinates _pageEnd;
+    private int _rowStart;
+    private int _rowEnd;
 
     public Vector2 PageSize;
 
@@ -271,24 +271,21 @@ public partial class TextBox
         MouseInput mouseInput = _backend.GetMouseInput();
 
         ConvertCoordinates(mouseInput.Position,
-            out PageCoordinates pageCoordinates,
+            out int _,
             out TextCoordinates textCoordinates);
 
         if (textCoordinates.IsFold)
         {
             if (MouseAction.Click == mouseInput.LeftAction)
             {
-                if (GetLine(textCoordinates.LineIndex, out Line line))
+                if (null != textCoordinates.Line?.Folding)
                 {
-                    if (null != line?.Folding)
-                    {
-                        line.Folding.Folded = !line.Folding.Folded;
+                    textCoordinates.Line.Folding.Folded = !textCoordinates.Line.Folding.Folded;
 
-                        RowsCache.SetDirty();
-                        SetCaretDirty();
+                    RowsCache.SetDirty();
+                    SetCaretDirty();
 
-                        return;
-                    }
+                    return;
                 }
             }
         }
@@ -377,8 +374,8 @@ public partial class TextBox
             _viewPos = viewPos;
             _viewSize = viewSize;
 
-            ConvertCoordinates(_viewPos, out _pageStart, out _, -3);
-            ConvertCoordinates(_viewPos + _viewSize, out _pageEnd, out _, 3);
+            ConvertCoordinates(_viewPos, out _rowStart, out _, -3);
+            ConvertCoordinates(_viewPos + _viewSize, out _rowEnd, out _, 3);
 
             foreach (Line line in Lines)
             {

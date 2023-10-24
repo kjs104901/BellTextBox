@@ -6,14 +6,13 @@ namespace Bell;
 public partial class TextBox
 {
     private void ConvertCoordinates(Vector2 viewCoordinates,
-        out PageCoordinates pageCoordinates,
+        out int rowIndex,
         out TextCoordinates textCoordinates,
         int yOffset = 0)
     {
         float x = viewCoordinates.X - LineNumberWidth - FoldWidth;
         float y = viewCoordinates.Y;
         
-        pageCoordinates = new();
         textCoordinates = new();
         
         int row = (int)(y / GetFontHeight()) + yOffset;
@@ -21,7 +20,8 @@ public partial class TextBox
             row = 0;
         if (row >= Rows.Count)
             row = Rows.Count - 1;
-        pageCoordinates.RowIndex = row;
+        
+        rowIndex = row;
         
         if (x < -FoldWidth)
         {
@@ -33,17 +33,14 @@ public partial class TextBox
         if (Rows.Count > row)
         {
             SubLine subLine = Rows[row];
-            textCoordinates.LineIndex = subLine.LineIndex;
+            textCoordinates.Line = subLine.Line;
 
             if (x < - GetFontWhiteSpaceWidth())
             {
-                if (GetLine(subLine.LineIndex, out line))
+                if (subLine.Line.Folding != null)
                 {
-                    if (line.Folding != null)
-                    {
-                        textCoordinates.IsFold = true;
-                        return;
-                    }
+                    textCoordinates.IsFold = true;
+                    return;
                 }
             }
 
@@ -70,20 +67,15 @@ public partial class TextBox
                 column += textBlockRender.Text.Length;
                 pageX -= textBlockRender.Width;
             }
-
-            pageCoordinates.ColumnIndex = column;
             
             textCoordinates.CharIndex = 0;
-            if (GetLine(subLine.LineIndex, out line))
+            foreach (SubLine lineSubLine in subLine.Line.SubLines)
             {
-                foreach (SubLine lineSubLine in line.SubLines)
-                {
-                    if (subLine.WrapIndex <= lineSubLine.WrapIndex)
-                        break;
-                    textCoordinates.CharIndex += lineSubLine.Chars.Count;
-                }
+                if (subLine.WrapIndex <= lineSubLine.WrapIndex)
+                    break;
+                textCoordinates.CharIndex += lineSubLine.Chars.Count;
             }
-            textCoordinates.CharIndex += pageCoordinates.ColumnIndex;
+            textCoordinates.CharIndex += column;
         }
     }
     

@@ -29,24 +29,24 @@ internal class InputCharCommand : Command
 
     public override void Do(Caret caret)
     {
-        if (ThreadLocal.TextBox.GetLine(caret.Position.LineIndex, out Line line))
+        Line line = caret.Position.Line;
+        var chars = line.Chars;
+        
+        int targetIndex = caret.Position.CharIndex;
+        if (targetIndex < 0 || targetIndex > chars.Count)
         {
-            int targetIndex = caret.Position.CharIndex;
-            if (targetIndex < 0 || targetIndex > line.Chars.Count)
-            {
-                // TODO error
-                return;
-            }
+            // TODO error
+            return;
+        }
             
-            line.Chars.InsertRange(targetIndex, _chars);
-            line.SetCharsDirty();
-            ThreadLocal.TextBox.RowsCache.SetDirty();
+        chars.InsertRange(targetIndex, _chars);
+        line.SetCharsDirty();
+        ThreadLocal.TextBox.RowsCache.SetDirty();
 
-            if (EditDirection.Forward == _direction)
-            {
-                ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.Right);
-                ThreadLocal.TextBox.RemoveCaretsSelection();
-            }
+        if (EditDirection.Forward == _direction)
+        {
+            ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.Right);
+            ThreadLocal.TextBox.RemoveCaretsSelection();
         }
     }
 
@@ -80,40 +80,40 @@ internal class DeleteCharCommand : Command
 
     public override void Do(Caret caret)
     {
-        if (ThreadLocal.TextBox.GetLine(caret.Position.LineIndex, out Line line))
+        Line line = caret.Position.Line;
+        List<char> chars = line.Chars;
+        
+        _deletedCount = _count;
+            
+        int targetIndex = caret.Position.CharIndex;
+        if (targetIndex < 0 || targetIndex > chars.Count)
         {
-            _deletedCount = _count;
+            // TODO error
+            return;
+        }
             
-            int targetIndex = caret.Position.CharIndex;
-            if (targetIndex < 0 || targetIndex > line.Chars.Count)
-            {
-                // TODO error
-                return;
-            }
-            
-            if (EditDirection.Forward == _direction)
-            {
-                if (targetIndex + _deletedCount > line.Chars.Count)
-                    _deletedCount = line.Chars.Count - targetIndex;
+        if (EditDirection.Forward == _direction)
+        {
+            if (targetIndex + _deletedCount > chars.Count)
+                _deletedCount = chars.Count - targetIndex;
 
-                _deletedChars = line.Chars.GetRange(targetIndex, _deletedCount).ToArray();
-                line.Chars.RemoveRange(targetIndex, _deletedCount);
-                line.SetCharsDirty();
-                ThreadLocal.TextBox.RowsCache.SetDirty();
-            }
-            else if (EditDirection.Backward == _direction)
-            {
-                if (targetIndex - _deletedCount < 0)
-                    _deletedCount = targetIndex;
+            _deletedChars = chars.GetRange(targetIndex, _deletedCount).ToArray();
+            chars.RemoveRange(targetIndex, _deletedCount);
+            line.SetCharsDirty();
+            ThreadLocal.TextBox.RowsCache.SetDirty();
+        }
+        else if (EditDirection.Backward == _direction)
+        {
+            if (targetIndex - _deletedCount < 0)
+                _deletedCount = targetIndex;
                 
-                _deletedChars = line.Chars.GetRange(targetIndex - _deletedCount, _deletedCount).ToArray();
-                line.Chars.RemoveRange(targetIndex - _deletedCount, _deletedCount);
-                line.SetCharsDirty();
-                ThreadLocal.TextBox.RowsCache.SetDirty();
+            _deletedChars = chars.GetRange(targetIndex - _deletedCount, _deletedCount).ToArray();
+            chars.RemoveRange(targetIndex - _deletedCount, _deletedCount);
+            line.SetCharsDirty();
+            ThreadLocal.TextBox.RowsCache.SetDirty();
 
-                ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.Left);
-                ThreadLocal.TextBox.RemoveCaretsSelection();
-            }
+            ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.Left);
+            ThreadLocal.TextBox.RemoveCaretsSelection();
         }
     }
 
@@ -142,56 +142,43 @@ internal class SplitLineCommand : Command
 
     public override void Do(Caret caret)
     {
-        if (ThreadLocal.TextBox.GetLine(caret.Position.LineIndex, out Line line))
+        char[] restOfLine;
+        int insertLineIndex;
+
+        Line line = caret.Position.Line;
+        List<char> chars = line.Chars;
+        
+        if (EditDirection.Forward == _direction)
         {
-            char[] restOfLine;
-            int insertLineIndex;
+            // Get forward rest of line
+            restOfLine = chars.GetRange(caret.Position.CharIndex, chars.Count - caret.Position.CharIndex).ToArray();
+            chars.RemoveRange(caret.Position.CharIndex, chars.Count - caret.Position.CharIndex);
+            line.SetCharsDirty();
             
-            if (EditDirection.Forward == _direction)
-            {
-                // Get forward rest of line
-                restOfLine = line.Chars.GetRange(caret.Position.CharIndex, line.Chars.Count - caret.Position.CharIndex).ToArray();
-                line.Chars.RemoveRange(caret.Position.CharIndex, line.Chars.Count - caret.Position.CharIndex);
-                line.SetCharsDirty();
-                
-                // TODO auto indent?
-                
-                insertLineIndex = caret.Position.LineIndex + 1;
-                
-                ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.Down);
-                ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.StartOfLine);
-                ThreadLocal.TextBox.RemoveCaretsSelection();
-            }
-            else
-            {
-                // Get backward rest of line
-                restOfLine = line.Chars.GetRange(0, caret.Position.CharIndex).ToArray();
-                line.Chars.RemoveRange(0, caret.Position.CharIndex);
-                line.SetCharsDirty();
-                
-                insertLineIndex = caret.Position.LineIndex;
-                    
-                ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.Up);
-                ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.EndOfLine);
-                ThreadLocal.TextBox.RemoveCaretsSelection();
-            }
+            // TODO auto indent?
             
-            // Update line index
-            foreach (Line textBoxLine in ThreadLocal.TextBox.Lines)
-            {
-                if (textBoxLine.Index >= insertLineIndex)
-                {
-                    textBoxLine.Index++;
-                    textBoxLine.SetCharsDirty();
-                }
-            }
-                
-            // Create new line and insert
-            Line newLine = new Line(insertLineIndex, restOfLine);
-                
-            ThreadLocal.TextBox.Lines.Insert(insertLineIndex, newLine);
-            ThreadLocal.TextBox.RowsCache.SetDirty();
+            insertLineIndex = caret.Position.Line.Index + 1;
+            
+            ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.Down);
+            ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.StartOfLine);
+            ThreadLocal.TextBox.RemoveCaretsSelection();
         }
+        else
+        {
+            // Get backward rest of line
+            restOfLine = chars.GetRange(0, caret.Position.CharIndex).ToArray();
+            chars.RemoveRange(0, caret.Position.CharIndex);
+            line.SetCharsDirty();
+            
+            insertLineIndex = caret.Position.Line.Index;
+                
+            ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.Up);
+            ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.EndOfLine);
+            ThreadLocal.TextBox.RemoveCaretsSelection();
+        }
+        
+        // Create new line and insert
+        ThreadLocal.TextBox.InsertLine(insertLineIndex, restOfLine);
     }
 
     public override void Undo(Caret caret)
@@ -221,34 +208,37 @@ internal class MergeLineCommand : Command
 
     public override void Do(Caret caret)
     {
-        if (ThreadLocal.TextBox.GetLine(caret.Position.LineIndex, out Line line))
+        Line line = caret.Position.Line;
+        List<char> chars = line.Chars;
+        
+        if (EditDirection.Forward == _direction)
         {
-            if (EditDirection.Forward == _direction)
-            {
-                if (false == ThreadLocal.TextBox.GetLine(caret.Position.LineIndex + 1, out Line nextLine))
-                    return;
+            int removeLineIndex = caret.Position.Line.Index + 1;
+            
+            if (false == ThreadLocal.TextBox.GetLine(removeLineIndex, out Line nextLine))
+                return;
                 
-                line.Chars.AddRange(nextLine.Chars);
-                line.SetCharsDirty();
+            chars.AddRange(nextLine.Chars);
+            line.SetCharsDirty();
+            
+            ThreadLocal.TextBox.RemoveLine(removeLineIndex);
+        }
+        else if (EditDirection.Backward == _direction)
+        {
+            int removeLineIndex = caret.Position.Line.Index - 1;
+            
+            if (false == ThreadLocal.TextBox.GetLine(removeLineIndex, out Line prevLine))
+                return;
                 
-                ThreadLocal.TextBox.Lines.RemoveAt(caret.Position.LineIndex + 1);
-                ThreadLocal.TextBox.RowsCache.SetDirty();
-            }
-            else if (EditDirection.Backward == _direction)
-            {
-                if (false == ThreadLocal.TextBox.GetLine(caret.Position.LineIndex - 1, out Line prevLine))
-                    return;
+            caret.Position.Line = prevLine;
+            caret.Position.CharIndex = prevLine.Chars.Count;
+            caret.AnchorPosition.Line = prevLine;
+            caret.AnchorPosition.CharIndex = prevLine.Chars.Count;
                 
-                ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.Up);
-                ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.EndOfLine);
-                ThreadLocal.TextBox.RemoveCaretsSelection();
-                
-                prevLine.Chars.AddRange(line.Chars);
-                prevLine.SetCharsDirty();
-                
-                ThreadLocal.TextBox.Lines.RemoveAt(caret.Position.LineIndex);
-                ThreadLocal.TextBox.RowsCache.SetDirty();
-            }
+            prevLine.Chars.AddRange(chars);
+            prevLine.SetCharsDirty();
+            
+            ThreadLocal.TextBox.RemoveLine(caret.Position.Line.Index);
         }
     }
 

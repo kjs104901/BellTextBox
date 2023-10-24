@@ -21,7 +21,7 @@ public partial class TextBox
         
         LineNumberWidth = StringPool<int>.Get(Lines.Count).Sum(GetFontWidth) + GetFontReferenceWidth();
 
-        for (int i = _pageStart.RowIndex; i <= _pageEnd.RowIndex; i++)
+        for (int i = _rowStart; i <= _rowEnd; i++)
         {
             if (Rows.Count <= i)
                 break;
@@ -75,7 +75,7 @@ public partial class TextBox
 
             if (subLine.WrapIndex == 0)
             {
-                string lineIndex = StringPool<int>.Get(subLine.LineIndex);
+                string lineIndex = StringPool<int>.Get(subLine.Line.Index);
                 float lineIndexWidth = lineIndex.Sum(GetFontWidth);
 
                 _backend.RenderText(new Vector2(LineNumberWidth - lineIndexWidth, lineTextStartY),
@@ -83,14 +83,11 @@ public partial class TextBox
                     Theme.DefaultFontColor.ToVector());
             }
             
-            if (GetLine(subLine.LineIndex, out Line line))
+            if (subLine.Line.Folding != null)
             {
-                if (line.Folding != null)
-                {
-                    _backend.RenderText(new Vector2(LineNumberWidth, lineTextStartY),
-                        line.Folding.Folded ? " >" : " V",
-                        Theme.DefaultFontColor.ToVector());
-                }
+                _backend.RenderText(new Vector2(LineNumberWidth, lineTextStartY),
+                    subLine.Line.Folding.Folded ? " >" : " V",
+                    Theme.DefaultFontColor.ToVector());
             }
 
             if (subLine.LineSelection.HasCaret)

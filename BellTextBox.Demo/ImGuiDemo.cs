@@ -23,21 +23,6 @@ class ImGuiDemo
     {
         Vector3 clearColor = new(0.45f, 0.55f, 0.6f);
         string textInput = @"--- START ---
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }}}}}}}}}
 ||||||||
 aaaaaaaa

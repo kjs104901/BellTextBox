@@ -99,4 +99,37 @@ public partial class TextBox
         line = Line.Empty;
         return false;
     }
+
+    public void InsertLine(int insertLineIndex, char[] lineChars)
+    {
+        Line newLine = new Line(insertLineIndex, lineChars);
+        Lines.Insert(insertLineIndex, newLine);
+        
+        // Update line index
+        int i = 0;
+        foreach (Line textBoxLine in Lines)
+        {
+            textBoxLine.Index = i++;
+            textBoxLine.SetCharsDirty();
+        }
+        
+        RowsCache.SetDirty();
+        FoldingListCache.SetDirty();
+    }
+
+    public void RemoveLine(int removeLineIndex)
+    {
+        Lines.RemoveAt(removeLineIndex);
+        
+        // Update line index
+        int i = 0;
+        foreach (Line textBoxLine in Lines)
+        {
+            textBoxLine.Index = i++;
+            textBoxLine.SetCharsDirty();
+        }
+        
+        RowsCache.SetDirty();
+        FoldingListCache.SetDirty();
+    }
 }

@@ -90,94 +90,97 @@ public partial class TextBox
     {
         TextCoordinates newCoordinates = currentCoordinates;
         
-        if (ThreadLocal.TextBox.GetLine(currentCoordinates.LineIndex, out Line line))
+        if (CaretMove.Right == caretMove)
         {
-            if (CaretMove.Right == caretMove)
+            // Check end of line
+            if (currentCoordinates.CharIndex < currentCoordinates.Line.Chars.Count)
             {
-                // Check end of line
-                if (currentCoordinates.CharIndex < line.Chars.Count)
-                {
-                    newCoordinates.CharIndex++;
-                }
-                else
-                {
-                    // Check end of file
-                    if (currentCoordinates.LineIndex < ThreadLocal.TextBox.Lines.Count - 1)
-                    {
-                        newCoordinates.LineIndex++;
-                        newCoordinates.CharIndex = 0;
-                    }
-                }
+                newCoordinates.CharIndex++;
             }
-            else if (CaretMove.Left == caretMove)
-            {
-                // Check start of line
-                if (currentCoordinates.CharIndex > 0)
-                {
-                    newCoordinates.CharIndex--;
-                }
-                else
-                {
-                    // Check start of file
-                    if (currentCoordinates.LineIndex > 0)
-                    {
-                        newCoordinates.LineIndex--;
-                        newCoordinates.CharIndex = ThreadLocal.TextBox.Lines[newCoordinates.LineIndex].Chars.Count;
-                    }
-                }
-            }
-            else if (CaretMove.Up == caretMove)
-            {
-                // Check start of file
-                if (currentCoordinates.LineIndex > 0)
-                {
-                    newCoordinates.LineIndex--;
-                    newCoordinates.CharIndex = Math.Min(currentCoordinates.CharIndex, ThreadLocal.TextBox.Lines[newCoordinates.LineIndex].Chars.Count);
-                }
-            }
-            else if (CaretMove.Down == caretMove)
+            else
             {
                 // Check end of file
-                if (currentCoordinates.LineIndex < ThreadLocal.TextBox.Lines.Count - 1)
+                if (GetLine(currentCoordinates.Line.Index + 1, out Line nextLine))
                 {
-                    newCoordinates.LineIndex++;
-                    newCoordinates.CharIndex = Math.Min(currentCoordinates.CharIndex, ThreadLocal.TextBox.Lines[newCoordinates.LineIndex].Chars.Count);
+                    newCoordinates.Line = nextLine;
+                    newCoordinates.CharIndex = 0;
                 }
             }
-            else if (CaretMove.StartOfLine == caretMove)
+        }
+        else if (CaretMove.Left == caretMove)
+        {
+            // Check start of line
+            if (currentCoordinates.CharIndex > 0)
             {
+                newCoordinates.CharIndex--;
+            }
+            else
+            {
+                // Check start of file
+                if (GetLine(currentCoordinates.Line.Index - 1, out Line prevLine))
+                {
+                    newCoordinates.Line = prevLine;
+                    newCoordinates.CharIndex = prevLine.Chars.Count;
+                }
+            }
+        }
+        else if (CaretMove.Up == caretMove)
+        {
+            // Check start of file
+            if (GetLine(currentCoordinates.Line.Index - 1, out Line prevLine))
+            {
+                newCoordinates.Line = prevLine;
+                newCoordinates.CharIndex = Math.Min(currentCoordinates.CharIndex, prevLine.Chars.Count);
+            }
+        }
+        else if (CaretMove.Down == caretMove)
+        {
+            // Check end of file
+            if (GetLine(currentCoordinates.Line.Index + 1, out Line nextLine))
+            {
+                newCoordinates.Line = nextLine;
+                newCoordinates.CharIndex = Math.Min(currentCoordinates.CharIndex, nextLine.Chars.Count);
+            }
+        }
+        else if (CaretMove.StartOfLine == caretMove)
+        {
+            newCoordinates.CharIndex = 0;
+        }
+        else if (CaretMove.EndOfLine == caretMove)
+        {
+            newCoordinates.CharIndex = currentCoordinates.Line.Chars.Count;
+        }
+        else if (CaretMove.StartOfWord == caretMove)
+        {
+            // TODO
+        }
+        else if (CaretMove.EndOfWord == caretMove)
+        {
+            // TODO
+        }
+        else if (CaretMove.StartOfFile == caretMove)
+        {
+            if (GetLine(0, out Line startLine))
+            {
+                newCoordinates.Line = startLine;
                 newCoordinates.CharIndex = 0;
             }
-            else if (CaretMove.EndOfLine == caretMove)
+        }
+        else if (CaretMove.EndOfFile == caretMove)
+        {
+            if (GetLine(ThreadLocal.TextBox.Lines.Count - 1, out Line lastLine))
             {
-                newCoordinates.CharIndex = line.Chars.Count;
+                newCoordinates.Line = lastLine;
+                newCoordinates.CharIndex = lastLine.Chars.Count();
             }
-            else if (CaretMove.StartOfWord == caretMove)
-            {
-                // TODO
-            }
-            else if (CaretMove.EndOfWord == caretMove)
-            {
-                // TODO
-            }
-            else if (CaretMove.StartOfFile == caretMove)
-            {
-                newCoordinates.LineIndex = 0;
-                newCoordinates.CharIndex = 0;
-            }
-            else if (CaretMove.EndOfFile == caretMove)
-            {
-                newCoordinates.LineIndex = ThreadLocal.TextBox.Lines.Count - 1;
-                newCoordinates.CharIndex = ThreadLocal.TextBox.Lines[newCoordinates.LineIndex].Chars.Count;
-            }
-            else if (CaretMove.PageUp == caretMove)
-            {
-                // TODO
-            }
-            else if (CaretMove.PageDown == caretMove)
-            {
-                // TODO
-            }
+        }
+        else if (CaretMove.PageUp == caretMove)
+        {
+            // TODO
+        }
+        else if (CaretMove.PageDown == caretMove)
+        {
+            // TODO
         }
         
         return newCoordinates;

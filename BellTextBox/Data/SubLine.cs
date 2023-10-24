@@ -6,7 +6,7 @@ public class SubLine
 {
     public int Row;
     
-    public int LineIndex;
+    public Line Line;
     public int WrapIndex;
 
     public int StartCharIndex;
@@ -22,9 +22,9 @@ public class SubLine
     public LineSelection LineSelection => LineSelectionCache.Get();
     public readonly Cache<LineSelection> LineSelectionCache;
 
-    public SubLine(int lineIndex, int wrapIndex, int startCharIndex, float wrapIndentWidth)
+    public SubLine(Line line, int wrapIndex, int startCharIndex, float wrapIndentWidth)
     {
-        LineIndex = lineIndex;
+        Line = line;
         WrapIndex = wrapIndex;
         StartCharIndex = startCharIndex;
 
@@ -37,7 +37,7 @@ public class SubLine
     {
         position = 0.0f;
         
-        if (coordinates.LineIndex != LineIndex)
+        if (coordinates.Line.Index != Line.Index)
             return false;
         
         var index = coordinates.CharIndex - StartCharIndex;
@@ -53,10 +53,10 @@ public class SubLine
 
     private int CompareSubLine(TextCoordinates coordinates)
     {
-        if (coordinates.LineIndex < LineIndex)
+        if (coordinates.Line.Index < Line.Index)
             return 1;
 
-        if (coordinates.LineIndex > LineIndex)
+        if (coordinates.Line.Index > Line.Index)
             return -1;
         
         var index = coordinates.CharIndex - StartCharIndex;

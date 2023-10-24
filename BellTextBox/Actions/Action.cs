@@ -105,29 +105,29 @@ internal class DeleteSelection : Action
 
         caret.GetSortedSelection(out TextCoordinates start, out TextCoordinates end);
 
-        if (ThreadLocal.TextBox.Lines.Count <= start.LineIndex || ThreadLocal.TextBox.Lines.Count <= end.LineIndex)
+        if (ThreadLocal.TextBox.Lines.Count <= start.Line.Index || ThreadLocal.TextBox.Lines.Count <= end.Line.Index)
             return commands; // TODO assert?
 
         if (caret.AnchorPosition < caret.Position)
         {
             // Backward delete
-            for (int i = caret.Position.LineIndex; i >= caret.AnchorPosition.LineIndex; i--)
+            for (int i = caret.Position.Line.Index; i >= caret.AnchorPosition.Line.Index; i--)
             {
                 if (ThreadLocal.TextBox.GetLine(i, out Line lineToDelete))
                 {
                     int deleteCount = lineToDelete.Chars.Count;
-                    if (i == caret.Position.LineIndex)
+                    if (i == caret.Position.Line.Index)
                     {
                         deleteCount = caret.Position.CharIndex;
                     }
 
-                    if (i == caret.AnchorPosition.LineIndex)
+                    if (i == caret.AnchorPosition.Line.Index)
                     {
                         deleteCount -= caret.AnchorPosition.CharIndex;
                     }
 
                     commands.Add(new DeleteCharCommand(EditDirection.Backward, deleteCount));
-                    if (i > caret.AnchorPosition.LineIndex)
+                    if (i > caret.AnchorPosition.Line.Index)
                     {
                         commands.Add(new MergeLineCommand(EditDirection.Backward));
                     }
@@ -137,23 +137,23 @@ internal class DeleteSelection : Action
         else if (caret.Position < caret.AnchorPosition)
         {
             // Forward delete
-            for (int i = caret.Position.LineIndex; i <= caret.AnchorPosition.LineIndex; i++)
+            for (int i = caret.Position.Line.Index; i <= caret.AnchorPosition.Line.Index; i++)
             {
                 if (ThreadLocal.TextBox.GetLine(i, out Line lineToDelete))
                 {
                     int deleteCount = lineToDelete.Chars.Count;
-                    if (i == caret.AnchorPosition.LineIndex)
+                    if (i == caret.AnchorPosition.Line.Index)
                     {
                         deleteCount = caret.AnchorPosition.CharIndex;
                     }
 
-                    if (i == caret.Position.LineIndex)
+                    if (i == caret.Position.Line.Index)
                     {
                         deleteCount -= caret.Position.CharIndex;
                     }
 
                     commands.Add(new DeleteCharCommand(EditDirection.Forward, deleteCount));
-                    if (i < caret.AnchorPosition.LineIndex)
+                    if (i < caret.AnchorPosition.Line.Index)
                     {
                         commands.Add(new MergeLineCommand(EditDirection.Forward));
                     }
@@ -200,7 +200,7 @@ internal class DeleteCharAction : Action
         // if caret is at the beginning of the line, merge line (backward)
         if (caret.Position.CharIndex == 0 && _direction == EditDirection.Backward)
         {
-            if (caret.Position.LineIndex == 0)
+            if (caret.Position.Line.Index == 0)
                 return commands;
 
             commands.Add(new MergeLineCommand(EditDirection.Backward));
@@ -208,16 +208,13 @@ internal class DeleteCharAction : Action
         }
 
         // if caret is at the end of the line, merge line (forward)
-        if (ThreadLocal.TextBox.GetLine(caret.Position.LineIndex, out Line lineToDelete))
+        if (caret.Position.CharIndex == caret.Position.Line.Chars.Count && _direction == EditDirection.Forward)
         {
-            if (caret.Position.CharIndex == lineToDelete.Chars.Count - 1 && _direction == EditDirection.Forward)
-            {
-                if (caret.Position.LineIndex == ThreadLocal.TextBox.Lines.Count - 1)
-                    return commands;
-
-                commands.Add(new MergeLineCommand(EditDirection.Forward));
+            if (caret.Position.Line.Index == ThreadLocal.TextBox.Lines.Count - 1)
                 return commands;
-            }
+
+            commands.Add(new MergeLineCommand(EditDirection.Forward));
+            return commands;
         }
         
         // else delete char
