@@ -14,9 +14,6 @@ public partial class TextBox
     private PageCoordinates _pageStart;
     private PageCoordinates _pageEnd;
 
-    private TextCoordinates _textStart;
-    private TextCoordinates _textEnd;
-
     public Vector2 PageSize;
 
     private TextCoordinates _mouseDragStartText;
@@ -380,8 +377,8 @@ public partial class TextBox
             _viewPos = viewPos;
             _viewSize = viewSize;
 
-            ConvertCoordinates(_viewPos, out _pageStart, out _textStart, -3);
-            ConvertCoordinates(_viewPos + _viewSize, out _pageEnd, out _textEnd, 3);
+            ConvertCoordinates(_viewPos, out _pageStart, out _, -3);
+            ConvertCoordinates(_viewPos + _viewSize, out _pageEnd, out _, 3);
 
             foreach (Line line in Lines)
             {

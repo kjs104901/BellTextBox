@@ -154,6 +154,8 @@ internal class SplitLineCommand : Command
                 line.Chars.RemoveRange(caret.Position.CharIndex, line.Chars.Count - caret.Position.CharIndex);
                 line.SetCharsDirty();
                 
+                // TODO auto indent?
+                
                 insertLineIndex = caret.Position.LineIndex + 1;
                 
                 ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.Down);
@@ -166,7 +168,7 @@ internal class SplitLineCommand : Command
                 restOfLine = line.Chars.GetRange(0, caret.Position.CharIndex).ToArray();
                 line.Chars.RemoveRange(0, caret.Position.CharIndex);
                 line.SetCharsDirty();
-
+                
                 insertLineIndex = caret.Position.LineIndex;
                     
                 ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.Up);
@@ -178,19 +180,28 @@ internal class SplitLineCommand : Command
             foreach (Line textBoxLine in ThreadLocal.TextBox.Lines)
             {
                 if (textBoxLine.Index >= insertLineIndex)
+                {
                     textBoxLine.Index++;
+                    textBoxLine.SetCharsDirty();
+                }
             }
                 
             // Create new line and insert
             Line newLine = new Line(insertLineIndex, restOfLine);
                 
-            ThreadLocal.TextBox.Lines.Insert(caret.Position.LineIndex + 1, newLine);
+            ThreadLocal.TextBox.Lines.Insert(insertLineIndex, newLine);
             ThreadLocal.TextBox.RowsCache.SetDirty();
         }
     }
 
     public override void Undo(Caret caret)
     {
+        // TODO auto indent?
+        
+        if (EditDirection.Forward == _direction)
+            new MergeLineCommand(EditDirection.Backward).Do(caret);
+        else if (EditDirection.Backward == _direction)
+            new MergeLineCommand(EditDirection.Forward).Do(caret);
     }
 
     public override string GetDebugString()
@@ -210,10 +221,43 @@ internal class MergeLineCommand : Command
 
     public override void Do(Caret caret)
     {
+        if (ThreadLocal.TextBox.GetLine(caret.Position.LineIndex, out Line line))
+        {
+            if (EditDirection.Forward == _direction)
+            {
+                if (false == ThreadLocal.TextBox.GetLine(caret.Position.LineIndex + 1, out Line nextLine))
+                    return;
+                
+                line.Chars.AddRange(nextLine.Chars);
+                line.SetCharsDirty();
+                
+                ThreadLocal.TextBox.Lines.RemoveAt(caret.Position.LineIndex + 1);
+                ThreadLocal.TextBox.RowsCache.SetDirty();
+            }
+            else if (EditDirection.Backward == _direction)
+            {
+                if (false == ThreadLocal.TextBox.GetLine(caret.Position.LineIndex - 1, out Line prevLine))
+                    return;
+                
+                ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.Up);
+                ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.EndOfLine);
+                ThreadLocal.TextBox.RemoveCaretsSelection();
+                
+                prevLine.Chars.AddRange(line.Chars);
+                prevLine.SetCharsDirty();
+                
+                ThreadLocal.TextBox.Lines.RemoveAt(caret.Position.LineIndex);
+                ThreadLocal.TextBox.RowsCache.SetDirty();
+            }
+        }
     }
 
     public override void Undo(Caret caret)
     {
+        if (EditDirection.Forward == _direction)
+            new SplitLineCommand(EditDirection.Backward).Do(caret);
+        else if (EditDirection.Backward == _direction)
+            new SplitLineCommand(EditDirection.Forward).Do(caret);
     }
 
     public override string GetDebugString()
