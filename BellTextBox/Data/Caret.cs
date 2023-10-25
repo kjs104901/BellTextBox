@@ -45,4 +45,9 @@ public class Caret
             end = AnchorPosition;
         }
     }
+
+    public void RemoveSelection()
+    {
+        AnchorPosition = Position;
+    }
 }

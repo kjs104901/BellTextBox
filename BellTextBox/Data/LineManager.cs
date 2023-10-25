@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Bell.Actions;
 using Bell.Utils;
 
 namespace Bell.Data;
@@ -26,7 +27,7 @@ public class LineManager
             bool visible = true;
 
             line.Folding = Folding.None;
-            foreach (Folding folding in ThreadLocal.FoldingManager.FoldingList)
+            foreach (Folding folding in Singleton.FoldingManager.FoldingList)
             {
                 if (folding.End == line.Index)
                 {
@@ -53,7 +54,6 @@ public class LineManager
             {
                 foreach (SubLine subLine in line.SubLines)
                 {
-                    subLine.Row = row++;
                     rows.Add(subLine);
                 }
             }
@@ -74,21 +74,21 @@ public class LineManager
         return false;
     }
 
-    public void InsertLine(int insertLineIndex, char[] lineChars)
+    public Line InsertLine(int lineIndex, char[] lineChars)
     {
-        Line newLine = new Line(insertLineIndex, lineChars);
-        Lines.Insert(insertLineIndex, newLine);
+        Line newLine = new Line(lineIndex, lineChars);
+        Lines.Insert(lineIndex, newLine);
         
         // Update line index
-        int i = 0;
-        foreach (Line textBoxLine in Lines)
+        for (int i = lineIndex; i < Lines.Count; i++)
         {
-            textBoxLine.Index = i++;
-            textBoxLine.SetCharsDirty();
+            Lines[i].Index = i;
         }
         
         RowsCache.SetDirty();
-        ThreadLocal.FoldingManager.FoldingListCache.SetDirty();
+        Singleton.FoldingManager.FoldingListCache.SetDirty();
+        
+        return newLine;
     }
 
     public void RemoveLine(int removeLineIndex)
@@ -96,14 +96,12 @@ public class LineManager
         Lines.RemoveAt(removeLineIndex);
         
         // Update line index
-        int i = 0;
-        foreach (Line textBoxLine in Lines)
+        for (int i = removeLineIndex; i < Lines.Count; i++)
         {
-            textBoxLine.Index = i++;
-            textBoxLine.SetCharsDirty();
+            Lines[i].Index = i;
         }
         
         RowsCache.SetDirty();
-        ThreadLocal.FoldingManager.FoldingListCache.SetDirty();
+        Singleton.FoldingManager.FoldingListCache.SetDirty();
     }
 }

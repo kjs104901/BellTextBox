@@ -5,16 +5,10 @@ namespace Bell.Data;
 
 public class SubLine
 {
-    public int Row;
-    
-    public int WrapIndex;
-
-    //public Line Line;
-    //public int StartCharIndex;
-
     public LineCoordinates LineCoordinates;
-
-    public float IndentWidth;
+    public readonly int WrapIndex;
+    
+    public readonly float IndentWidth;
 
     public readonly List<TextBlockRender> TextBlockRenders = new();
     public readonly List<WhiteSpaceRender> WhiteSpaceRenders = new();
@@ -72,7 +66,7 @@ public class SubLine
 
         bool fakeSelected = false;
         
-        foreach (Caret caret in ThreadLocal.CaretManager.Carets)
+        foreach (Caret caret in Singleton.CaretManager.Carets)
         {
             caret.GetSortedSelection(out var start, out var end);
 
@@ -97,7 +91,7 @@ public class SubLine
                         lineSelection.SelectionEnd = CharWidths.Sum();
                         if (lineSelection.SelectionEnd < 1.0f)
                         {
-                            lineSelection.SelectionEnd = ThreadLocal.FontManager.GetFontWhiteSpaceWidth();
+                            lineSelection.SelectionEnd = Singleton.FontManager.GetFontWhiteSpaceWidth();
                             fakeSelected = true;
                         }
                         lineSelection.Selected = true;
@@ -111,7 +105,7 @@ public class SubLine
                         lineSelection.SelectionEnd = CharWidths.Sum();
                         if (lineSelection.SelectionEnd < 1.0f)
                         {
-                            lineSelection.SelectionEnd = ThreadLocal.FontManager.GetFontWhiteSpaceWidth();
+                            lineSelection.SelectionEnd = Singleton.FontManager.GetFontWhiteSpaceWidth();
                             fakeSelected = true;
                         }
                         lineSelection.Selected = true;
@@ -132,7 +126,7 @@ public class SubLine
                 lineSelection.HasCaretAnchor = true;
                 lineSelection.CaretAnchorPosition = anchorPosition;
                 if (caret.AnchorPosition == end && fakeSelected && lineSelection.CaretAnchorPosition < 1.0f)
-                    lineSelection.CaretAnchorPosition = ThreadLocal.FontManager.GetFontWhiteSpaceWidth();
+                    lineSelection.CaretAnchorPosition = Singleton.FontManager.GetFontWhiteSpaceWidth();
             }
 
             if (caret.Position.IsSameSubLine(LineCoordinates))
@@ -141,7 +135,7 @@ public class SubLine
                 lineSelection.HasCaret = true;
                 lineSelection.CaretPosition = caretPosition;
                 if (caret.Position == end && fakeSelected && lineSelection.CaretPosition < 1.0f)
-                    lineSelection.CaretPosition = ThreadLocal.FontManager.GetFontWhiteSpaceWidth();
+                    lineSelection.CaretPosition = Singleton.FontManager.GetFontWhiteSpaceWidth();
             }
         }
 

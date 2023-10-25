@@ -10,7 +10,7 @@ public class FontManager
 
     public void UpdateReferenceSize()
     {
-        var fontSize = ThreadLocal.TextBox._backend.GetFontSize();
+        var fontSize = Singleton.TextBox._backend.GetFontSize();
         if (false == _fontDictionary.ContainsKey(fontSize))
             _fontDictionary.TryAdd(fontSize, new Font(fontSize));
         _fontCache = _fontDictionary[fontSize];
@@ -27,11 +27,11 @@ public class FontManager
 
     public float GetLineHeight()
     {
-        return _fontCache.Size * ThreadLocal.TextBox.LeadingHeight;
+        return _fontCache.Size * Singleton.TextBox.LeadingHeight;
     }
 
     public float GetLineHeightOffset()
     {
-        return ((_fontCache.Size * ThreadLocal.TextBox.LeadingHeight) - _fontCache.Size) / 2.0f;
+        return ((_fontCache.Size * Singleton.TextBox.LeadingHeight) - _fontCache.Size) / 2.0f;
     }
 }

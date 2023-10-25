@@ -53,7 +53,7 @@ public class Line
     private List<ColorStyle> UpdateColors(List<ColorStyle> colors)
     {
         colors.Clear();
-        if (ThreadLocal.TextBox.SyntaxHighlightEnabled == false)
+        if (Singleton.TextBox.SyntaxHighlightEnabled == false)
             return colors;
 
         for (int i = 0; i < Chars.Count; i++)
@@ -61,15 +61,15 @@ public class Line
             ColorStyle colorStyle;
             if (char.IsLower(Chars[i]))
             {
-                colorStyle = ThreadLocal.TextBox.Theme.BlockCommentFontColor;
+                colorStyle = Singleton.TextBox.Theme.BlockCommentFontColor;
             }
             else if (false == char.IsAscii(Chars[i]))
             {
-                colorStyle = ThreadLocal.TextBox.Theme.LineCommentFontColor;
+                colorStyle = Singleton.TextBox.Theme.LineCommentFontColor;
             }
             else
             {
-                colorStyle = ThreadLocal.TextBox.Theme.DefaultFontColor;
+                colorStyle = Singleton.TextBox.Theme.DefaultFontColor;
             }
             colors.Add(colorStyle);
         }
@@ -80,10 +80,10 @@ public class Line
     private HashSet<int> UpdateCutoff(HashSet<int> cutoffs)
     {
         cutoffs.Clear();
-        if (WrapMode.None == ThreadLocal.TextBox.WrapMode)
+        if (WrapMode.None == Singleton.TextBox.WrapMode)
             return cutoffs;
 
-        var lineWidth = ThreadLocal.TextBox.PageSize.X - ThreadLocal.TextBox.LineNumberWidth - ThreadLocal.TextBox.FoldWidth;
+        var lineWidth = Singleton.TextBox.PageSize.X - Singleton.TextBox.LineNumberWidth - Singleton.TextBox.FoldWidth;
         if (lineWidth < 1.0f)
             return cutoffs;
 
@@ -91,15 +91,15 @@ public class Line
 
         for (int i = 0; i < Chars.Count; i++)
         {
-            widthAccumulated += ThreadLocal.FontManager.GetFontWidth(Chars[i]);
-            if (widthAccumulated + ThreadLocal.FontManager.GetFontReferenceWidth() > lineWidth)
+            widthAccumulated += Singleton.FontManager.GetFontWidth(Chars[i]);
+            if (widthAccumulated + Singleton.FontManager.GetFontReferenceWidth() > lineWidth)
             {
-                if (ThreadLocal.TextBox.WrapMode == WrapMode.BreakWord)
+                if (Singleton.TextBox.WrapMode == WrapMode.BreakWord)
                 {
                     cutoffs.Add(i);
                     widthAccumulated = 0;
                 }
-                else if (ThreadLocal.TextBox.WrapMode == WrapMode.Word)
+                else if (Singleton.TextBox.WrapMode == WrapMode.Word)
                 {
                     // go back to the start of word
                     float backWidth = 0.0f;
@@ -108,8 +108,8 @@ public class Line
                         if (char.IsWhiteSpace(Chars[i]))
                             break;
 
-                        backWidth += ThreadLocal.FontManager.GetFontWidth(Chars[i]);
-                        if (backWidth + ThreadLocal.FontManager.GetFontReferenceWidth() * 10 > lineWidth)
+                        backWidth += Singleton.FontManager.GetFontWidth(Chars[i]);
+                        if (backWidth + Singleton.FontManager.GetFontReferenceWidth() * 10 > lineWidth)
                             break; // Give up on word wrap. break word.
 
                         i--;
@@ -136,17 +136,17 @@ public class Line
         subLines.Clear();
         
         float wrapIndentWidth = 0.0f;
-        if (ThreadLocal.TextBox.WordWrapIndent)
+        if (Singleton.TextBox.WordWrapIndent)
         {
             // TODO Cache
-            wrapIndentWidth = ThreadLocal.TextBox.CountTabStart(String) * ThreadLocal.TextBox.GetTabRenderSize(); 
+            wrapIndentWidth = Singleton.TextBox.CountTabStart(String) * Singleton.TextBox.GetTabRenderSize(); 
         }
 
         int wrapIndex = 0;
         SubLine subLine = new SubLine(this, 0, wrapIndex, 0.0f);
 
         bool isFirstCharInLine = true;
-        ColorStyle renderGroupColor = ThreadLocal.TextBox.Theme.DefaultFontColor;
+        ColorStyle renderGroupColor = Singleton.TextBox.Theme.DefaultFontColor;
 
         _buffers.Clear();
         float bufferWidth = 0.0f;
@@ -155,12 +155,12 @@ public class Line
         for (int i = 0; i < Chars.Count; i++)
         {
             char c = Chars[i];
-            float cWidth = ThreadLocal.FontManager.GetFontWidth(c);
+            float cWidth = Singleton.FontManager.GetFontWidth(c);
 
             subLine.Chars.Add(c);
             subLine.CharWidths.Add(cWidth);
             
-            if (ThreadLocal.TextBox.ShowingWhitespace && char.IsWhiteSpace(c))
+            if (Singleton.TextBox.ShowingWhitespace && char.IsWhiteSpace(c))
             {
                 subLine.WhiteSpaceRenders.Add(new() { C = c, PosX = posX + bufferWidth });
             }
@@ -204,7 +204,7 @@ public class Line
                 subLine = new SubLine(this, i, wrapIndex, wrapIndentWidth);
 
                 isFirstCharInLine = true;
-                renderGroupColor = ThreadLocal.TextBox.Theme.DefaultFontColor;
+                renderGroupColor = Singleton.TextBox.Theme.DefaultFontColor;
                 _buffers.Clear();
 
                 posX = 0.0f;

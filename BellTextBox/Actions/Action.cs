@@ -20,7 +20,7 @@ internal abstract class Action
         _startCarets.Clear();
         _endCarets.Clear();
 
-        foreach (Caret caret in ThreadLocal.CaretManager.Carets)
+        foreach (Caret caret in Singleton.CaretManager.Carets)
         {
             _startCarets.Add(caret.Clone());
 
@@ -38,12 +38,12 @@ internal abstract class Action
     
     public void RedoCommands()
     {
-        ThreadLocal.CaretManager.SetCarets(_startCarets);
+        Singleton.CaretManager.SetCarets(_startCarets);
         
         for (int i = 0; i < _caretsCommands.Count; i++)
         {
             List<Command> commands = _caretsCommands[i];
-            Caret caret = ThreadLocal.CaretManager.Carets[i];
+            Caret caret = Singleton.CaretManager.Carets[i];
 
             foreach (Command command in commands)
             {
@@ -51,17 +51,17 @@ internal abstract class Action
             }
         }
 
-        ThreadLocal.CaretManager.SetCarets(_endCarets);
+        Singleton.CaretManager.SetCarets(_endCarets);
     }
 
     public void UndoCommands()
     {
-        ThreadLocal.CaretManager.SetCarets(_endCarets);
+        Singleton.CaretManager.SetCarets(_endCarets);
 
         for (int i = _caretsCommands.Count - 1; i >= 0; i--)
         {
             List<Command> commands = _caretsCommands[i];
-            Caret caret = ThreadLocal.CaretManager.Carets[i];
+            Caret caret = Singleton.CaretManager.Carets[i];
 
             for (int j = commands.Count - 1; j >= 0; j--)
             {
@@ -70,7 +70,7 @@ internal abstract class Action
             }
         }
 
-        ThreadLocal.CaretManager.SetCarets(_startCarets);
+        Singleton.CaretManager.SetCarets(_startCarets);
     }
 
     public bool IsAllSame<T>()
@@ -105,7 +105,7 @@ internal class DeleteSelection : Action
 
         caret.GetSortedSelection(out LineCoordinates start, out LineCoordinates end);
 
-        if (ThreadLocal.LineManager.Lines.Count <= start.Line.Index || ThreadLocal.LineManager.Lines.Count <= end.Line.Index)
+        if (Singleton.LineManager.Lines.Count <= start.Line.Index || Singleton.LineManager.Lines.Count <= end.Line.Index)
             return commands; // TODO assert?
 
         if (caret.AnchorPosition < caret.Position)
@@ -113,7 +113,7 @@ internal class DeleteSelection : Action
             // Backward delete
             for (int i = caret.Position.Line.Index; i >= caret.AnchorPosition.Line.Index; i--)
             {
-                if (ThreadLocal.LineManager.GetLine(i, out Line lineToDelete))
+                if (Singleton.LineManager.GetLine(i, out Line lineToDelete))
                 {
                     int deleteCount = lineToDelete.Chars.Count;
                     if (i == caret.Position.Line.Index)
@@ -139,7 +139,7 @@ internal class DeleteSelection : Action
             // Forward delete
             for (int i = caret.Position.Line.Index; i <= caret.AnchorPosition.Line.Index; i++)
             {
-                if (ThreadLocal.LineManager.GetLine(i, out Line lineToDelete))
+                if (Singleton.LineManager.GetLine(i, out Line lineToDelete))
                 {
                     int deleteCount = lineToDelete.Chars.Count;
                     if (i == caret.AnchorPosition.Line.Index)
@@ -210,7 +210,7 @@ internal class DeleteCharAction : Action
         // if caret is at the end of the line, merge line (forward)
         if (caret.Position.CharIndex == caret.Position.Line.Chars.Count && _direction == EditDirection.Forward)
         {
-            if (caret.Position.Line.Index == ThreadLocal.LineManager.Lines.Count - 1)
+            if (caret.Position.Line.Index == Singleton.LineManager.Lines.Count - 1)
                 return commands;
 
             commands.Add(new MergeLineCommand(EditDirection.Forward));
@@ -244,7 +244,7 @@ internal class TabAction : Action
             return commands;
         }
 
-        commands.Add(new InputCharCommand(EditDirection.Forward, ThreadLocal.TextBox.GetTabString().ToCharArray()));
+        commands.Add(new InputCharCommand(EditDirection.Forward, Singleton.TextBox.GetTabString().ToCharArray()));
         return commands;
     }
 }

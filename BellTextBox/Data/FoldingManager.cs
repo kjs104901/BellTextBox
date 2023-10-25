@@ -18,18 +18,18 @@ public class FoldingManager
         foldingList.Clear();
 
         Dictionary<int, Stack<int>> foldingStacks = new();
-        for (int i = 0; i < ThreadLocal.TextBox.Language.Foldings.Count; i++)
+        for (int i = 0; i < Singleton.TextBox.Language.Foldings.Count; i++)
         {
             foldingStacks.TryAdd(i, new Stack<int>());
             foldingStacks[i].Clear();
         }
         
-        foreach (Line line in ThreadLocal.LineManager.Lines)
+        foreach (Line line in Singleton.LineManager.Lines)
         {
-            for (int i = 0; i < ThreadLocal.TextBox.Language.Foldings.Count; i++)
+            for (int i = 0; i < Singleton.TextBox.Language.Foldings.Count; i++)
             {
-                var startFolding = ThreadLocal.TextBox.Language.Foldings[i].Item1;
-                var endFolding = ThreadLocal.TextBox.Language.Foldings[i].Item2;
+                var startFolding = Singleton.TextBox.Language.Foldings[i].Item1;
+                var endFolding = Singleton.TextBox.Language.Foldings[i].Item2;
 
                 for (int j = 0; j < line.CountSubstrings(startFolding); j++)
                 {
@@ -51,7 +51,7 @@ public class FoldingManager
         {
             while (foldingStack.TryPop(out int start))
             {
-                int end = ThreadLocal.LineManager.Lines.Count - 1;
+                int end = Singleton.LineManager.Lines.Count - 1;
                 AddFolding(foldingList, start, end);
             }
         }

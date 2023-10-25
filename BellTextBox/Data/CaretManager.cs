@@ -8,7 +8,7 @@ public class CaretManager
 
     internal void SetCaretDirty()
     {
-        foreach (SubLine row in ThreadLocal.LineManager.Rows)
+        foreach (SubLine row in Singleton.LineManager.Rows)
         {
             row.LineSelectionCache.SetDirty();
         }
@@ -89,6 +89,11 @@ public class CaretManager
         Carets.Clear();
         // TODO select multiple lines
         SetCaretDirty();
+    }
+
+    internal List<Caret> GetCaretsInLine(Line line)
+    {
+        return Carets.Where(caret => caret.Position.Line == line).ToList();
     }
 
     internal void CopyClipboard()

@@ -11,7 +11,7 @@ public partial class TextBox
 
     public void Render(Vector2 viewPos, Vector2 viewSize)
     {
-        ThreadLocal.TextBox = this;
+        Singleton.TextBox = this;
         ProcessInput(viewPos, viewSize);
 
         FontManager.UpdateReferenceSize();
@@ -28,9 +28,9 @@ public partial class TextBox
 
             SubLine subLine = LineManager.Rows[i];
 
-            var lineY = subLine.Row * FontManager.GetLineHeight();
+            var lineY = i * FontManager.GetLineHeight();
             var lineTextStartY = lineY + FontManager.GetLineHeightOffset();
-            var lineEndY = (subLine.Row + 1) * FontManager.GetLineHeight();
+            var lineEndY = (i + 1) * FontManager.GetLineHeight();
             var lineTextEndY = lineEndY - FontManager.GetLineHeightOffset();
 
             var lineStartX = LineNumberWidth + FoldWidth + subLine.IndentWidth;

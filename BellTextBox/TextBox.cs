@@ -39,10 +39,10 @@ public partial class TextBox
     
     public void SetText(string text)
     {
-        ThreadLocal.TextBox = this;
+        Singleton.TextBox = this;
         
-        text = ThreadLocal.TextBox.ReplaceTab(text);
-        text = ThreadLocal.TextBox.ReplaceEol(text);
+        text = Singleton.TextBox.ReplaceTab(text);
+        text = Singleton.TextBox.ReplaceEol(text);
 
         LineManager.Lines.Clear();
         int i = 0;
@@ -57,13 +57,13 @@ public partial class TextBox
 
     public string GetText()
     {
-        ThreadLocal.TextBox = this;
+        Singleton.TextBox = this;
         
         _sb.Clear();
         foreach (Line line in LineManager.Lines)
         {
             _sb.Append(line.String);
-            _sb.Append(ThreadLocal.TextBox.GetEolString());
+            _sb.Append(Singleton.TextBox.GetEolString());
         }
         return _sb.ToString();
     }

@@ -4,7 +4,7 @@ using Bell.Data;
 
 namespace Bell.Utils;
 
-public static class ThreadLocal
+public static class Singleton
 {
     private static readonly ThreadLocal<TextBox> ThreadLocalTextBox = new();
     public static TextBox TextBox

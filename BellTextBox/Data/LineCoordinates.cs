@@ -49,7 +49,7 @@ public struct LineCoordinates : IEquatable<LineCoordinates>
             else
             {
                 // Check end of file
-                if (ThreadLocal.LineManager.GetLine(newCoordinates.Line.Index + 1, out Line nextLine))
+                if (Singleton.LineManager.GetLine(newCoordinates.Line.Index + 1, out Line nextLine))
                 {
                     newCoordinates.Line = nextLine;
                     newCoordinates.CharIndex = 0;
@@ -66,7 +66,7 @@ public struct LineCoordinates : IEquatable<LineCoordinates>
             else
             {
                 // Check start of file
-                if (ThreadLocal.LineManager.GetLine(newCoordinates.Line.Index - 1, out Line prevLine))
+                if (Singleton.LineManager.GetLine(newCoordinates.Line.Index - 1, out Line prevLine))
                 {
                     newCoordinates.Line = prevLine;
                     newCoordinates.CharIndex = prevLine.Chars.Count;
@@ -76,7 +76,7 @@ public struct LineCoordinates : IEquatable<LineCoordinates>
         else if (CaretMove.Up == caretMove)
         {
             // Check start of file
-            if (ThreadLocal.LineManager.GetLine(newCoordinates.Line.Index - 1, out Line prevLine))
+            if (Singleton.LineManager.GetLine(newCoordinates.Line.Index - 1, out Line prevLine))
             {
                 newCoordinates.Line = prevLine;
                 newCoordinates.CharIndex = Math.Min(newCoordinates.CharIndex, prevLine.Chars.Count);
@@ -85,7 +85,7 @@ public struct LineCoordinates : IEquatable<LineCoordinates>
         else if (CaretMove.Down == caretMove)
         {
             // Check end of file
-            if (ThreadLocal.LineManager.GetLine(newCoordinates.Line.Index + 1, out Line nextLine))
+            if (Singleton.LineManager.GetLine(newCoordinates.Line.Index + 1, out Line nextLine))
             {
                 newCoordinates.Line = nextLine;
                 newCoordinates.CharIndex = Math.Min(newCoordinates.CharIndex, nextLine.Chars.Count);
@@ -109,7 +109,7 @@ public struct LineCoordinates : IEquatable<LineCoordinates>
         }
         else if (CaretMove.StartOfFile == caretMove)
         {
-            if (ThreadLocal.LineManager.GetLine(0, out Line startLine))
+            if (Singleton.LineManager.GetLine(0, out Line startLine))
             {
                 newCoordinates.Line = startLine;
                 newCoordinates.CharIndex = 0;
@@ -117,7 +117,7 @@ public struct LineCoordinates : IEquatable<LineCoordinates>
         }
         else if (CaretMove.EndOfFile == caretMove)
         {
-            if (ThreadLocal.LineManager.GetLine(ThreadLocal.LineManager.Lines.Count - 1, out Line lastLine))
+            if (Singleton.LineManager.GetLine(Singleton.LineManager.Lines.Count - 1, out Line lastLine))
             {
                 newCoordinates.Line = lastLine;
                 newCoordinates.CharIndex = lastLine.Chars.Count();
