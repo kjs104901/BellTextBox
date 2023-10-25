@@ -14,26 +14,26 @@ public partial class TextBox
         ThreadLocal.TextBox = this;
         ProcessInput(viewPos, viewSize);
 
-        UpdateReferenceSize();
-        FoldWidth = GetFontReferenceWidth() * 2;
+        FontManager.UpdateReferenceSize();
+        FoldWidth = FontManager.GetFontReferenceWidth() * 2;
 
         _backend.RenderPage(PageSize, new Vector4(0.2f, 0.1f, 0.1f, 1.0f)); // TODO background color
         
-        LineNumberWidth = StringPool<int>.Get(Lines.Count).Sum(GetFontWidth) + GetFontReferenceWidth();
+        LineNumberWidth = StringPool<int>.Get(LineManager.Lines.Count).Sum(FontManager.GetFontWidth) + FontManager.GetFontReferenceWidth();
 
         for (int i = _rowStart; i <= _rowEnd; i++)
         {
-            if (Rows.Count <= i)
+            if (LineManager.Rows.Count <= i)
                 break;
 
-            SubLine subLine = Rows[i];
+            SubLine subLine = LineManager.Rows[i];
 
-            var lineY = subLine.Row * GetFontHeight();
-            var lineTextStartY = lineY + GetFontHeightOffset();
-            var lineEndY = (subLine.Row + 1) * GetFontHeight();
-            var lineTextEndY = lineEndY - GetFontHeightOffset();
+            var lineY = subLine.Row * FontManager.GetLineHeight();
+            var lineTextStartY = lineY + FontManager.GetLineHeightOffset();
+            var lineEndY = (subLine.Row + 1) * FontManager.GetLineHeight();
+            var lineTextEndY = lineEndY - FontManager.GetLineHeightOffset();
 
-            var lineStartX = LineNumberWidth + FoldWidth + subLine.WrapIndentWidth;
+            var lineStartX = LineNumberWidth + FoldWidth + subLine.IndentWidth;
 
             if (subLine.LineSelection.Selected)
             {
@@ -75,18 +75,18 @@ public partial class TextBox
 
             if (subLine.WrapIndex == 0)
             {
-                string lineIndex = StringPool<int>.Get(subLine.Line.Index);
-                float lineIndexWidth = lineIndex.Sum(GetFontWidth);
+                string lineIndex = StringPool<int>.Get(subLine.LineCoordinates.Line.Index);
+                float lineIndexWidth = lineIndex.Sum(FontManager.GetFontWidth);
 
                 _backend.RenderText(new Vector2(LineNumberWidth - lineIndexWidth, lineTextStartY),
                     lineIndex,
                     Theme.DefaultFontColor.ToVector());
             }
             
-            if (subLine.Line.Folding != null)
+            if (Folding.None != subLine.LineCoordinates.Line.Folding)
             {
                 _backend.RenderText(new Vector2(LineNumberWidth, lineTextStartY),
-                    subLine.Line.Folding.Folded ? " >" : " V",
+                    subLine.LineCoordinates.Line.Folding.Folded ? " >" : " V",
                     Theme.DefaultFontColor.ToVector());
             }
 

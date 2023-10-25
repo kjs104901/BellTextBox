@@ -1,44 +1,18 @@
 ﻿using System.Text;
-using Bell.Data;
 using Bell.Utils;
 
-namespace Bell;
+namespace Bell.Data;
 
-public partial class TextBox
+public class LineManager
 {
     public List<Line> Lines = new();
 
     public List<SubLine> Rows => RowsCache.Get();
     public readonly Cache<List<SubLine>> RowsCache;
     
-    private readonly StringBuilder _sb = new();
-
-    public void SetText(string text)
+    public LineManager()
     {
-        text = ReplaceTab(text);
-        text = ReplaceEol(text);
-
-        Lines.Clear();
-        int i = 0;
-        foreach (string lineText in text.Split('\n'))
-        {
-            Line line = new Line(i++, lineText.ToArray());
-            Lines.Add(line);
-        }
-
-        RowsCache.SetDirty();
-    }
-
-    public string GetText()
-    {
-        _sb.Clear();
-        foreach (Line line in Lines)
-        {
-            _sb.Append(line.String);
-            _sb.Append(GetEolString());
-        }
-
-        return _sb.ToString();
+        RowsCache = new Cache<List<SubLine>>(new List<SubLine>(), UpdateRows);
     }
 
     private List<SubLine> UpdateRows(List<SubLine> rows)
@@ -51,8 +25,8 @@ public partial class TextBox
         {
             bool visible = true;
 
-            line.Folding = null;
-            foreach (Folding folding in FoldingList)
+            line.Folding = Folding.None;
+            foreach (Folding folding in ThreadLocal.FoldingManager.FoldingList)
             {
                 if (folding.End == line.Index)
                 {
@@ -114,7 +88,7 @@ public partial class TextBox
         }
         
         RowsCache.SetDirty();
-        FoldingListCache.SetDirty();
+        ThreadLocal.FoldingManager.FoldingListCache.SetDirty();
     }
 
     public void RemoveLine(int removeLineIndex)
@@ -130,6 +104,6 @@ public partial class TextBox
         }
         
         RowsCache.SetDirty();
-        FoldingListCache.SetDirty();
+        ThreadLocal.FoldingManager.FoldingListCache.SetDirty();
     }
 }

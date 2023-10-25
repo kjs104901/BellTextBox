@@ -41,12 +41,12 @@ internal class InputCharCommand : Command
             
         chars.InsertRange(targetIndex, _chars);
         line.SetCharsDirty();
-        ThreadLocal.TextBox.RowsCache.SetDirty();
+        ThreadLocal.LineManager.RowsCache.SetDirty();
 
         if (EditDirection.Forward == _direction)
         {
-            ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.Right);
-            ThreadLocal.TextBox.RemoveCaretsSelection();
+            ThreadLocal.CaretManager.MoveCaretsPosition(CaretMove.Right);
+            ThreadLocal.CaretManager.RemoveCaretsSelection();
         }
     }
 
@@ -100,7 +100,7 @@ internal class DeleteCharCommand : Command
             _deletedChars = chars.GetRange(targetIndex, _deletedCount).ToArray();
             chars.RemoveRange(targetIndex, _deletedCount);
             line.SetCharsDirty();
-            ThreadLocal.TextBox.RowsCache.SetDirty();
+            ThreadLocal.LineManager.RowsCache.SetDirty();
         }
         else if (EditDirection.Backward == _direction)
         {
@@ -110,10 +110,10 @@ internal class DeleteCharCommand : Command
             _deletedChars = chars.GetRange(targetIndex - _deletedCount, _deletedCount).ToArray();
             chars.RemoveRange(targetIndex - _deletedCount, _deletedCount);
             line.SetCharsDirty();
-            ThreadLocal.TextBox.RowsCache.SetDirty();
+            ThreadLocal.LineManager.RowsCache.SetDirty();
 
-            ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.Left);
-            ThreadLocal.TextBox.RemoveCaretsSelection();
+            ThreadLocal.CaretManager.MoveCaretsPosition(CaretMove.Left);
+            ThreadLocal.CaretManager.RemoveCaretsSelection();
         }
     }
 
@@ -159,9 +159,9 @@ internal class SplitLineCommand : Command
             
             insertLineIndex = caret.Position.Line.Index + 1;
             
-            ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.Down);
-            ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.StartOfLine);
-            ThreadLocal.TextBox.RemoveCaretsSelection();
+            ThreadLocal.CaretManager.MoveCaretsPosition(CaretMove.Down);
+            ThreadLocal.CaretManager.MoveCaretsPosition(CaretMove.StartOfLine);
+            ThreadLocal.CaretManager.RemoveCaretsSelection();
         }
         else
         {
@@ -172,13 +172,13 @@ internal class SplitLineCommand : Command
             
             insertLineIndex = caret.Position.Line.Index;
                 
-            ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.Up);
-            ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.EndOfLine);
-            ThreadLocal.TextBox.RemoveCaretsSelection();
+            ThreadLocal.CaretManager.MoveCaretsPosition(CaretMove.Up);
+            ThreadLocal.CaretManager.MoveCaretsPosition(CaretMove.EndOfLine);
+            ThreadLocal.CaretManager.RemoveCaretsSelection();
         }
         
         // Create new line and insert
-        ThreadLocal.TextBox.InsertLine(insertLineIndex, restOfLine);
+        ThreadLocal.LineManager.InsertLine(insertLineIndex, restOfLine);
     }
 
     public override void Undo(Caret caret)
@@ -215,19 +215,19 @@ internal class MergeLineCommand : Command
         {
             int removeLineIndex = caret.Position.Line.Index + 1;
             
-            if (false == ThreadLocal.TextBox.GetLine(removeLineIndex, out Line nextLine))
+            if (false == ThreadLocal.LineManager.GetLine(removeLineIndex, out Line nextLine))
                 return;
                 
             chars.AddRange(nextLine.Chars);
             line.SetCharsDirty();
             
-            ThreadLocal.TextBox.RemoveLine(removeLineIndex);
+            ThreadLocal.LineManager.RemoveLine(removeLineIndex);
         }
         else if (EditDirection.Backward == _direction)
         {
             int removeLineIndex = caret.Position.Line.Index - 1;
             
-            if (false == ThreadLocal.TextBox.GetLine(removeLineIndex, out Line prevLine))
+            if (false == ThreadLocal.LineManager.GetLine(removeLineIndex, out Line prevLine))
                 return;
                 
             caret.Position.Line = prevLine;
@@ -238,7 +238,7 @@ internal class MergeLineCommand : Command
             prevLine.Chars.AddRange(chars);
             prevLine.SetCharsDirty();
             
-            ThreadLocal.TextBox.RemoveLine(caret.Position.Line.Index);
+            ThreadLocal.LineManager.RemoveLine(caret.Position.Line.Index);
         }
     }
 

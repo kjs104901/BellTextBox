@@ -1,5 +1,6 @@
 ﻿namespace Bell.Data;
 
+/*
 public struct TextCoordinates : IEquatable<TextCoordinates>
 {
     public Line Line;
@@ -18,3 +19,4 @@ public struct TextCoordinates : IEquatable<TextCoordinates>
     public static bool operator <=(TextCoordinates l, TextCoordinates r) => l.Line.Index != r.Line.Index ? l.Line.Index < r.Line.Index : l.CharIndex <= r.CharIndex;
     public static bool operator >=(TextCoordinates l, TextCoordinates r) => l.Line.Index != r.Line.Index ? l.Line.Index > r.Line.Index : l.CharIndex >= r.CharIndex;
 }
+*/

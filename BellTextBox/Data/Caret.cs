@@ -1,9 +1,29 @@
 ﻿namespace Bell.Data;
 
+public enum CaretMove
+{
+    None,
+
+    Up,
+    Down,
+    Left,
+    Right,
+
+    StartOfFile,
+    EndOfFile,
+    StartOfLine,
+    EndOfLine,
+    StartOfWord,
+    EndOfWord,
+
+    PageUp,
+    PageDown,
+}
+
 public class Caret
 {
-    public TextCoordinates AnchorPosition;
-    public TextCoordinates Position;
+    public LineCoordinates AnchorPosition;
+    public LineCoordinates Position;
 
     public bool HasSelection => AnchorPosition != Position;
 
@@ -12,7 +32,7 @@ public class Caret
         return new Caret() { AnchorPosition = AnchorPosition, Position = Position };
     }
 
-    public void GetSortedSelection(out TextCoordinates start, out TextCoordinates end)
+    public void GetSortedSelection(out LineCoordinates start, out LineCoordinates end)
     {
         if (AnchorPosition < Position)
         {

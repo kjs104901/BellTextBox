@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text;
+using Bell.Themes;
 using Bell.Utils;
 
 namespace Bell.Data;
@@ -10,7 +11,7 @@ public class Line
 
     public readonly List<char> Chars = new();
     
-    public Folding? Folding;
+    public Folding Folding = Folding.None;
     
     public string String => StringCache.Get();
     public readonly Cache<string> StringCache;
@@ -90,8 +91,8 @@ public class Line
 
         for (int i = 0; i < Chars.Count; i++)
         {
-            widthAccumulated += ThreadLocal.TextBox.GetFontWidth(Chars[i]);
-            if (widthAccumulated + ThreadLocal.TextBox.GetFontReferenceWidth() > lineWidth)
+            widthAccumulated += ThreadLocal.FontManager.GetFontWidth(Chars[i]);
+            if (widthAccumulated + ThreadLocal.FontManager.GetFontReferenceWidth() > lineWidth)
             {
                 if (ThreadLocal.TextBox.WrapMode == WrapMode.BreakWord)
                 {
@@ -107,8 +108,8 @@ public class Line
                         if (char.IsWhiteSpace(Chars[i]))
                             break;
 
-                        backWidth += ThreadLocal.TextBox.GetFontWidth(Chars[i]);
-                        if (backWidth + ThreadLocal.TextBox.GetFontReferenceWidth() * 10 > lineWidth)
+                        backWidth += ThreadLocal.FontManager.GetFontWidth(Chars[i]);
+                        if (backWidth + ThreadLocal.FontManager.GetFontReferenceWidth() * 10 > lineWidth)
                             break; // Give up on word wrap. break word.
 
                         i--;
@@ -142,7 +143,7 @@ public class Line
         }
 
         int wrapIndex = 0;
-        SubLine subLine = new SubLine(this, wrapIndex, 0, 0.0f);
+        SubLine subLine = new SubLine(this, 0, wrapIndex, 0.0f);
 
         bool isFirstCharInLine = true;
         ColorStyle renderGroupColor = ThreadLocal.TextBox.Theme.DefaultFontColor;
@@ -154,7 +155,7 @@ public class Line
         for (int i = 0; i < Chars.Count; i++)
         {
             char c = Chars[i];
-            float cWidth = ThreadLocal.TextBox.GetFontWidth(c);
+            float cWidth = ThreadLocal.FontManager.GetFontWidth(c);
 
             subLine.Chars.Add(c);
             subLine.CharWidths.Add(cWidth);
@@ -200,7 +201,7 @@ public class Line
                 subLines.Add(subLine);
 
                 wrapIndex++;
-                subLine = new SubLine(this, wrapIndex, i, wrapIndentWidth);
+                subLine = new SubLine(this, i, wrapIndex, wrapIndentWidth);
 
                 isFirstCharInLine = true;
                 renderGroupColor = ThreadLocal.TextBox.Theme.DefaultFontColor;

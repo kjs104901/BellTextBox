@@ -1,4 +1,6 @@
-﻿namespace Bell.Data;
+﻿using Bell.Data;
+
+namespace Bell.Themes;
 
 public class Theme
 {
