@@ -36,7 +36,6 @@ public partial class TextBox
 
         _shiftPressed |= EnumFlag.Has(hk, HotKeys.Shift);
         _altPressed |= EnumFlag.Has(hk, HotKeys.Alt);
-        _imeComposition = keyboardInput.ImeComposition;
 
 
         // Chars
@@ -72,13 +71,19 @@ public partial class TextBox
             ActionManager.DoAction(new InputCharAction(EditDirection.Forward, keyboardInputChar));
         }
         
-        if (false == string.IsNullOrEmpty(_imeComposition))
+        // IME
+        if (false == string.IsNullOrEmpty(keyboardInput.ImeComposition))
         {
             if (CaretManager.HasCaretsSelection())
             {
                 ActionManager.DoAction(new DeleteSelection());
                 CaretManager.RemoveCaretsSelection();
             }
+        }
+        if (_imeComposition != keyboardInput.ImeComposition)
+        {
+            _imeComposition = keyboardInput.ImeComposition;
+            return;
         }
 
         if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.Shift | HotKeys.Z)) // RedoAction

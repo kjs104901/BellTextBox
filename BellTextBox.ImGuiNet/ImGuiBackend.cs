@@ -94,7 +94,7 @@ public class ImGuiBackend : IBackend
                     _keyboardInput.Chars.Add((char)io.InputQueueCharacters[i]);
                 }
             }
-
+            
             if (OperatingSystem.IsWindows())
             {
                 _keyboardInput.ImeComposition = WindowsNative.GetCompositionString();

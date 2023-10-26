@@ -3,6 +3,7 @@ using System.Numerics;
 using Bell.ImGuiNet;
 using ImGuiNET;
 using Veldrid;
+using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
 
 namespace Bell.Demo;
@@ -99,6 +100,7 @@ public class FontStyle : IComparable<FontStyle>
             ImGui.SetNextWindowPos(new Vector2(0, 0));
             ImGui.SetNextWindowSize(new Vector2(sdl2Window.Width, sdl2Window.Height));
             ImGui.Begin("Demo", ImGuiWindowFlags.NoResize);
+            
 
             if (ImGui.BeginTable("table2", 3, ImGuiTableFlags.Resizable))
             {
