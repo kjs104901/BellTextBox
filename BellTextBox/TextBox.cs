@@ -36,6 +36,11 @@ public partial class TextBox
         sb.AppendLine(ActionManager.GetDebugString());
         return sb.ToString();
     }
+
+    public List<string> GetLogs()
+    {
+        return Logger.GetLogs().Select(i => $"[{i.Item1}] ({i.Item2}) {i.Item3}").ToList();
+    }
     
     public void SetText(string text)
     {

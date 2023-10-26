@@ -27,11 +27,6 @@ public class Caret
 
     public bool HasSelection => AnchorPosition != Position;
 
-    public Caret Clone()
-    {
-        return new Caret() { AnchorPosition = AnchorPosition, Position = Position };
-    }
-
     public void GetSortedSelection(out LineCoordinates start, out LineCoordinates end)
     {
         if (AnchorPosition < Position)
@@ -50,4 +45,23 @@ public class Caret
     {
         AnchorPosition = Position;
     }
+    
+    public CaretCoordinates GetCaretCoordinates()
+    {
+        return new CaretCoordinates
+        {
+            PositionLineIndex = Position.Line.Index,
+            PositionCharIndex = Position.CharIndex,
+            AnchorPositionLineIndex = AnchorPosition.Line.Index,
+            AnchorPositionCharIndex = AnchorPosition.CharIndex,
+        };
+    }
+}
+
+public struct CaretCoordinates
+{
+    public int PositionLineIndex;
+    public int PositionCharIndex;
+    public int AnchorPositionLineIndex;
+    public int AnchorPositionCharIndex;
 }

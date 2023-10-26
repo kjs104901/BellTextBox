@@ -8,6 +8,8 @@ public class CaretManager
 
     internal void SetCaretDirty()
     {
+        // TODO move to line manager
+        Singleton.LineManager.RowsCache.SetDirty();
         foreach (SubLine row in Singleton.LineManager.Rows)
         {
             row.LineSelectionCache.SetDirty();
@@ -36,13 +38,6 @@ public class CaretManager
     internal void AddCaret(LineCoordinates lineCoordinates)
     {
         Carets.Add(new Caret() { Position = lineCoordinates, AnchorPosition = lineCoordinates });
-        SetCaretDirty();
-    }
-
-    public void SetCarets(List<Caret> carets)
-    {
-        Carets.Clear();
-        Carets.AddRange(carets);
         SetCaretDirty();
     }
 

@@ -250,8 +250,21 @@ public class Line
         return count;
     }
 
-    public struct TextInfo
+    public SubLine GetSubLine(int charIndex)
     {
-        
+        int indexCount = 0;
+        foreach (SubLine subLine in SubLines)
+        {
+            // TODO FIXME 좌표에 문제있다. 중복 좌표 문제
+            if (indexCount <= charIndex && charIndex <= indexCount + subLine.Chars.Count)
+            {
+                //Singleton.Logger.Info("GetSubLine charIndex: {charIndex}, indexCount: {indexCount}, subLine.Chars.Count: {subLine.Chars.Count}");
+                return subLine;
+            }
+
+            indexCount += subLine.Chars.Count;
+        }
+        Singleton.Logger.Error("GetSubLine failed to find. charIndex: {charIndex}, indexCount: {indexCount}");
+        return SubLines[0];
     }
 }

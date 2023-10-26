@@ -8,21 +8,65 @@ internal abstract class Action
 {
     private readonly List<List<Command>> _caretsCommands = new();
 
-    private readonly List<Caret> _startCarets = new();
-    private readonly List<Caret> _endCarets = new();
+    private readonly List<CaretCoordinates> _startCarets = new();
+    private readonly List<CaretCoordinates> _endCarets = new();
 
     protected abstract List<Command> CreateCommands(Caret caret);
+
+    private void SaveCarets(List<CaretCoordinates> coordinatesList)
+    {
+        coordinatesList.Clear();
+        foreach (Caret caret in Singleton.CaretManager.Carets)
+        {
+            coordinatesList.Add(caret.GetCaretCoordinates());
+        }
+    }
+    
+    private void RestoreCarets(List<CaretCoordinates> coordinatesList)
+    {
+        Singleton.CaretManager.Carets.Clear();
+        foreach (CaretCoordinates caretCoordinates in coordinatesList)
+        {
+            if (false == Singleton.LineManager.GetLine(caretCoordinates.PositionLineIndex, out Line line))
+            {
+                Singleton.Logger.Error($"RestoreStartCarets: line not found: {caretCoordinates.PositionLineIndex}");
+                continue;
+            }
+
+            if (line.Chars.Count < caretCoordinates.PositionCharIndex)
+            {
+                Singleton.Logger.Error($"RestoreStartCarets: char not found: {caretCoordinates.PositionCharIndex}");
+                continue;
+            }
+
+            if (false == Singleton.LineManager.GetLine(caretCoordinates.AnchorPositionLineIndex, out Line anchorLine))
+            {
+                Singleton.Logger.Error($"RestoreStartCarets: anchor line not found: {caretCoordinates.AnchorPositionLineIndex}");
+                continue;
+            }
+            
+            if (anchorLine.Chars.Count < caretCoordinates.AnchorPositionCharIndex)
+            {
+                Singleton.Logger.Error($"RestoreStartCarets: anchor char not found: {caretCoordinates.PositionCharIndex}");
+                continue;
+            }
+            
+            Singleton.CaretManager.Carets.Add(new Caret()
+            {
+                Position = new LineCoordinates() { Line = line, CharIndex = caretCoordinates.PositionCharIndex },
+                AnchorPosition = new LineCoordinates() { Line = anchorLine, CharIndex = caretCoordinates.AnchorPositionCharIndex },
+            });
+        }
+        Singleton.CaretManager.SetCaretDirty();
+    }
 
     public void DoCommands()
     {
         _caretsCommands.Clear();
 
-        _startCarets.Clear();
-        _endCarets.Clear();
-
         foreach (Caret caret in Singleton.CaretManager.Carets)
         {
-            _startCarets.Add(caret.Clone());
+            SaveCarets(_startCarets);
 
             var commands = CreateCommands(caret);
             _caretsCommands.Add(commands);
@@ -30,15 +74,17 @@ internal abstract class Action
             foreach (Command command in commands)
             {
                 command.Do(caret);
+                
+                Singleton.Logger.Info($"DoCommands: {command.GetDebugString()}");
             }
 
-            _endCarets.Add(caret.Clone());
+            SaveCarets(_endCarets);
         }
     }
     
     public void RedoCommands()
     {
-        Singleton.CaretManager.SetCarets(_startCarets);
+        RestoreCarets(_startCarets);
         
         for (int i = 0; i < _caretsCommands.Count; i++)
         {
@@ -48,15 +94,17 @@ internal abstract class Action
             foreach (Command command in commands)
             {
                 command.Do(caret);
+                
+                Singleton.Logger.Info($"RedoCommands: {command.GetDebugString()}");
             }
         }
 
-        Singleton.CaretManager.SetCarets(_endCarets);
+        RestoreCarets(_endCarets);
     }
 
     public void UndoCommands()
     {
-        Singleton.CaretManager.SetCarets(_endCarets);
+        RestoreCarets(_endCarets);
 
         for (int i = _caretsCommands.Count - 1; i >= 0; i--)
         {
@@ -67,10 +115,12 @@ internal abstract class Action
             {
                 Command command = commands[j];
                 command.Undo(caret);
+                
+                Singleton.Logger.Info($"UndoCommands: {command.GetDebugString()}");
             }
         }
 
-        Singleton.CaretManager.SetCarets(_startCarets);
+        RestoreCarets(_startCarets);
     }
 
     public bool IsAllSame<T>()

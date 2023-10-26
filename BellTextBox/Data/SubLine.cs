@@ -32,7 +32,6 @@ public class SubLine
     public float GetCharPosition(LineCoordinates coordinates)
     {
         int index = coordinates.CharIndex - LineCoordinates.CharIndex;
-            
         float position = 0.0f;
         for (var i = 0; i < index; i++)
         {

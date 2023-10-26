@@ -14,6 +14,7 @@ public class ImGuiTextBox
     }
 
     public string DebugString => _textBox.GetDebugString();
+    public List<string> Logs => _textBox.GetLogs();
 
     public void Render(Vector2 size)
     {

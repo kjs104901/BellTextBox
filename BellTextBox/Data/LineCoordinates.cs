@@ -16,22 +16,21 @@ public struct LineCoordinates : IEquatable<LineCoordinates>
     public static bool operator >(LineCoordinates l, LineCoordinates r) => l.Line.Index != r.Line.Index ? l.Line.Index > r.Line.Index : l.CharIndex > r.CharIndex;
     public static bool operator <=(LineCoordinates l, LineCoordinates r) => l.Line.Index != r.Line.Index ? l.Line.Index < r.Line.Index : l.CharIndex <= r.CharIndex;
     public static bool operator >=(LineCoordinates l, LineCoordinates r) => l.Line.Index != r.Line.Index ? l.Line.Index > r.Line.Index : l.CharIndex >= r.CharIndex;
-    
+
     public SubLine GetSubLine()
     {
-        var foundSubLine = Line.SubLines[0];
-        foreach (var subLine in Line.SubLines)
-        {
-            if (subLine.LineCoordinates.CharIndex > CharIndex)
-                break;
-            foundSubLine = subLine;
-        }
-        return foundSubLine;
+        return Line.GetSubLine(CharIndex);
     }
-
+    
     public bool IsSameSubLine(LineCoordinates other)
     {
-        return GetSubLine() == other.GetSubLine();
+        if (Line != other.Line)
+            return false;
+        
+        if (GetSubLine() != other.GetSubLine())
+            return false;
+        
+        return true;
     }
     
     // TODO change to Move?, change CaretMove name?
