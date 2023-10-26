@@ -64,10 +64,10 @@ internal abstract class Action
     {
         _caretsCommands.Clear();
 
+        SaveCarets(_startCarets);
+
         foreach (Caret caret in Singleton.CaretManager.Carets)
         {
-            SaveCarets(_startCarets);
-
             var commands = CreateCommands(caret);
             _caretsCommands.Add(commands);
 
@@ -77,9 +77,8 @@ internal abstract class Action
                 
                 Singleton.Logger.Info($"DoCommands: {command.GetDebugString()}");
             }
-
-            SaveCarets(_endCarets);
         }
+        SaveCarets(_endCarets);
     }
     
     public void RedoCommands()

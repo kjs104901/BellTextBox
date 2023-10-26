@@ -17,6 +17,8 @@ public readonly struct ColorStyle : IComparable<ColorStyle>
         _a = a;
     }
 
+    public static ColorStyle None = new ColorStyle(0, 0, 0, 0);
+
     public int CompareTo(ColorStyle other)
     {
         var rComparison = _r.CompareTo(other._r);

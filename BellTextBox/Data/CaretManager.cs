@@ -10,7 +10,7 @@ public class CaretManager
     {
         // TODO move to line manager
         Singleton.LineManager.RowsCache.SetDirty();
-        foreach (SubLine row in Singleton.LineManager.Rows)
+        foreach (Row row in Singleton.LineManager.Rows)
         {
             row.LineSelectionCache.SetDirty();
         }

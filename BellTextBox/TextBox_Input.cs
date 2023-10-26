@@ -11,9 +11,6 @@ public partial class TextBox
     private Vector2 _viewPos;
     private Vector2 _viewSize;
 
-    private int _rowStart;
-    private int _rowEnd;
-
     public Vector2 PageSize;
 
     private LineCoordinates _mouseDragStartText;
@@ -41,6 +38,40 @@ public partial class TextBox
         _altPressed |= EnumFlag.Has(hk, HotKeys.Alt);
         _imeComposition = keyboardInput.ImeComposition;
 
+
+        // Chars
+        foreach (char keyboardInputChar in keyboardInput.Chars)
+        {
+            if (keyboardInputChar == 0)
+                continue;
+
+            if (keyboardInputChar == '\n')
+            {
+                ActionManager.DoAction(new EnterAction());
+                continue;
+            }
+
+            if (keyboardInputChar == '\t')
+            {
+                if (EnumFlag.Has(hk, HotKeys.Shift))
+                    ActionManager.DoAction(new UnTabAction());
+                else
+                    ActionManager.DoAction(new TabAction());
+                continue;
+            }
+
+            if (keyboardInputChar < 32)
+                continue;
+
+            if (CaretManager.HasCaretsSelection())
+            {
+                ActionManager.DoAction(new DeleteSelection());
+                CaretManager.RemoveCaretsSelection();
+            }
+
+            ActionManager.DoAction(new InputCharAction(EditDirection.Forward, keyboardInputChar));
+        }
+        
         if (false == string.IsNullOrEmpty(_imeComposition))
         {
             if (CaretManager.HasCaretsSelection())
@@ -231,39 +262,6 @@ public partial class TextBox
         {
             Overwrite = !Overwrite;
         }
-
-        // Chars
-        foreach (char keyboardInputChar in keyboardInput.Chars)
-        {
-            if (keyboardInputChar == 0)
-                continue;
-
-            if (keyboardInputChar == '\n')
-            {
-                ActionManager.DoAction(new EnterAction());
-                continue;
-            }
-
-            if (keyboardInputChar == '\t')
-            {
-                if (EnumFlag.Has(hk, HotKeys.Shift))
-                    ActionManager.DoAction(new UnTabAction());
-                else
-                    ActionManager.DoAction(new TabAction());
-                continue;
-            }
-
-            if (keyboardInputChar < 32)
-                continue;
-
-            if (CaretManager.HasCaretsSelection())
-            {
-                ActionManager.DoAction(new DeleteSelection());
-                CaretManager.RemoveCaretsSelection();
-            }
-
-            ActionManager.DoAction(new InputCharAction(EditDirection.Forward, keyboardInputChar));
-        }
     }
 
     private void ProcessMouseInput()
@@ -376,9 +374,6 @@ public partial class TextBox
             _viewPos = viewPos;
             _viewSize = viewSize;
 
-            _rowStart = GetRowIndex(_viewPos, -3);
-            _rowEnd = GetRowIndex(_viewPos + _viewSize, 3);
-            
             foreach (Line line in LineManager.Lines)
             {
                 line.CutoffsCache.SetDirty();
@@ -429,8 +424,8 @@ public partial class TextBox
         
         if (LineManager.Rows.Count > rowIndex)
         {
-            SubLine subLine = LineManager.Rows[rowIndex];
-            Line line = subLine.LineCoordinates.Line;
+            Row row = LineManager.Rows[rowIndex];
+            Line line = row.SubLine.LineCoordinates.Line;
             
             lineCoordinates.Line = line;
 
@@ -446,56 +441,11 @@ public partial class TextBox
             lineCoordinates.CharIndex = 0;
             foreach (SubLine lineSubLine in line.SubLines)
             {
-                if (subLine.WrapIndex <= lineSubLine.WrapIndex)
+                if (row.SubLine.WrapIndex <= lineSubLine.WrapIndex)
                     break;
                 lineCoordinates.CharIndex += lineSubLine.Chars.Count;
             }
-            lineCoordinates.CharIndex += subLine.GetCharIndex(x - subLine.IndentWidth);
+            lineCoordinates.CharIndex += row.SubLine.GetCharIndex(x - row.IndentWidth);
         }
     }
-    
-    
-    
-    
-    
-    /*
-    private Vector2 PageToView(TextCoordinates textCoordinates)
-    {
-        var view = new Vector2();
-
-        if (LineManager.Rows.Count > textCoordinates.Row)
-        {
-            SubLine subLine = LineManager.Rows[textCoordinates.Row];
-
-            int column = textCoordinates.Column;
-            float pageX = 0.0f + subLine.TabWidth;
-            foreach (var textBlockRender in subLine.TextBlockRenders)
-            {
-                if (column < textBlockRender.Text.Length)
-                {
-                    foreach (char c in textBlockRender.Text)
-                    {
-                        if (column < 1)
-                            break;
-
-                        column -= 1;
-                        pageX += GetFontWidth(c);
-                    }
-
-                    break;
-                }
-
-                column -= textBlockRender.Text.Length;
-                pageX += textBlockRender.Width;
-            }
-
-            view.X = Math.Max(view.X, pageX);
-        }
-
-        view.X += LineNumberWidth + FoldWidth;
-        view.Y = textCoordinates.Row * GetFontHeight();
-
-        return view;
-    }
-    */
 }

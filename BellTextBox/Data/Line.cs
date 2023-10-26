@@ -27,7 +27,6 @@ public class Line
     
     // buffer to avoid GC
     private readonly StringBuilder _sb = new();
-    private readonly List<char> _buffers = new();
     
     public static readonly Line Empty = new(0, Array.Empty<char>());
 
@@ -135,22 +134,8 @@ public class Line
     {
         subLines.Clear();
         
-        float wrapIndentWidth = 0.0f;
-        if (Singleton.TextBox.WordWrapIndent)
-        {
-            // TODO Cache
-            wrapIndentWidth = Singleton.TextBox.CountTabStart(String) * Singleton.TextBox.GetTabRenderSize(); 
-        }
-
-        int wrapIndex = 0;
-        SubLine subLine = new SubLine(this, 0, wrapIndex, 0.0f);
-
-        bool isFirstCharInLine = true;
-        ColorStyle renderGroupColor = Singleton.TextBox.Theme.DefaultFontColor;
-
-        _buffers.Clear();
-        float bufferWidth = 0.0f;
-        float posX = 0.0f;
+        int subIndexIndex = 0;
+        SubLine subLine = new SubLine(this, 0, subIndexIndex);
 
         for (int i = 0; i < Chars.Count; i++)
         {
@@ -160,66 +145,16 @@ public class Line
             subLine.Chars.Add(c);
             subLine.CharWidths.Add(cWidth);
             
-            if (Singleton.TextBox.ShowingWhitespace && char.IsWhiteSpace(c))
-            {
-                subLine.WhiteSpaceRenders.Add(new() { C = c, PosX = posX + bufferWidth });
-            }
-            
-            if (isFirstCharInLine)
-            {
-                renderGroupColor = Colors[i];
-                
-                _buffers.Add(c);
-                bufferWidth += cWidth;
-
-                isFirstCharInLine = false;
-                continue;
-            }
-            
-            if (renderGroupColor != Colors[i]) // need new render group
-            {
-                subLine.TextBlockRenders.Add(new()
-                {
-                    Text = String.Concat(_buffers), ColorStyle = renderGroupColor, Width = bufferWidth, PosX = posX
-                });
-                posX += bufferWidth;
-
-                renderGroupColor = Colors[i];
-                _buffers.Clear();
-                bufferWidth = 0.0f;
-            }
-
-            _buffers.Add(c);
-            bufferWidth += cWidth;
-
             if (Cutoffs.Contains(i)) // need new line
             {
-                subLine.TextBlockRenders.Add(new()
-                {
-                    Text = String.Concat(_buffers), ColorStyle = renderGroupColor, Width = bufferWidth, PosX = posX
-                });
                 subLines.Add(subLine);
 
-                wrapIndex++;
-                subLine = new SubLine(this, i, wrapIndex, wrapIndentWidth);
-
-                isFirstCharInLine = true;
-                renderGroupColor = Singleton.TextBox.Theme.DefaultFontColor;
-                _buffers.Clear();
-
-                posX = 0.0f;
-                bufferWidth = 0.0f;
+                subIndexIndex++;
+                subLine = new SubLine(this, i, subIndexIndex);
             }
         }
-
-        // Add remains
-        if (_buffers.Count > 0 || wrapIndex == 0)
-            subLine.TextBlockRenders.Add(new()
-                { Text = String.Concat(_buffers), ColorStyle = renderGroupColor, Width = bufferWidth, PosX = posX });
-
-        if (subLine.TextBlockRenders.Count > 0)
-            subLines.Add(subLine);
-
+        
+        subLines.Add(subLine);
         return subLines;
     }
 
@@ -266,5 +201,12 @@ public class Line
         }
         Singleton.Logger.Error("GetSubLine failed to find. charIndex: {charIndex}, indexCount: {indexCount}");
         return SubLines[0];
+    }
+
+    public float GetIndentWidth()
+    {
+        if (Singleton.TextBox.WordWrapIndent)
+            return Singleton.TextBox.CountTabStart(String) * Singleton.TextBox.GetTabRenderSize();
+        return 0.0f;
     }
 }
