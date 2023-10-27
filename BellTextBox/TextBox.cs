@@ -58,7 +58,6 @@ public partial class TextBox
             Line line = new Line(i++, lineText.ToArray());
             LineManager.Lines.Add(line);
         }
-
         RowManager.RowsCache.SetDirty();
     }
 

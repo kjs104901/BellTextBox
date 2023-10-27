@@ -29,7 +29,6 @@ internal abstract class Action
     {
         Singleton.CaretManager.ClearCarets();
         Singleton.CaretManager.AddCarets(carets);
-        Singleton.CaretManager.SetCaretDirty();
         return true;
     }
 

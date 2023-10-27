@@ -9,6 +9,7 @@ public class Line
 {
     public int Index = 0;
 
+    // TODO private 고민
     public readonly List<char> Chars = new();
 
     public Folding Folding = Folding.None;
@@ -151,7 +152,7 @@ public class Line
                 lineSubs.Add(lineSub);
 
                 lineSubIndex++;
-                lineSub = new LineSub(Index, i, lineSubIndex);
+                lineSub = new LineSub(Index, i + 1, lineSubIndex);
             }
         }
 

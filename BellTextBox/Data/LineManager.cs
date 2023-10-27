@@ -40,10 +40,7 @@ public class LineManager
                 Lines[i].LineSubsCache.SetDirty();
             }
         }
-
         Singleton.RowManager.RowsCache.SetDirty();
-        Singleton.FoldingManager.FoldingListCache.SetDirty();
-
         return newLine;
     }
 
@@ -64,8 +61,6 @@ public class LineManager
                 Lines[i].LineSubsCache.SetDirty();
             }
         }
-
         Singleton.RowManager.RowsCache.SetDirty();
-        Singleton.FoldingManager.FoldingListCache.SetDirty();
     }
 }

@@ -20,7 +20,8 @@ public class FoldingManager
         Dictionary<int, Stack<int>> foldingStacks = new();
         for (int i = 0; i < Singleton.TextBox.Language.Foldings.Count; i++)
         {
-            foldingStacks.TryAdd(i, new Stack<int>());
+            if (foldingStacks.ContainsKey(i) == false)
+                foldingStacks.TryAdd(i, new Stack<int>());
             foldingStacks[i].Clear();
         }
         

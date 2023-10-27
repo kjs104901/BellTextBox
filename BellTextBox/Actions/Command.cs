@@ -44,6 +44,8 @@ internal class InputCharCommand : Command
             caret.Position.Move(CaretMove.Right, _chars.Length);
             caret.RemoveSelection();
         }
+        
+        Singleton.FoldingManager.FoldingListCache.SetDirty();
     }
 
     public override void Undo(Caret caret)
@@ -115,6 +117,7 @@ internal class DeleteCharCommand : Command
         {
             Logger.Warning($"DeleteCharCommand: _count != _deletedCount {_count} {_deletedCount}");
         }
+        Singleton.FoldingManager.FoldingListCache.SetDirty();
     }
 
     public override void Undo(Caret caret)
@@ -182,6 +185,8 @@ internal class SplitLineCommand : Command
             caret.Position = new Coordinates() { LineIndex = insertLineIndex, CharIndex = charIndex };
             caret.RemoveSelection();
         }
+        
+        Singleton.FoldingManager.FoldingListCache.SetDirty();
     }
 
     public override void Undo(Caret caret)
@@ -259,6 +264,8 @@ internal class MergeLineCommand : Command
             
             Singleton.LineManager.RemoveLine(currentLineIndex);
         }
+        
+        Singleton.FoldingManager.FoldingListCache.SetDirty();
     }
 
     public override void Undo(Caret caret)

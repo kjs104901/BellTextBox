@@ -16,6 +16,15 @@ public class RowManager
         RowsCache = new Cache<List<Row>>(new List<Row>(), UpdateRows);
     }
     
+    public void OnRowChanged()
+    {
+        RowsCache.SetDirty();
+        foreach (Row row in Rows)
+        {
+            row.LineSelectionCache.SetDirty();
+        }
+    }
+    
     private List<Row> UpdateRows(List<Row> rows)
     {
         rows.Clear();

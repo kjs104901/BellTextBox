@@ -290,9 +290,7 @@ public partial class TextBox
                     if (Folding.None != line.Folding)
                     {
                         line.Folding.Switch();
-
-                        RowManager.RowsCache.SetDirty();
-                        CaretManager.SetCaretDirty();
+                        RowManager.OnRowChanged();
                         return;
                     }
                 }

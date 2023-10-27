@@ -7,21 +7,10 @@ public class CaretManager
 {
     private readonly List<Caret> _carets = new();
 
-
-    internal void SetCaretDirty()
-    {
-        // TODO move to line manager
-        Singleton.RowManager.RowsCache.SetDirty();
-        foreach (Row row in Singleton.RowManager.Rows)
-        {
-            row.LineSelectionCache.SetDirty();
-        }
-    }
-
     internal void ClearCarets()
     {
         _carets.Clear();
-        SetCaretDirty();
+        Singleton.RowManager.OnRowChanged();
     }
 
     internal void AddCarets(List<Caret> carets)
@@ -37,7 +26,7 @@ public class CaretManager
 
             _carets.Add(caret);
         }
-        SetCaretDirty();
+        Singleton.RowManager.OnRowChanged();
     }
 
     internal int Count => _carets.Count;
@@ -58,7 +47,7 @@ public class CaretManager
             _carets.Add(new Caret() { Position = coordinates, AnchorPosition = coordinates });
         }
 
-        SetCaretDirty();
+        Singleton.RowManager.OnRowChanged();
         return _carets[0];
     }
 
@@ -72,7 +61,7 @@ public class CaretManager
             return;
         }
         _carets.Add(caret);
-        SetCaretDirty();
+        Singleton.RowManager.OnRowChanged();
     }
 
     public void MoveCaretsPosition(CaretMove caretMove)
@@ -82,7 +71,7 @@ public class CaretManager
             caret.Position.Move(caretMove);
         }
 
-        SetCaretDirty();
+        Singleton.RowManager.OnRowChanged();
     }
 
     public void MoveCaretsAnchor(CaretMove caretMove)
@@ -92,7 +81,7 @@ public class CaretManager
             caret.AnchorPosition.Move(caretMove);
         }
 
-        SetCaretDirty();
+        Singleton.RowManager.OnRowChanged();
     }
 
 
@@ -114,14 +103,14 @@ public class CaretManager
             caret.AnchorPosition = caret.Position;
         }
 
-        SetCaretDirty();
+        Singleton.RowManager.OnRowChanged();
     }
 
     internal void SelectRectangle(Coordinates startPosition, Coordinates endPosition)
     {
         _carets.Clear();
         // TODO select multiple lines
-        SetCaretDirty();
+        Singleton.RowManager.OnRowChanged();
     }
 
     internal List<Caret> GetCaretsInLine(Line line)
