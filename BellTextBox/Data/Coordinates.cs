@@ -89,15 +89,17 @@ public struct Coordinates
         return true;
     }
     
-    public void Move(CaretMove caretMove, int count = 1)
+    public Coordinates FindMove(CaretMove caretMove, int count = 1)
     {
+        Coordinates newCoordinates = this;
         for (int i = 0; i < count; i++)
         {
-            MoveSingle(caretMove);
+            newCoordinates = newCoordinates.FindMoveSingle(caretMove);
         }
+        return newCoordinates;
     }
 
-    private void MoveSingle(CaretMove caretMove)
+    private Coordinates FindMoveSingle(CaretMove caretMove)
     {
         if (CaretMove.Right == caretMove)
         {
@@ -197,5 +199,6 @@ public struct Coordinates
         {
             // TODO
         }
+        return this;
     }
 }

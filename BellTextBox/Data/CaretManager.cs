@@ -68,9 +68,8 @@ public class CaretManager
     {
         foreach (Caret caret in _carets)
         {
-            caret.Position.Move(caretMove);
+            caret.Position = caret.Position.FindMove(caretMove);
         }
-
         Singleton.RowManager.OnRowChanged();
     }
 
@@ -78,9 +77,8 @@ public class CaretManager
     {
         foreach (Caret caret in _carets)
         {
-            caret.AnchorPosition.Move(caretMove);
+            caret.AnchorPosition = caret.AnchorPosition.FindMove(caretMove);
         }
-
         Singleton.RowManager.OnRowChanged();
     }
 

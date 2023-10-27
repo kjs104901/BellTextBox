@@ -41,7 +41,7 @@ internal class InputCharCommand : Command
 
         if (EditDirection.Forward == _direction)
         {
-            caret.Position.Move(CaretMove.Right, _chars.Length);
+            caret.Position = caret.Position.FindMove(CaretMove.Right, _chars.Length);
             caret.RemoveSelection();
         }
         
@@ -109,7 +109,7 @@ internal class DeleteCharCommand : Command
             line.SetCharsDirty();
             Singleton.RowManager.RowsCache.SetDirty();
 
-            caret.Position.Move(CaretMove.Left, _deletedCount);
+            caret.Position = caret.Position.FindMove(CaretMove.Left, _deletedCount);
             caret.RemoveSelection();
         }
 
