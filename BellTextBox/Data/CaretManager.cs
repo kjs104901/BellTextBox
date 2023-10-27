@@ -1,4 +1,5 @@
-﻿using Bell.Utils;
+﻿using System.Text;
+using Bell.Utils;
 
 namespace Bell.Data;
 
@@ -125,5 +126,17 @@ public class CaretManager
 
         ActionManager.DoAction(new PasteAction(text));
         */
+    }
+
+    public string GetDebugString()
+    {
+        StringBuilder sb = new ();
+        foreach (Caret caret in Carets)
+        {
+            sb.AppendLine("Caret:");
+            sb.AppendLine("\tPosition\t" + caret.Position.Line.Index + ":" + caret.Position.CharIndex);
+            sb.AppendLine("\tAnchorPosition\t" + caret.AnchorPosition.Line.Index + ":" + caret.AnchorPosition.CharIndex);
+        }
+        return sb.ToString();
     }
 }

@@ -35,6 +35,7 @@ public partial class TextBox
     {
         var sb = new StringBuilder();
         sb.AppendLine(ActionManager.GetDebugString());
+        sb.AppendLine(CaretManager.GetDebugString());
         return sb.ToString();
     }
 
