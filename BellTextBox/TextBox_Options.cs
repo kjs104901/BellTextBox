@@ -45,7 +45,7 @@ public partial class TextBox
     
     public Language Language { get; set; } = Language.PlainText();
 
-    public bool IsDebugMode = true;
+    public readonly bool IsDebugMode = true;
 
     public int CountTabStart(string line)
     {
