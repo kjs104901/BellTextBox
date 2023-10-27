@@ -29,24 +29,20 @@ internal class InputCharCommand : Command
 
     public override void Do(Caret caret)
     {
-        if (ThreadLocal.TextBox.GetLine(caret.Position.LineIndex, out Line line))
+        if (false == Singleton.LineManager.GetLine(caret.Position.LineIndex, out Line line))
         {
-            int targetIndex = caret.Position.CharIndex;
-            if (targetIndex < 0 || targetIndex > line.Chars.Count)
-            {
-                // TODO error
-                return;
-            }
-            
-            line.Chars.InsertRange(targetIndex, _chars);
-            line.SetCharsDirty();
-            ThreadLocal.TextBox.RowsCache.SetDirty();
+            Logger.Error($"InputCharCommand: Line not found {caret.Position.LineIndex}");
+            return;
+        }
+        
+        line.Chars.InsertRange(caret.Position.CharIndex, _chars);
+        line.SetCharsDirty();
+        Singleton.RowManager.RowsCache.SetDirty();
 
-            if (EditDirection.Forward == _direction)
-            {
-                ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.Right);
-                ThreadLocal.TextBox.RemoveCaretsSelection();
-            }
+        if (EditDirection.Forward == _direction)
+        {
+            caret.Position.Move(CaretMove.Right, _chars.Length);
+            caret.RemoveSelection();
         }
     }
 
@@ -60,7 +56,7 @@ internal class InputCharCommand : Command
 
     public override string GetDebugString()
     {
-        return string.Join(' ', _chars);
+        return "Input" + string.Join(' ', _chars);
     }
 }
 
@@ -80,40 +76,44 @@ internal class DeleteCharCommand : Command
 
     public override void Do(Caret caret)
     {
-        if (ThreadLocal.TextBox.GetLine(caret.Position.LineIndex, out Line line))
+        if (false == Singleton.LineManager.GetLine(caret.Position.LineIndex, out Line line))
         {
-            _deletedCount = _count;
-            
-            int targetIndex = caret.Position.CharIndex;
-            if (targetIndex < 0 || targetIndex > line.Chars.Count)
-            {
-                // TODO error
-                return;
-            }
-            
-            if (EditDirection.Forward == _direction)
-            {
-                if (targetIndex + _deletedCount > line.Chars.Count)
-                    _deletedCount = line.Chars.Count - targetIndex;
+            Logger.Error($"DeleteCharCommand: Line not found {caret.Position.LineIndex}");
+            return;
+        }
 
-                _deletedChars = line.Chars.GetRange(targetIndex, _deletedCount).ToArray();
-                line.Chars.RemoveRange(targetIndex, _deletedCount);
-                line.SetCharsDirty();
-                ThreadLocal.TextBox.RowsCache.SetDirty();
-            }
-            else if (EditDirection.Backward == _direction)
-            {
-                if (targetIndex - _deletedCount < 0)
-                    _deletedCount = targetIndex;
+        _deletedCount = _count;
+            
+        List<char> chars = line.Chars;
+        int targetIndex = caret.Position.CharIndex;
+            
+        if (EditDirection.Forward == _direction)
+        {
+            if (targetIndex + _deletedCount > chars.Count)
+                _deletedCount = chars.Count - targetIndex;
+
+            _deletedChars = chars.GetRange(targetIndex, _deletedCount).ToArray();
+            chars.RemoveRange(targetIndex, _deletedCount);
+            line.SetCharsDirty();
+            Singleton.RowManager.RowsCache.SetDirty();
+        }
+        else if (EditDirection.Backward == _direction)
+        {
+            if (targetIndex - _deletedCount < 0)
+                _deletedCount = targetIndex;
                 
-                _deletedChars = line.Chars.GetRange(targetIndex - _deletedCount, _deletedCount).ToArray();
-                line.Chars.RemoveRange(targetIndex - _deletedCount, _deletedCount);
-                line.SetCharsDirty();
-                ThreadLocal.TextBox.RowsCache.SetDirty();
+            _deletedChars = chars.GetRange(targetIndex - _deletedCount, _deletedCount).ToArray();
+            chars.RemoveRange(targetIndex - _deletedCount, _deletedCount);
+            line.SetCharsDirty();
+            Singleton.RowManager.RowsCache.SetDirty();
 
-                ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.Left);
-                ThreadLocal.TextBox.RemoveCaretsSelection();
-            }
+            caret.Position.Move(CaretMove.Left, _deletedCount);
+            caret.RemoveSelection();
+        }
+
+        if (_count != _deletedCount)
+        {
+            Logger.Warning($"DeleteCharCommand: _count != _deletedCount {_count} {_deletedCount}");
         }
     }
 
@@ -142,55 +142,56 @@ internal class SplitLineCommand : Command
 
     public override void Do(Caret caret)
     {
-        if (ThreadLocal.TextBox.GetLine(caret.Position.LineIndex, out Line line))
+        if (false == Singleton.LineManager.GetLine(caret.Position.LineIndex, out Line line))
         {
-            char[] restOfLine;
-            int insertLineIndex;
-            
-            if (EditDirection.Forward == _direction)
-            {
-                // Get forward rest of line
-                restOfLine = line.Chars.GetRange(caret.Position.CharIndex, line.Chars.Count - caret.Position.CharIndex).ToArray();
-                line.Chars.RemoveRange(caret.Position.CharIndex, line.Chars.Count - caret.Position.CharIndex);
-                line.SetCharsDirty();
-                
-                insertLineIndex = caret.Position.LineIndex + 1;
-                
-                ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.Down);
-                ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.StartOfLine);
-                ThreadLocal.TextBox.RemoveCaretsSelection();
-            }
-            else
-            {
-                // Get backward rest of line
-                restOfLine = line.Chars.GetRange(0, caret.Position.CharIndex).ToArray();
-                line.Chars.RemoveRange(0, caret.Position.CharIndex);
-                line.SetCharsDirty();
+            Logger.Error($"SplitLineCommand: Line not found {caret.Position.LineIndex}");
+            return;
+        }
+        
+        char[] restOfLine;
+        int insertLineIndex;
 
-                insertLineIndex = caret.Position.LineIndex;
-                    
-                ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.Up);
-                ThreadLocal.TextBox.MoveCaretsPosition(CaretMove.EndOfLine);
-                ThreadLocal.TextBox.RemoveCaretsSelection();
-            }
+        List<char> chars = line.Chars;
+        
+        if (EditDirection.Forward == _direction)
+        {
+            // Get forward rest of line
+            restOfLine = chars.GetRange(caret.Position.CharIndex, chars.Count - caret.Position.CharIndex).ToArray();
+            chars.RemoveRange(caret.Position.CharIndex, chars.Count - caret.Position.CharIndex);
+            line.SetCharsDirty();
             
-            // Update line index
-            foreach (Line textBoxLine in ThreadLocal.TextBox.Lines)
-            {
-                if (textBoxLine.Index >= insertLineIndex)
-                    textBoxLine.Index++;
-            }
-                
-            // Create new line and insert
-            Line newLine = new Line(insertLineIndex, restOfLine);
-                
-            ThreadLocal.TextBox.Lines.Insert(caret.Position.LineIndex + 1, newLine);
-            ThreadLocal.TextBox.RowsCache.SetDirty();
+            // TODO auto indent?
+            
+            insertLineIndex = caret.Position.LineIndex + 1;
+            Line newLine = Singleton.LineManager.InsertLine(insertLineIndex, restOfLine);
+            
+            caret.Position = new Coordinates() { LineIndex = insertLineIndex, CharIndex = 0 };
+            caret.RemoveSelection();
+        }
+        else
+        {
+            // Get backward rest of line
+            restOfLine = chars.GetRange(0, caret.Position.CharIndex).ToArray();
+            chars.RemoveRange(0, caret.Position.CharIndex);
+            line.SetCharsDirty();
+            
+            insertLineIndex = caret.Position.LineIndex;
+            Line newLine = Singleton.LineManager.InsertLine(insertLineIndex, restOfLine);
+
+            int charIndex = restOfLine.Length;
+            caret.Position = new Coordinates() { LineIndex = insertLineIndex, CharIndex = charIndex };
+            caret.RemoveSelection();
         }
     }
 
     public override void Undo(Caret caret)
     {
+        // TODO auto indent?
+        
+        if (EditDirection.Forward == _direction)
+            new MergeLineCommand(EditDirection.Backward).Do(caret);
+        else if (EditDirection.Backward == _direction)
+            new MergeLineCommand(EditDirection.Forward).Do(caret);
     }
 
     public override string GetDebugString()
@@ -210,10 +211,62 @@ internal class MergeLineCommand : Command
 
     public override void Do(Caret caret)
     {
+        if (false == Singleton.LineManager.GetLine(caret.Position.LineIndex, out Line line))
+        {
+            Logger.Error($"MergeLineCommand: Line not found {caret.Position.LineIndex}");
+            return;
+        }
+        
+        if (EditDirection.Forward == _direction)
+        {
+            int nextLineIndex = line.Index + 1;
+            
+            if (false == Singleton.LineManager.GetLine(nextLineIndex, out Line nextLine))
+                return;
+                
+            line.Chars.AddRange(nextLine.Chars);
+            line.SetCharsDirty();
+
+            // TODO 정리?
+            foreach (Caret moveCaret in Singleton.CaretManager.GetCaretsInLine(nextLine))
+            {
+                moveCaret.Position.LineIndex = line.Index;
+                moveCaret.Position.CharIndex += line.Chars.Count;
+                moveCaret.AnchorPosition.LineIndex = line.Index;
+                moveCaret.AnchorPosition.CharIndex += line.Chars.Count;
+            }
+            
+            Singleton.LineManager.RemoveLine(nextLineIndex);
+        }
+        else if (EditDirection.Backward == _direction)
+        {
+            int currentLineIndex = line.Index;
+            int prevLineIndex = line.Index - 1;
+            
+            if (false == Singleton.LineManager.GetLine(prevLineIndex, out Line prevLine))
+                return;
+            
+            foreach (Caret moveCaret in Singleton.CaretManager.GetCaretsInLine(line))
+            {
+                moveCaret.Position.LineIndex = prevLine.Index;
+                moveCaret.Position.CharIndex += prevLine.Chars.Count;
+                moveCaret.AnchorPosition.LineIndex = prevLine.Index;
+                moveCaret.AnchorPosition.CharIndex += prevLine.Chars.Count;
+            }
+                
+            prevLine.Chars.AddRange(line.Chars);
+            prevLine.SetCharsDirty();
+            
+            Singleton.LineManager.RemoveLine(currentLineIndex);
+        }
     }
 
     public override void Undo(Caret caret)
     {
+        if (EditDirection.Forward == _direction)
+            new SplitLineCommand(EditDirection.Backward).Do(caret);
+        else if (EditDirection.Backward == _direction)
+            new SplitLineCommand(EditDirection.Forward).Do(caret);
     }
 
     public override string GetDebugString()

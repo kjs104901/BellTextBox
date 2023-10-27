@@ -1,20 +1,35 @@
 ﻿namespace Bell.Data;
 
+public enum CaretMove
+{
+    None,
+
+    Up,
+    Down,
+    Left,
+    Right,
+
+    StartOfFile,
+    EndOfFile,
+    StartOfLine,
+    EndOfLine,
+    StartOfWord,
+    EndOfWord,
+
+    PageUp,
+    PageDown,
+}
+
 public class Caret
 {
-    public TextCoordinates AnchorPosition;
-    public TextCoordinates Position;
+    public Coordinates AnchorPosition;
+    public Coordinates Position;
 
-    public bool HasSelection => AnchorPosition != Position;
+    public bool HasSelection => !AnchorPosition.IsSameAs(Position, Compare.ByChar);
 
-    public Caret Clone()
+    public void GetSortedPosition(out Coordinates start, out Coordinates end)
     {
-        return new Caret() { AnchorPosition = AnchorPosition, Position = Position };
-    }
-
-    public void GetSortedSelection(out TextCoordinates start, out TextCoordinates end)
-    {
-        if (AnchorPosition < Position)
+        if (Position.IsBiggerThan(AnchorPosition, Compare.ByChar))
         {
             start = AnchorPosition;
             end = Position;
@@ -25,4 +40,11 @@ public class Caret
             end = AnchorPosition;
         }
     }
+
+    public void RemoveSelection()
+    {
+        AnchorPosition = Position;
+    }
+
+    public Caret Clone() => new() { AnchorPosition = AnchorPosition, Position = Position };
 }

@@ -1,38 +1,35 @@
-﻿using Bell.Data;
+﻿using Bell.Languages;
 using Bell.Utils;
 
-namespace Bell;
+namespace Bell.Data;
 
-public class Folding
-{
-    public int Start;
-    public int End;
-    
-    public bool Folded;
-}
-
-public partial class TextBox
+public class FoldingManager
 {
     public List<Folding> FoldingList => FoldingListCache.Get();
     public readonly Cache<List<Folding>> FoldingListCache;
+
+    public FoldingManager()
+    {
+        FoldingListCache = new Cache<List<Folding>>(new List<Folding>(), UpdateFoldingList);
+    }
 
     private List<Folding> UpdateFoldingList(List<Folding> foldingList)
     {
         foldingList.Clear();
 
         Dictionary<int, Stack<int>> foldingStacks = new();
-        for (int i = 0; i < Language.Foldings.Count; i++)
+        for (int i = 0; i < Singleton.TextBox.Language.Foldings.Count; i++)
         {
             foldingStacks.TryAdd(i, new Stack<int>());
             foldingStacks[i].Clear();
         }
         
-        foreach (Line line in Lines)
+        foreach (Line line in Singleton.LineManager.Lines)
         {
-            for (int i = 0; i < Language.Foldings.Count; i++)
+            for (int i = 0; i < Singleton.TextBox.Language.Foldings.Count; i++)
             {
-                var startFolding = Language.Foldings[i].Item1;
-                var endFolding = Language.Foldings[i].Item2;
+                var startFolding = Singleton.TextBox.Language.Foldings[i].Item1;
+                var endFolding = Singleton.TextBox.Language.Foldings[i].Item2;
 
                 for (int j = 0; j < line.CountSubstrings(startFolding); j++)
                 {
@@ -54,7 +51,7 @@ public partial class TextBox
         {
             while (foldingStack.TryPop(out int start))
             {
-                int end = Lines.Count - 1;
+                int end = Singleton.LineManager.Lines.Count - 1;
                 AddFolding(foldingList, start, end);
             }
         }

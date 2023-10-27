@@ -1,17 +1,14 @@
 ﻿using System.Text;
-using Bell.Actions;
-using Bell.Data;
-using Action = Bell.Actions.Action;
 
-namespace Bell;
+namespace Bell.Actions;
 
-public partial class TextBox
+public class ActionManager
 {
     private const int HistoryCapacity = 1000;
     private readonly LinkedList<Action> _actionHistory = new();
     private readonly LinkedList<Action> _actionRedoHistory = new();
-
-    private void DoAction(Action action)
+    
+    internal void DoAction(Action action)
     {
         action.DoCommands();
         
@@ -23,7 +20,7 @@ public partial class TextBox
         _actionRedoHistory.Clear();
     }
 
-    private void UndoAction()
+    internal void UndoAction()
     {
         if (_actionHistory.Last == null)
             return;
@@ -43,7 +40,7 @@ public partial class TextBox
         }
     }
     
-    private void UndoActionSequence<T>()
+    internal void UndoActionSequence<T>()
     {
         while (_actionHistory.Last != null &&
                _actionHistory.Last.Value.IsAllSame<T>())
@@ -55,7 +52,7 @@ public partial class TextBox
         }
     }
 
-    private void RedoAction()
+    internal void RedoAction()
     {
         if (_actionRedoHistory.First == null)
             return;
@@ -75,7 +72,7 @@ public partial class TextBox
         }
     }
     
-    private void RedoActionSequence<T>()
+    internal void RedoActionSequence<T>()
     {
         while (_actionRedoHistory.First != null &&
                _actionRedoHistory.First.Value.IsAllSame<T>())
@@ -87,7 +84,7 @@ public partial class TextBox
         }
     }
 
-    internal string GetActionDebugString()
+    internal string GetDebugString()
     {
         StringBuilder sb = new ();
         sb.AppendLine("History:");

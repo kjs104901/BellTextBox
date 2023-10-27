@@ -45,6 +45,8 @@ public partial class TextBox
     
     public Language Language { get; set; } = Language.PlainText();
 
+    public bool IsDebugMode = true;
+
     public int CountTabStart(string line)
     {
         string tabString = GetTabString();
@@ -60,9 +62,16 @@ public partial class TextBox
 
     public float GetTabRenderSize()
     {
-        return GetFontWhiteSpaceWidth() * TabSize;
+        return FontManager.GetFontWhiteSpaceWidth() * TabSize;
     }
 
+    public string GetTabString()
+    {
+        if (TabMode.Space == TabMode)
+            return new string(' ', TabSize);
+        return "\t";
+    }
+    
     public string ReplaceTab(string text)
     {
         switch (TabMode)
@@ -75,13 +84,6 @@ public partial class TextBox
         return text;
     }
     
-    public string GetTabString()
-    {
-        if (TabMode.Space == TabMode)
-            return new string(' ', TabSize);
-        return "\t";
-    }
-
     public string ReplaceEol(string text)
     {
         return text.Replace("\r\n", "\n")

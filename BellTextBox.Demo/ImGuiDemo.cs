@@ -3,6 +3,7 @@ using System.Numerics;
 using Bell.ImGuiNet;
 using ImGuiNET;
 using Veldrid;
+using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
 
 namespace Bell.Demo;
@@ -23,21 +24,6 @@ class ImGuiDemo
     {
         Vector3 clearColor = new(0.45f, 0.55f, 0.6f);
         string textInput = @"--- START ---
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }}}}}}}}}
 ||||||||
 aaaaaaaa
@@ -108,26 +94,29 @@ public class FontStyle : IComparable<FontStyle>
             var snapshot = sdl2Window.PumpEvents();
             if (!sdl2Window.Exists)
                 break;
-            imGuiRenderer.Update(deltaTime,
-                snapshot); // Feed the input events to our ImGui controller, which passes them through to ImGui.
+            imGuiRenderer.Update(deltaTime, snapshot);
 
             ImGui.SetNextWindowPos(new Vector2(0, 0));
             ImGui.SetNextWindowSize(new Vector2(sdl2Window.Width, sdl2Window.Height));
             ImGui.Begin("Demo", ImGuiWindowFlags.NoResize);
+            
 
-            if (ImGui.BeginTable("table2", 2, ImGuiTableFlags.Resizable))
+            if (ImGui.BeginTable("table2", 3, ImGuiTableFlags.Resizable))
             {
                 ImGui.TableSetupColumn("C1", ImGuiTableColumnFlags.None, 100);
-                ImGui.TableSetupColumn("C2", ImGuiTableColumnFlags.None, 200);
+                ImGui.TableSetupColumn("C2", ImGuiTableColumnFlags.None, 100);
+                ImGui.TableSetupColumn("C3", ImGuiTableColumnFlags.None, 200);
 
                 ImGui.TableNextRow();
 
                 ImGui.TableNextColumn();
                 string debugString = imGuiBellTextBox.DebugString;
                 ImGui.InputTextMultiline("##Debug", ref debugString, (uint)debugString.Length, new Vector2(-1, -1));
-
-                ImGui.TableNextColumn();
                 
+                ImGui.TableNextColumn();
+                imGuiBellTextBox.Logs.ForEach(ImGui.Text);
+                
+                ImGui.TableNextColumn();
                 ImGui.PushFont(imFontPtr);
                 imGuiBellTextBox.Render(new Vector2(-1, -1));
                 ImGui.PopFont();
