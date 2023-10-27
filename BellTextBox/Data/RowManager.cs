@@ -69,7 +69,7 @@ public class RowManager
                     {
                         char c = lineSub.Chars[j];
 
-                        ColorStyle charColor = line.Colors[lineSub.LineCoordinates.CharIndex + j];
+                        ColorStyle charColor = line.Colors[lineSub.Coordinates.CharIndex + j];
                         float charWidth = lineSub.CharWidths[j];
 
                         if (j == 0)

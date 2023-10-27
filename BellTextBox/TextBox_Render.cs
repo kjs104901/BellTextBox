@@ -76,21 +76,24 @@ public partial class TextBox
                 }
             }
 
-            if (row.LineSub.WrapIndex == 0)
+            if (LineManager.GetLine(row.LineSub.Coordinates.LineIndex, out Line line))
             {
-                string lineIndex = StringPool<int>.Get(row.LineSub.LineCoordinates.Line.Index);
-                float lineIndexWidth = lineIndex.Sum(FontManager.GetFontWidth);
+                if (row.LineSub.LineSubIndex == 0)
+                {
+                    string lineIndex = StringPool<int>.Get(line.Index);
+                    float lineIndexWidth = lineIndex.Sum(FontManager.GetFontWidth);
 
-                Backend.RenderText(new Vector2(LineNumberWidth - lineIndexWidth, lineTextStartY),
-                    lineIndex,
-                    Theme.DefaultFontColor.ToVector());
-            }
+                    Backend.RenderText(new Vector2(LineNumberWidth - lineIndexWidth, lineTextStartY),
+                        lineIndex,
+                        Theme.DefaultFontColor.ToVector());
+                }
             
-            if (Folding.None != row.LineSub.LineCoordinates.Line.Folding)
-            {
-                Backend.RenderText(new Vector2(LineNumberWidth, lineTextStartY),
-                    row.LineSub.LineCoordinates.Line.Folding.Folded ? " >" : " V",
-                    Theme.DefaultFontColor.ToVector());
+                if (Folding.None != line.Folding)
+                {
+                    Backend.RenderText(new Vector2(LineNumberWidth, lineTextStartY),
+                        line.Folding.Folded ? " >" : " V",
+                        Theme.DefaultFontColor.ToVector());
+                }
             }
 
             if (row.LineSelection.HasCaret)

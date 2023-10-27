@@ -13,7 +13,7 @@ public partial class TextBox
 
     public Vector2 PageSize;
 
-    private LineCoordinates _mouseDragStartText;
+    private Coordinates _mouseDragStartText;
 
     private bool _shiftPressed;
     private bool _altPressed;
@@ -36,8 +36,7 @@ public partial class TextBox
 
         _shiftPressed |= EnumFlag.Has(hk, HotKeys.Shift);
         _altPressed |= EnumFlag.Has(hk, HotKeys.Alt);
-
-
+        
         // Chars
         foreach (char keyboardInputChar in keyboardInput.Chars)
         {
@@ -278,7 +277,7 @@ public partial class TextBox
 
         ConvertCoordinates(mouseInput.Position,
             out int _,
-            out LineCoordinates lineCoordinates,
+            out Coordinates coordinates,
             out bool isLineNumber,
             out bool isFold);
 
@@ -286,13 +285,16 @@ public partial class TextBox
         {
             if (MouseAction.Click == mouseInput.LeftAction)
             {
-                if (Folding.None != lineCoordinates.Line.Folding)
+                if (LineManager.GetLine(coordinates.LineIndex, out Line line))
                 {
-                    lineCoordinates.Line.Folding.Switch();
+                    if (Folding.None != line.Folding)
+                    {
+                        line.Folding.Switch();
 
-                    RowManager.RowsCache.SetDirty();
-                    CaretManager.SetCaretDirty();
-                    return;
+                        RowManager.RowsCache.SetDirty();
+                        CaretManager.SetCaretDirty();
+                        return;
+                    }
                 }
             }
         }
@@ -316,27 +318,27 @@ public partial class TextBox
         if (MouseAction.Click == mouseInput.LeftAction ||
             MouseAction.Click == mouseInput.MiddleAction)
         {
-            _mouseDragStartText = lineCoordinates;
+            _mouseDragStartText = coordinates;
         }
 
         if (MouseAction.Click == mouseInput.LeftAction)
         {
             if (_shiftPressed)
             {
-                CaretManager.SingleCaret().AnchorPosition = lineCoordinates;
+                CaretManager.SingleCaret().AnchorPosition = coordinates;
             }
             else if (_altPressed)
             {
-                CaretManager.AddCaret(lineCoordinates);
+                CaretManager.AddCaret(coordinates);
             }
             else
             {
-                CaretManager.SingleCaret(lineCoordinates);
+                CaretManager.SingleCaret(coordinates);
             }
         }
         else if (MouseAction.DoubleClick == mouseInput.LeftAction)
         {
-            CaretManager.SingleCaret(lineCoordinates);
+            CaretManager.SingleCaret(coordinates);
 
             if (_shiftPressed)
             {
@@ -355,16 +357,16 @@ public partial class TextBox
         {
             if (_altPressed)
             {
-                CaretManager.SelectRectangle(_mouseDragStartText, lineCoordinates);
+                CaretManager.SelectRectangle(_mouseDragStartText, coordinates);
             }
             else
             {
-                CaretManager.SingleCaret(_mouseDragStartText).Position = lineCoordinates;
+                CaretManager.SingleCaret(_mouseDragStartText).Position = coordinates;
             }
         }
         else if (MouseAction.Dragging == mouseInput.MiddleAction)
         {
-            CaretManager.SelectRectangle(_mouseDragStartText, lineCoordinates);
+            CaretManager.SelectRectangle(_mouseDragStartText, coordinates);
         }
 
         _shiftPressed = false;
@@ -413,12 +415,12 @@ public partial class TextBox
 
     private void ConvertCoordinates(Vector2 viewCoordinates,
         out int rowIndex,
-        out LineCoordinates lineCoordinates,
+        out Coordinates coordinates,
         out bool isLineNumber,
         out bool isFold)
     {
         rowIndex = GetRowIndex(viewCoordinates);
-        lineCoordinates = new LineCoordinates { Line = Line.Empty, CharIndex = 0 };
+        coordinates = new Coordinates { LineIndex = 0, CharIndex = 0 };
         isLineNumber = false;
         isFold = false;
 
@@ -432,21 +434,21 @@ public partial class TextBox
         if (RowManager.Rows.Count > rowIndex)
         {
             Row row = RowManager.Rows[rowIndex];
-            Line line = row.LineSub.LineCoordinates.Line;
-
-            lineCoordinates.Line = line;
-
-            if (x < -FontManager.GetFontWhiteSpaceWidth())
+            if (LineManager.GetLine(row.LineSub.Coordinates.LineIndex, out Line line))
             {
-                if (Folding.None != line.Folding)
-                {
-                    isFold = true;
-                    return;
-                }
-            }
+                coordinates.LineIndex = line.Index;
 
-            lineCoordinates.CharIndex =
-                row.LineSub.LineCoordinates.CharIndex + row.LineSub.GetCharIndex(x - row.IndentWidth);
+                if (x < -FontManager.GetFontWhiteSpaceWidth())
+                {
+                    if (Folding.None != line.Folding)
+                    {
+                        isFold = true;
+                        return;
+                    }
+                }
+                coordinates.CharIndex =
+                    row.LineSub.Coordinates.CharIndex + row.LineSub.GetCharIndex(x - row.IndentWidth);
+            }
         }
     }
 }

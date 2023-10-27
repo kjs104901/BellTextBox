@@ -22,14 +22,14 @@ public enum CaretMove
 
 public class Caret
 {
-    public LineCoordinates AnchorPosition;
-    public LineCoordinates Position;
+    public Coordinates AnchorPosition;
+    public Coordinates Position;
 
-    public bool HasSelection => AnchorPosition != Position;
+    public bool HasSelection => !AnchorPosition.IsSameAs(Position, Compare.ByChar);
 
-    public void GetSortedSelection(out LineCoordinates start, out LineCoordinates end)
+    public void GetSortedPosition(out Coordinates start, out Coordinates end)
     {
-        if (AnchorPosition < Position)
+        if (Position.IsBiggerThan(AnchorPosition, Compare.ByChar))
         {
             start = AnchorPosition;
             end = Position;
@@ -45,23 +45,6 @@ public class Caret
     {
         AnchorPosition = Position;
     }
-    
-    public CaretCoordinates GetCaretCoordinates()
-    {
-        return new CaretCoordinates
-        {
-            PositionLineIndex = Position.Line.Index,
-            PositionCharIndex = Position.CharIndex,
-            AnchorPositionLineIndex = AnchorPosition.Line.Index,
-            AnchorPositionCharIndex = AnchorPosition.CharIndex,
-        };
-    }
-}
 
-public struct CaretCoordinates
-{
-    public int PositionLineIndex;
-    public int PositionCharIndex;
-    public int AnchorPositionLineIndex;
-    public int AnchorPositionCharIndex;
+    public Caret Clone() => new() { AnchorPosition = AnchorPosition, Position = Position };
 }

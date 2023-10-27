@@ -29,26 +29,19 @@ internal class InputCharCommand : Command
 
     public override void Do(Caret caret)
     {
-        Line line = caret.Position.Line;
-        var chars = line.Chars;
-        
-        int targetIndex = caret.Position.CharIndex;
-        if (targetIndex < 0 || targetIndex > chars.Count)
+        if (false == Singleton.LineManager.GetLine(caret.Position.LineIndex, out Line line))
         {
-            // TODO error
+            Logger.Error($"InputCharCommand: Line not found {caret.Position.LineIndex}");
             return;
         }
-            
-        chars.InsertRange(targetIndex, _chars);
+        
+        line.Chars.InsertRange(caret.Position.CharIndex, _chars);
         line.SetCharsDirty();
         Singleton.RowManager.RowsCache.SetDirty();
 
         if (EditDirection.Forward == _direction)
         {
-            for (int i = 0; i < _chars.Length; i++)
-            {
-                caret.Position = caret.Position.FindCoordinates(CaretMove.Right);
-            }
+            caret.Position.Move(CaretMove.Right, _chars.Length);
             caret.RemoveSelection();
         }
     }
@@ -63,7 +56,7 @@ internal class InputCharCommand : Command
 
     public override string GetDebugString()
     {
-        return string.Join(' ', _chars);
+        return "Input" + string.Join(' ', _chars);
     }
 }
 
@@ -83,17 +76,16 @@ internal class DeleteCharCommand : Command
 
     public override void Do(Caret caret)
     {
-        Line line = caret.Position.Line;
-        List<char> chars = line.Chars;
-        
-        _deletedCount = _count;
-            
-        int targetIndex = caret.Position.CharIndex;
-        if (targetIndex < 0 || targetIndex > chars.Count)
+        if (false == Singleton.LineManager.GetLine(caret.Position.LineIndex, out Line line))
         {
-            // TODO error
+            Logger.Error($"DeleteCharCommand: Line not found {caret.Position.LineIndex}");
             return;
         }
+
+        _deletedCount = _count;
+            
+        List<char> chars = line.Chars;
+        int targetIndex = caret.Position.CharIndex;
             
         if (EditDirection.Forward == _direction)
         {
@@ -115,11 +107,13 @@ internal class DeleteCharCommand : Command
             line.SetCharsDirty();
             Singleton.RowManager.RowsCache.SetDirty();
 
-            for (int i = 0; i < _deletedCount; i++)
-            {
-                caret.Position = caret.Position.FindCoordinates(CaretMove.Left);
-            }
+            caret.Position.Move(CaretMove.Left, _deletedCount);
             caret.RemoveSelection();
+        }
+
+        if (_count != _deletedCount)
+        {
+            Logger.Warning($"DeleteCharCommand: _count != _deletedCount {_count} {_deletedCount}");
         }
     }
 
@@ -148,10 +142,15 @@ internal class SplitLineCommand : Command
 
     public override void Do(Caret caret)
     {
+        if (false == Singleton.LineManager.GetLine(caret.Position.LineIndex, out Line line))
+        {
+            Logger.Error($"SplitLineCommand: Line not found {caret.Position.LineIndex}");
+            return;
+        }
+        
         char[] restOfLine;
         int insertLineIndex;
 
-        Line line = caret.Position.Line;
         List<char> chars = line.Chars;
         
         if (EditDirection.Forward == _direction)
@@ -163,10 +162,10 @@ internal class SplitLineCommand : Command
             
             // TODO auto indent?
             
-            insertLineIndex = caret.Position.Line.Index + 1;
+            insertLineIndex = caret.Position.LineIndex + 1;
             Line newLine = Singleton.LineManager.InsertLine(insertLineIndex, restOfLine);
             
-            caret.Position = new LineCoordinates() { Line = newLine, CharIndex = 0 };
+            caret.Position = new Coordinates() { LineIndex = insertLineIndex, CharIndex = 0 };
             caret.RemoveSelection();
         }
         else
@@ -176,10 +175,11 @@ internal class SplitLineCommand : Command
             chars.RemoveRange(0, caret.Position.CharIndex);
             line.SetCharsDirty();
             
-            insertLineIndex = caret.Position.Line.Index;
+            insertLineIndex = caret.Position.LineIndex;
             Line newLine = Singleton.LineManager.InsertLine(insertLineIndex, restOfLine);
-            
-            caret.Position = new LineCoordinates() { Line = newLine, CharIndex = restOfLine.Length };
+
+            int charIndex = restOfLine.Length;
+            caret.Position = new Coordinates() { LineIndex = insertLineIndex, CharIndex = charIndex };
             caret.RemoveSelection();
         }
     }
@@ -211,7 +211,11 @@ internal class MergeLineCommand : Command
 
     public override void Do(Caret caret)
     {
-        Line line = caret.Position.Line;
+        if (false == Singleton.LineManager.GetLine(caret.Position.LineIndex, out Line line))
+        {
+            Logger.Error($"MergeLineCommand: Line not found {caret.Position.LineIndex}");
+            return;
+        }
         
         if (EditDirection.Forward == _direction)
         {
@@ -226,9 +230,9 @@ internal class MergeLineCommand : Command
             // TODO 정리?
             foreach (Caret moveCaret in Singleton.CaretManager.GetCaretsInLine(nextLine))
             {
-                moveCaret.Position.Line = line;
+                moveCaret.Position.LineIndex = line.Index;
                 moveCaret.Position.CharIndex += line.Chars.Count;
-                moveCaret.AnchorPosition.Line = line;
+                moveCaret.AnchorPosition.LineIndex = line.Index;
                 moveCaret.AnchorPosition.CharIndex += line.Chars.Count;
             }
             
@@ -244,9 +248,9 @@ internal class MergeLineCommand : Command
             
             foreach (Caret moveCaret in Singleton.CaretManager.GetCaretsInLine(line))
             {
-                moveCaret.Position.Line = prevLine;
+                moveCaret.Position.LineIndex = prevLine.Index;
                 moveCaret.Position.CharIndex += prevLine.Chars.Count;
-                moveCaret.AnchorPosition.Line = prevLine;
+                moveCaret.AnchorPosition.LineIndex = prevLine.Index;
                 moveCaret.AnchorPosition.CharIndex += prevLine.Chars.Count;
             }
                 

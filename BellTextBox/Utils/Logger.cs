@@ -17,17 +17,27 @@ public class Logger
     private readonly Queue<ValueTuple<Level, string, string>> _logs = new();
 
     [Conditional("DEBUG")]
-    public void Info(string message, [CallerMemberName] string callerMemberName = "") =>
-        AddLog(Level.Info, callerMemberName, message);
+    public static void Info(string message, [CallerMemberName] string callerMemberName = "")
+    {
+        Singleton.Logger.AddLog(Level.Info, callerMemberName, message);
+    }
 
     [Conditional("DEBUG")]
-    public void Warning(string message, [CallerMemberName] string callerMemberName = "") =>
-        AddLog(Level.Warning, callerMemberName, message);
+    public static void Warning(string message, [CallerMemberName] string callerMemberName = "")
+    {
+        Singleton.Logger.AddLog(Level.Warning, callerMemberName, message);
+    }
 
     [Conditional("DEBUG")]
-    public void Error(string message, [CallerMemberName] string callerMemberName = "") =>
-        AddLog(Level.Error, callerMemberName, message);
-
+    public static void Error(string message, [CallerMemberName] string callerMemberName = "")
+    {
+        Singleton.Logger.AddLog(Level.Error, callerMemberName, message);
+        if (Singleton.TextBox.IsDebugMode)
+        {
+            Debugger.Break();
+        }
+    }
+    
     private void AddLog(Level level, string message, string callerMemberName)
     {
         _logs.Enqueue(new(level, callerMemberName, message));

@@ -8,56 +8,29 @@ internal abstract class Action
 {
     private readonly List<List<Command>> _caretsCommands = new();
 
-    private readonly List<CaretCoordinates> _startCarets = new();
-    private readonly List<CaretCoordinates> _endCarets = new();
-
+    private readonly List<Caret> _startCarets = new();
+    private readonly List<Caret> _endCarets = new();
+    
+    private string _startText;
+    private string _endText;
+    
     protected abstract List<Command> CreateCommands(Caret caret);
 
-    private void SaveCarets(List<CaretCoordinates> coordinatesList)
+    private void SaveCarets(List<Caret> carets)
     {
-        coordinatesList.Clear();
-        foreach (Caret caret in Singleton.CaretManager.Carets)
+        carets.Clear();
+        for (int i = 0; i < Singleton.CaretManager.Count; i++)
         {
-            coordinatesList.Add(caret.GetCaretCoordinates());
+            carets.Add(Singleton.CaretManager.GetCaret(i).Clone());
         }
     }
-    
-    private void RestoreCarets(List<CaretCoordinates> coordinatesList)
+
+    private bool RestoreCarets(List<Caret> carets)
     {
-        Singleton.CaretManager.Carets.Clear();
-        foreach (CaretCoordinates caretCoordinates in coordinatesList)
-        {
-            if (false == Singleton.LineManager.GetLine(caretCoordinates.PositionLineIndex, out Line line))
-            {
-                Singleton.Logger.Error($"RestoreStartCarets: line not found: {caretCoordinates.PositionLineIndex}");
-                continue;
-            }
-
-            if (line.Chars.Count < caretCoordinates.PositionCharIndex)
-            {
-                Singleton.Logger.Error($"RestoreStartCarets: char not found: {caretCoordinates.PositionCharIndex}");
-                continue;
-            }
-
-            if (false == Singleton.LineManager.GetLine(caretCoordinates.AnchorPositionLineIndex, out Line anchorLine))
-            {
-                Singleton.Logger.Error($"RestoreStartCarets: anchor line not found: {caretCoordinates.AnchorPositionLineIndex}");
-                continue;
-            }
-            
-            if (anchorLine.Chars.Count < caretCoordinates.AnchorPositionCharIndex)
-            {
-                Singleton.Logger.Error($"RestoreStartCarets: anchor char not found: {caretCoordinates.PositionCharIndex}");
-                continue;
-            }
-            
-            Singleton.CaretManager.Carets.Add(new Caret()
-            {
-                Position = new LineCoordinates() { Line = line, CharIndex = caretCoordinates.PositionCharIndex },
-                AnchorPosition = new LineCoordinates() { Line = anchorLine, CharIndex = caretCoordinates.AnchorPositionCharIndex },
-            });
-        }
+        Singleton.CaretManager.ClearCarets();
+        Singleton.CaretManager.AddCarets(carets);
         Singleton.CaretManager.SetCaretDirty();
+        return true;
     }
 
     public void DoCommands()
@@ -65,61 +38,86 @@ internal abstract class Action
         _caretsCommands.Clear();
 
         SaveCarets(_startCarets);
+        if (Singleton.TextBox.IsDebugMode)
+            _startText = Singleton.TextBox.GetText();
 
-        foreach (Caret caret in Singleton.CaretManager.Carets)
+        for (int i = 0; i < Singleton.CaretManager.Count; i++)
         {
+            Caret caret = Singleton.CaretManager.GetCaret(i);
             var commands = CreateCommands(caret);
             _caretsCommands.Add(commands);
 
             foreach (Command command in commands)
             {
                 command.Do(caret);
-                
-                Singleton.Logger.Info($"DoCommands: {command.GetDebugString()}");
+                Logger.Info($"DoCommands: {command.GetDebugString()}");
             }
         }
+
         SaveCarets(_endCarets);
+        if (Singleton.TextBox.IsDebugMode)
+            _endText = Singleton.TextBox.GetText();
     }
-    
+
     public void RedoCommands()
     {
-        RestoreCarets(_startCarets);
-        
+        if (false == RestoreCarets(_startCarets))
+        {
+            Logger.Error("RedoCommands: failed to restore start carets");
+            return;
+        }
+
+        if (Singleton.TextBox.IsDebugMode && Singleton.TextBox.GetText() != _startText)
+            Logger.Error("RedoCommands: Text not match");
+
         for (int i = 0; i < _caretsCommands.Count; i++)
         {
             List<Command> commands = _caretsCommands[i];
-            Caret caret = Singleton.CaretManager.Carets[i];
+            Caret caret = Singleton.CaretManager.GetCaret(i);
 
             foreach (Command command in commands)
             {
                 command.Do(caret);
-                
-                Singleton.Logger.Info($"RedoCommands: {command.GetDebugString()}");
+
+                Logger.Info($"RedoCommands: {command.GetDebugString()}");
             }
         }
 
         RestoreCarets(_endCarets);
+            
+        if (Singleton.TextBox.IsDebugMode && Singleton.TextBox.GetText() != _endText)
+            Logger.Error("RedoCommands: Text not match");
     }
 
     public void UndoCommands()
     {
-        RestoreCarets(_endCarets);
+        if (false == RestoreCarets(_endCarets))
+        {
+            Logger.Error("UndoCommands: failed to restore end carets");
+            return;
+        }
+        
+        if (Singleton.TextBox.IsDebugMode && Singleton.TextBox.GetText() != _endText)
+            Logger.Error("UndoCommands: Text not match");
 
         for (int i = _caretsCommands.Count - 1; i >= 0; i--)
         {
             List<Command> commands = _caretsCommands[i];
-            Caret caret = Singleton.CaretManager.Carets[i];
+            Caret caret = Singleton.CaretManager.GetCaret(i);
 
             for (int j = commands.Count - 1; j >= 0; j--)
             {
                 Command command = commands[j];
                 command.Undo(caret);
-                
-                Singleton.Logger.Info($"UndoCommands: {command.GetDebugString()}");
+
+                Logger.Info($"UndoCommands: {command.GetDebugString()}");
             }
         }
 
         RestoreCarets(_startCarets);
+        
+        if (Singleton.TextBox.IsDebugMode && Singleton.TextBox.GetText() != _startText)
+            Logger.Error("UndoCommands: Text not match");
     }
 
     public bool IsAllSame<T>()
@@ -140,6 +138,7 @@ internal abstract class Action
                 sb.AppendLine($"\t\t{command.GetDebugString()}");
             }
         }
+
         return sb.ToString();
     }
 }
@@ -152,60 +151,61 @@ internal class DeleteSelection : Action
         if (false == caret.HasSelection)
             return commands;
 
-        caret.GetSortedSelection(out LineCoordinates start, out LineCoordinates end);
-
-        if (Singleton.LineManager.Lines.Count <= start.Line.Index || Singleton.LineManager.Lines.Count <= end.Line.Index)
-            return commands; // TODO assert?
-
-        if (caret.AnchorPosition < caret.Position)
+        if (caret.Position.IsBiggerThan(caret.AnchorPosition, Compare.ByChar))
         {
             // Backward delete
-            for (int i = caret.Position.Line.Index; i >= caret.AnchorPosition.Line.Index; i--)
+            for (int i = caret.Position.LineIndex; i >= caret.AnchorPosition.LineIndex; i--)
             {
-                if (Singleton.LineManager.GetLine(i, out Line lineToDelete))
+                if (!Singleton.LineManager.GetLine(i, out Line lineToDelete))
                 {
-                    int deleteCount = lineToDelete.Chars.Count;
-                    if (i == caret.Position.Line.Index)
-                    {
-                        deleteCount = caret.Position.CharIndex;
-                    }
+                    Logger.Error($"DeleteSelection: failed to get line: {i}");
+                    continue;
+                }
+                
+                int deleteCount = lineToDelete.Chars.Count;
+                if (i == caret.Position.LineIndex)
+                {
+                    deleteCount = caret.Position.CharIndex;
+                }
 
-                    if (i == caret.AnchorPosition.Line.Index)
-                    {
-                        deleteCount -= caret.AnchorPosition.CharIndex;
-                    }
+                if (i == caret.AnchorPosition.LineIndex)
+                {
+                    deleteCount -= caret.AnchorPosition.CharIndex;
+                }
 
-                    commands.Add(new DeleteCharCommand(EditDirection.Backward, deleteCount));
-                    if (i > caret.AnchorPosition.Line.Index)
-                    {
-                        commands.Add(new MergeLineCommand(EditDirection.Backward));
-                    }
+                commands.Add(new DeleteCharCommand(EditDirection.Backward, deleteCount));
+                if (i > caret.AnchorPosition.LineIndex)
+                {
+                    commands.Add(new MergeLineCommand(EditDirection.Backward));
                 }
             }
         }
-        else if (caret.Position < caret.AnchorPosition)
+        if (caret.AnchorPosition.IsBiggerThan(caret.Position, Compare.ByChar))
         {
             // Forward delete
-            for (int i = caret.Position.Line.Index; i <= caret.AnchorPosition.Line.Index; i++)
+            for (int i = caret.Position.LineIndex; i <= caret.AnchorPosition.LineIndex; i++)
             {
-                if (Singleton.LineManager.GetLine(i, out Line lineToDelete))
+                if (!Singleton.LineManager.GetLine(i, out Line lineToDelete))
                 {
-                    int deleteCount = lineToDelete.Chars.Count;
-                    if (i == caret.AnchorPosition.Line.Index)
-                    {
-                        deleteCount = caret.AnchorPosition.CharIndex;
-                    }
+                    Logger.Error($"DeleteSelection: failed to get line: {i}");
+                    continue;
+                }
+                
+                int deleteCount = lineToDelete.Chars.Count;
+                if (i == caret.AnchorPosition.LineIndex)
+                {
+                    deleteCount = caret.AnchorPosition.CharIndex;
+                }
 
-                    if (i == caret.Position.Line.Index)
-                    {
-                        deleteCount -= caret.Position.CharIndex;
-                    }
+                if (i == caret.Position.LineIndex)
+                {
+                    deleteCount -= caret.Position.CharIndex;
+                }
 
-                    commands.Add(new DeleteCharCommand(EditDirection.Forward, deleteCount));
-                    if (i < caret.AnchorPosition.Line.Index)
-                    {
-                        commands.Add(new MergeLineCommand(EditDirection.Forward));
-                    }
+                commands.Add(new DeleteCharCommand(EditDirection.Forward, deleteCount));
+                if (i < caret.AnchorPosition.LineIndex)
+                {
+                    commands.Add(new MergeLineCommand(EditDirection.Forward));
                 }
             }
         }
@@ -249,7 +249,7 @@ internal class DeleteCharAction : Action
         // if caret is at the beginning of the line, merge line (backward)
         if (caret.Position.CharIndex == 0 && _direction == EditDirection.Backward)
         {
-            if (caret.Position.Line.Index == 0)
+            if (caret.Position.LineIndex == 0)
                 return commands;
 
             commands.Add(new MergeLineCommand(EditDirection.Backward));
@@ -257,15 +257,21 @@ internal class DeleteCharAction : Action
         }
 
         // if caret is at the end of the line, merge line (forward)
-        if (caret.Position.CharIndex == caret.Position.Line.Chars.Count && _direction == EditDirection.Forward)
+        if (false == Singleton.LineManager.GetLine(caret.Position.LineIndex, out Line line))
         {
-            if (caret.Position.Line.Index == Singleton.LineManager.Lines.Count - 1)
+            Logger.Error($"DeleteCharAction: failed to get line: {caret.Position.LineIndex}");
+            return commands;
+        }
+        
+        if (caret.Position.CharIndex == line.Chars.Count && _direction == EditDirection.Forward)
+        {
+            if (caret.Position.LineIndex == Singleton.LineManager.Lines.Count - 1)
                 return commands;
 
             commands.Add(new MergeLineCommand(EditDirection.Forward));
             return commands;
         }
-        
+
         // else delete char
         commands.Add(new DeleteCharCommand(_direction, 1));
         return commands;

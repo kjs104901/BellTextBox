@@ -28,7 +28,7 @@ public class Line
     // buffer to avoid GC
     private readonly StringBuilder _sb = new();
 
-    public static readonly Line Empty = new(0, Array.Empty<char>());
+    public static readonly Line None = new(0, Array.Empty<char>());
 
     public Line(int index, char[] initialChars)
     {
@@ -135,8 +135,8 @@ public class Line
     {
         lineSubs.Clear();
 
-        int subIndexIndex = 0;
-        LineSub lineSub = new LineSub(this, 0, subIndexIndex);
+        int lineSubIndex = 0;
+        LineSub lineSub = new LineSub(Index, 0, lineSubIndex);
 
         for (int i = 0; i < Chars.Count; i++)
         {
@@ -150,8 +150,8 @@ public class Line
             {
                 lineSubs.Add(lineSub);
 
-                subIndexIndex++;
-                lineSub = new LineSub(this, i, subIndexIndex);
+                lineSubIndex++;
+                lineSub = new LineSub(Index, i, lineSubIndex);
             }
         }
 
@@ -188,21 +188,23 @@ public class Line
         return count;
     }
 
-    public LineSub GetLineSub(int charIndex)
+    public bool GetLineSub(int charIndex, out LineSub foundLineSub)
     {
+        foundLineSub = LineSub.None;
+
         foreach (LineSub lineSub in LineSubs)
         {
-            // TODO FIXME 좌표에 문제있다. 중복 좌표 문제
-            if (lineSub.LineCoordinates.CharIndex <= charIndex &&
-                charIndex <= lineSub.LineCoordinates.CharIndex + lineSub.Chars.Count)
+            if (lineSub.Coordinates.CharIndex <= charIndex &&
+                charIndex <= lineSub.Coordinates.CharIndex + lineSub.Chars.Count)
             {
-                //Singleton.Logger.Info("GetLineSub charIndex: {charIndex}, indexCount: {indexCount}, lineSub.Chars.Count: {lineSub.Chars.Count}");
-                return lineSub;
+                foundLineSub = lineSub;
+                return true;
             }
         }
 
-        Singleton.Logger.Error("GetLineSub failed to find. charIndex: {charIndex}, indexCount: {indexCount}");
-        return LineSubs[0];
+        Logger.Error($"GetLineSub failed to find. LineIndex: {Index}, charIndex: {charIndex}");
+        foundLineSub = LineSubs[0];
+        return false;
     }
 
     public float GetIndentWidth()

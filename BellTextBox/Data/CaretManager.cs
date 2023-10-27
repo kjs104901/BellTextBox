@@ -5,7 +5,8 @@ namespace Bell.Data;
 
 public class CaretManager
 {
-    public readonly List<Caret> Carets = new();
+    private readonly List<Caret> _carets = new();
+    
 
     internal void SetCaretDirty()
     {
@@ -16,46 +17,67 @@ public class CaretManager
             row.LineSelectionCache.SetDirty();
         }
     }
-
-    internal Caret SingleCaret(LineCoordinates lineCoordinates = new())
+    
+    internal void ClearCarets()
     {
-        if (Carets.Count > 1)
-            Carets.RemoveRange(1, Carets.Count - 1);
+        _carets.Clear();
+        SetCaretDirty();
+    }
 
-        if (Carets.Count > 0)
+    internal void AddCarets(List<Caret> carets)
+    {
+        foreach (Caret caret in carets)
         {
-            Carets[0].Position = lineCoordinates;
-            Carets[0].AnchorPosition = lineCoordinates;
+            if (false == CheckValid(caret))
+                continue;
+            
+            _carets.Add(caret);
+        }
+        SetCaretDirty();
+    }
+    
+    internal int Count => _carets.Count;
+    internal Caret GetCaret(int index) => _carets[index];
+
+    internal Caret SingleCaret(Coordinates coordinates = new())
+    {
+        if (_carets.Count > 1)
+            _carets.RemoveRange(1, _carets.Count - 1);
+
+        if (_carets.Count > 0)
+        {
+            _carets[0].Position = coordinates;
+            _carets[0].AnchorPosition = coordinates;
         }
         else
         {
-            Carets.Add(new Caret() { Position = lineCoordinates, AnchorPosition = lineCoordinates });
+            _carets.Add(new Caret() { Position = coordinates, AnchorPosition = coordinates });
         }
 
         SetCaretDirty();
-        return Carets[0];
+        return _carets[0];
     }
 
-    internal void AddCaret(LineCoordinates lineCoordinates)
+    internal void AddCaret(Coordinates coordinates)
     {
-        Carets.Add(new Caret() { Position = lineCoordinates, AnchorPosition = lineCoordinates });
+        _carets.Add(new Caret() { Position = coordinates, AnchorPosition = coordinates });
         SetCaretDirty();
     }
 
     public void MoveCaretsPosition(CaretMove caretMove)
     {
-        foreach (Caret caret in Carets)
+        foreach (Caret caret in _carets)
         {
-            caret.Position = caret.Position.FindCoordinates(caretMove);
+            caret.Position.Move(caretMove);
         }
         SetCaretDirty();
     }
     
     public void MoveCaretsAnchor(CaretMove caretMove)
     {
-        foreach (Caret caret in Carets)
+        foreach (Caret caret in _carets)
         {
-            caret.AnchorPosition = caret.AnchorPosition.FindCoordinates(caretMove);
+            caret.AnchorPosition.Move(caretMove);
         }
         SetCaretDirty();
     }
@@ -63,7 +85,7 @@ public class CaretManager
 
     internal bool HasCaretsSelection()
     {
-        foreach (Caret caret in Carets)
+        foreach (Caret caret in _carets)
         {
             if (caret.HasSelection)
                 return true;
@@ -73,33 +95,33 @@ public class CaretManager
 
     public void RemoveCaretsSelection()
     {
-        foreach (Caret caret in Carets)
+        foreach (Caret caret in _carets)
         {
             caret.AnchorPosition = caret.Position;
         }
         SetCaretDirty();
     }
 
-    internal void SelectRectangle(LineCoordinates startPosition, LineCoordinates endPosition)
+    internal void SelectRectangle(Coordinates startPosition, Coordinates endPosition)
     {
-        Carets.Clear();
+        _carets.Clear();
         // TODO select multiple lines
         SetCaretDirty();
     }
 
     internal List<Caret> GetCaretsInLine(Line line)
     {
-        return Carets.Where(caret => caret.Position.Line == line).ToList();
+        return _carets.Where(caret => caret.Position.LineIndex == line.Index).ToList();
     }
 
     internal void CopyClipboard()
     {
         /*
-        if (CaretManager.Carets.Count == 0)
+        if (CaretManager._carets.Count == 0)
             return;
 
         StringBuilder.Clear();
-        foreach (Caret caret in CaretManager.Carets)
+        foreach (Caret caret in CaretManager._carets)
         {
             if (caret.HasSelection)
             {
@@ -114,7 +136,7 @@ public class CaretManager
     internal void PasteClipboard()
     {
         /*
-        if (CaretManager.Carets.Count == 0)
+        if (CaretManager._carets.Count == 0)
             return;
 
         string text = GetClipboard();
@@ -128,14 +150,21 @@ public class CaretManager
         */
     }
 
+    private bool CheckValid(Caret caret)
+    {
+        //Logger.Error( $"AddCarets: invalid caret: {caret.Position.LineIndex} {caret.Position.CharIndex} {caret.AnchorPosition.LineIndex} {caret.AnchorPosition.CharIndex}");
+        // check caret valid
+        return true;
+    }
+
     public string GetDebugString()
     {
         StringBuilder sb = new ();
-        foreach (Caret caret in Carets)
+        foreach (Caret caret in _carets)
         {
             sb.AppendLine("Caret:");
-            sb.AppendLine("\tPosition\t" + caret.Position.Line.Index + ":" + caret.Position.CharIndex);
-            sb.AppendLine("\tAnchorPosition\t" + caret.AnchorPosition.Line.Index + ":" + caret.AnchorPosition.CharIndex);
+            sb.AppendLine("\tPosition\t" + caret.Position.LineIndex + ":" + caret.Position.CharIndex);
+            sb.AppendLine("\tAnchorPosition\t" + caret.AnchorPosition.LineIndex + ":" + caret.AnchorPosition.CharIndex);
         }
         return sb.ToString();
     }

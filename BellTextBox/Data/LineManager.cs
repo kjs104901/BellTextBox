@@ -11,10 +11,14 @@ public class LineManager
         if (0 <= lineIndex && lineIndex < Lines.Count)
         {
             line = Lines[lineIndex];
+            if (line.Index != lineIndex)
+            {
+                Logger.Error($"LineManager Line.Index != lineIndex: {line.Index} != {lineIndex}");
+            }
             return true;
         }
 
-        line = Line.Empty;
+        line = Line.None;
         return false;
     }
 
@@ -26,7 +30,15 @@ public class LineManager
         // Update line index
         for (int i = lineIndex; i < Lines.Count; i++)
         {
-            Lines[i].Index = i;
+            if (Lines[i].Index != i)
+            {
+                Lines[i].Index = i;
+                //foreach (LineSub lineSub in Lines[i].LineSubs)
+                //{
+                //    lineSub.Coordinates.LineIndex = i;
+                //}
+                Lines[i].LineSubsCache.SetDirty();
+            }
         }
 
         Singleton.RowManager.RowsCache.SetDirty();
@@ -42,7 +54,15 @@ public class LineManager
         // Update line index
         for (int i = removeLineIndex; i < Lines.Count; i++)
         {
-            Lines[i].Index = i;
+            if (Lines[i].Index != i)
+            {
+                Lines[i].Index = i;
+                //foreach (LineSub lineSub in Lines[i].LineSubs)
+                //{
+                //    lineSub.Coordinates.LineIndex = i;
+                //}
+                Lines[i].LineSubsCache.SetDirty();
+            }
         }
 
         Singleton.RowManager.RowsCache.SetDirty();

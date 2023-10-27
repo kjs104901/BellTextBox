@@ -5,18 +5,19 @@ namespace Bell.Data;
 
 public class LineSub
 {
-    public LineCoordinates LineCoordinates;
-    public readonly int WrapIndex;
+    // TODO Update LineIndex when Line.Index changes
+    public Coordinates Coordinates;
+    public readonly int LineSubIndex;
 
     public readonly List<char> Chars = new();
     public readonly List<float> CharWidths = new();
-
-
-    public LineSub(Line line, int charIndex, int wrapIndex)
+    
+    public static readonly LineSub None = new(-1, -1, -1);
+    
+    public LineSub(int lineIndex, int charIndex, int lineSubIndex)
     {
-        LineCoordinates = new LineCoordinates() { Line = line, CharIndex = charIndex };
-        
-        WrapIndex = wrapIndex;
+        Coordinates = new Coordinates() { LineIndex = lineIndex, CharIndex = charIndex };
+        LineSubIndex = lineSubIndex;
     }
     
     public int GetCharIndex(float position)
@@ -31,9 +32,9 @@ public class LineSub
         return CharWidths.Count;
     }
 
-    public float GetCharPosition(LineCoordinates coordinates)
+    public float GetCharPosition(Coordinates coordinates)
     {
-        int index = coordinates.CharIndex - LineCoordinates.CharIndex;
+        int index = coordinates.CharIndex - Coordinates.CharIndex;
         float position = 0.0f;
         for (var i = 0; i < index; i++)
         {
