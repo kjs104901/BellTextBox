@@ -76,9 +76,9 @@ public partial class TextBox
                 }
             }
 
-            if (row.SubLine.WrapIndex == 0)
+            if (row.LineSub.WrapIndex == 0)
             {
-                string lineIndex = StringPool<int>.Get(row.SubLine.LineCoordinates.Line.Index);
+                string lineIndex = StringPool<int>.Get(row.LineSub.LineCoordinates.Line.Index);
                 float lineIndexWidth = lineIndex.Sum(FontManager.GetFontWidth);
 
                 Backend.RenderText(new Vector2(LineNumberWidth - lineIndexWidth, lineTextStartY),
@@ -86,10 +86,10 @@ public partial class TextBox
                     Theme.DefaultFontColor.ToVector());
             }
             
-            if (Folding.None != row.SubLine.LineCoordinates.Line.Folding)
+            if (Folding.None != row.LineSub.LineCoordinates.Line.Folding)
             {
                 Backend.RenderText(new Vector2(LineNumberWidth, lineTextStartY),
-                    row.SubLine.LineCoordinates.Line.Folding.Folded ? " >" : " V",
+                    row.LineSub.LineCoordinates.Line.Folding.Folded ? " >" : " V",
                     Theme.DefaultFontColor.ToVector());
             }
 

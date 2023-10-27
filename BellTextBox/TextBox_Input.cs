@@ -384,7 +384,7 @@ public partial class TextBox
             foreach (Line line in LineManager.Lines)
             {
                 line.CutoffsCache.SetDirty();
-                line.SubLinesCache.SetDirty();
+                line.LineSubsCache.SetDirty();
             }
 
             RowManager.RowsCache.SetDirty();
@@ -432,7 +432,7 @@ public partial class TextBox
         if (RowManager.Rows.Count > rowIndex)
         {
             Row row = RowManager.Rows[rowIndex];
-            Line line = row.SubLine.LineCoordinates.Line;
+            Line line = row.LineSub.LineCoordinates.Line;
 
             lineCoordinates.Line = line;
 
@@ -446,7 +446,7 @@ public partial class TextBox
             }
 
             lineCoordinates.CharIndex =
-                row.SubLine.LineCoordinates.CharIndex + row.SubLine.GetCharIndex(x - row.IndentWidth);
+                row.LineSub.LineCoordinates.CharIndex + row.LineSub.GetCharIndex(x - row.IndentWidth);
         }
     }
 }

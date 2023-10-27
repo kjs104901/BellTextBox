@@ -22,8 +22,8 @@ public class Line
     public HashSet<int> Cutoffs => CutoffsCache.Get();
     public readonly Cache<HashSet<int>> CutoffsCache;
 
-    public List<SubLine> SubLines => SubLinesCache.Get();
-    public readonly Cache<List<SubLine>> SubLinesCache;
+    public List<LineSub> LineSubs => LineSubsCache.Get();
+    public readonly Cache<List<LineSub>> LineSubsCache;
 
     // buffer to avoid GC
     private readonly StringBuilder _sb = new();
@@ -38,7 +38,7 @@ public class Line
         ColorsCache = new(new(), UpdateColors);
         CutoffsCache = new(new(), UpdateCutoff);
         StringCache = new(string.Empty, UpdateString);
-        SubLinesCache = new(new List<SubLine>(), UpdateSubLines);
+        LineSubsCache = new(new List<LineSub>(), UpdateLineSubs);
     }
 
     public void SetCharsDirty()
@@ -46,7 +46,7 @@ public class Line
         ColorsCache.SetDirty();
         CutoffsCache.SetDirty();
         StringCache.SetDirty();
-        SubLinesCache.SetDirty();
+        LineSubsCache.SetDirty();
     }
 
     private List<ColorStyle> UpdateColors(List<ColorStyle> colors)
@@ -131,32 +131,32 @@ public class Line
         return _sb.ToString();
     }
 
-    private List<SubLine> UpdateSubLines(List<SubLine> subLines)
+    private List<LineSub> UpdateLineSubs(List<LineSub> lineSubs)
     {
-        subLines.Clear();
+        lineSubs.Clear();
 
         int subIndexIndex = 0;
-        SubLine subLine = new SubLine(this, 0, subIndexIndex);
+        LineSub lineSub = new LineSub(this, 0, subIndexIndex);
 
         for (int i = 0; i < Chars.Count; i++)
         {
             char c = Chars[i];
             float cWidth = Singleton.FontManager.GetFontWidth(c);
 
-            subLine.Chars.Add(c);
-            subLine.CharWidths.Add(cWidth);
+            lineSub.Chars.Add(c);
+            lineSub.CharWidths.Add(cWidth);
 
             if (Cutoffs.Contains(i)) // need new line
             {
-                subLines.Add(subLine);
+                lineSubs.Add(lineSub);
 
                 subIndexIndex++;
-                subLine = new SubLine(this, i, subIndexIndex);
+                lineSub = new LineSub(this, i, subIndexIndex);
             }
         }
 
-        subLines.Add(subLine);
-        return subLines;
+        lineSubs.Add(lineSub);
+        return lineSubs;
     }
 
     public int CountSubstrings(string findText)
@@ -188,21 +188,21 @@ public class Line
         return count;
     }
 
-    public SubLine GetSubLine(int charIndex)
+    public LineSub GetLineSub(int charIndex)
     {
-        foreach (SubLine subLine in SubLines)
+        foreach (LineSub lineSub in LineSubs)
         {
             // TODO FIXME 좌표에 문제있다. 중복 좌표 문제
-            if (subLine.LineCoordinates.CharIndex <= charIndex &&
-                charIndex <= subLine.LineCoordinates.CharIndex + subLine.Chars.Count)
+            if (lineSub.LineCoordinates.CharIndex <= charIndex &&
+                charIndex <= lineSub.LineCoordinates.CharIndex + lineSub.Chars.Count)
             {
-                //Singleton.Logger.Info("GetSubLine charIndex: {charIndex}, indexCount: {indexCount}, subLine.Chars.Count: {subLine.Chars.Count}");
-                return subLine;
+                //Singleton.Logger.Info("GetLineSub charIndex: {charIndex}, indexCount: {indexCount}, lineSub.Chars.Count: {lineSub.Chars.Count}");
+                return lineSub;
             }
         }
 
-        Singleton.Logger.Error("GetSubLine failed to find. charIndex: {charIndex}, indexCount: {indexCount}");
-        return SubLines[0];
+        Singleton.Logger.Error("GetLineSub failed to find. charIndex: {charIndex}, indexCount: {indexCount}");
+        return LineSubs[0];
     }
 
     public float GetIndentWidth()

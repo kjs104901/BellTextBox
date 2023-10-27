@@ -3,7 +3,7 @@ using Bell.Utils;
 
 namespace Bell.Data;
 
-public class SubLine
+public class LineSub
 {
     public LineCoordinates LineCoordinates;
     public readonly int WrapIndex;
@@ -12,7 +12,7 @@ public class SubLine
     public readonly List<float> CharWidths = new();
 
 
-    public SubLine(Line line, int charIndex, int wrapIndex)
+    public LineSub(Line line, int charIndex, int wrapIndex)
     {
         LineCoordinates = new LineCoordinates() { Line = line, CharIndex = charIndex };
         

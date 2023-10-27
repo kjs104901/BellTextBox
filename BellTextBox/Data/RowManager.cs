@@ -51,12 +51,12 @@ public class RowManager
 
             if (visible)
             {
-                for (int i = 0; i < line.SubLines.Count; i++)
+                for (int i = 0; i < line.LineSubs.Count; i++)
                 {
-                    SubLine subLine = line.SubLines[i];
+                    LineSub lineSub = line.LineSubs[i];
                     float indentWidth = i == 0 ? 0.0f : line.GetIndentWidth();
                     
-                    Row row = new Row(indentWidth, subLine);
+                    Row row = new Row(indentWidth, lineSub);
 
                     float startPosX = 0.0f;
                     float currPosX = 0.0f;
@@ -65,12 +65,12 @@ public class RowManager
                     float buffersWidth = 0.0f;
 
                     ColorStyle renderGroupColor = ColorStyle.None;
-                    for (int j = 0; j < subLine.Chars.Count; j++)
+                    for (int j = 0; j < lineSub.Chars.Count; j++)
                     {
-                        char c = subLine.Chars[j];
+                        char c = lineSub.Chars[j];
 
-                        ColorStyle charColor = line.Colors[subLine.LineCoordinates.CharIndex + j];
-                        float charWidth = subLine.CharWidths[j];
+                        ColorStyle charColor = line.Colors[lineSub.LineCoordinates.CharIndex + j];
+                        float charWidth = lineSub.CharWidths[j];
 
                         if (j == 0)
                         {

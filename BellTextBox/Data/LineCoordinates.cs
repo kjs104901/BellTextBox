@@ -17,17 +17,17 @@ public struct LineCoordinates : IEquatable<LineCoordinates>
     public static bool operator <=(LineCoordinates l, LineCoordinates r) => l.Line.Index != r.Line.Index ? l.Line.Index < r.Line.Index : l.CharIndex <= r.CharIndex;
     public static bool operator >=(LineCoordinates l, LineCoordinates r) => l.Line.Index != r.Line.Index ? l.Line.Index > r.Line.Index : l.CharIndex >= r.CharIndex;
 
-    public SubLine GetSubLine()
+    public LineSub GetLineSub()
     {
-        return Line.GetSubLine(CharIndex);
+        return Line.GetLineSub(CharIndex);
     }
     
-    public bool IsSameSubLine(LineCoordinates other)
+    public bool IsSameLineSub(LineCoordinates other)
     {
         if (Line != other.Line)
             return false;
         
-        if (GetSubLine() != other.GetSubLine())
+        if (GetLineSub() != other.GetLineSub())
             return false;
         
         return true;
