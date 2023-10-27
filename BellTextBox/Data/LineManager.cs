@@ -81,9 +81,6 @@ public class LineManager
                             renderGroupColor = charColor;
                         }
                         
-                        _buffers.Add(c);
-                        buffersWidth += charWidth;
-
                         if (renderGroupColor != charColor) // need new render group
                         {
                             row.TextBlockRenders.Add(new()
@@ -100,6 +97,9 @@ public class LineManager
                             
                             renderGroupColor = charColor;
                         }
+                        
+                        _buffers.Add(c);
+                        buffersWidth += charWidth;
 
                         if (Singleton.TextBox.ShowingWhitespace && char.IsWhiteSpace(c))
                         {

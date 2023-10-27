@@ -10,31 +10,31 @@ public class Line
     public int Index = 0;
 
     public readonly List<char> Chars = new();
-    
+
     public Folding Folding = Folding.None;
-    
+
     public string String => StringCache.Get();
     public readonly Cache<string> StringCache;
 
     public List<ColorStyle> Colors => ColorsCache.Get();
     public readonly Cache<List<ColorStyle>> ColorsCache;
-    
+
     public HashSet<int> Cutoffs => CutoffsCache.Get();
     public readonly Cache<HashSet<int>> CutoffsCache;
 
     public List<SubLine> SubLines => SubLinesCache.Get();
     public readonly Cache<List<SubLine>> SubLinesCache;
-    
+
     // buffer to avoid GC
     private readonly StringBuilder _sb = new();
-    
+
     public static readonly Line Empty = new(0, Array.Empty<char>());
 
     public Line(int index, char[] initialChars)
     {
         Index = index;
         Chars.AddRange(initialChars);
-        
+
         ColorsCache = new(new(), UpdateColors);
         CutoffsCache = new(new(), UpdateCutoff);
         StringCache = new(string.Empty, UpdateString);
@@ -70,6 +70,7 @@ public class Line
             {
                 colorStyle = Singleton.TextBox.Theme.DefaultFontColor;
             }
+
             colors.Add(colorStyle);
         }
 
@@ -133,7 +134,7 @@ public class Line
     private List<SubLine> UpdateSubLines(List<SubLine> subLines)
     {
         subLines.Clear();
-        
+
         int subIndexIndex = 0;
         SubLine subLine = new SubLine(this, 0, subIndexIndex);
 
@@ -144,7 +145,7 @@ public class Line
 
             subLine.Chars.Add(c);
             subLine.CharWidths.Add(cWidth);
-            
+
             if (Cutoffs.Contains(i)) // need new line
             {
                 subLines.Add(subLine);
@@ -153,7 +154,7 @@ public class Line
                 subLine = new SubLine(this, i, subIndexIndex);
             }
         }
-        
+
         subLines.Add(subLine);
         return subLines;
     }
@@ -161,7 +162,7 @@ public class Line
     public int CountSubstrings(string findText)
     {
         int count = 0;
-        
+
         int textLength = Chars.Count;
         int findTextLength = findText.Length;
 
@@ -176,29 +177,30 @@ public class Line
                     break;
                 }
             }
+
             if (isMatch)
             {
                 count++;
-                i += findTextLength - 1;  // Skip the length of substring to avoid overlapping counts
+                i += findTextLength - 1; // Skip the length of substring to avoid overlapping counts
             }
         }
+
         return count;
     }
 
     public SubLine GetSubLine(int charIndex)
     {
-        int indexCount = 0;
         foreach (SubLine subLine in SubLines)
         {
             // TODO FIXME 좌표에 문제있다. 중복 좌표 문제
-            if (indexCount <= charIndex && charIndex <= indexCount + subLine.Chars.Count)
+            if (subLine.LineCoordinates.CharIndex <= charIndex &&
+                charIndex <= subLine.LineCoordinates.CharIndex + subLine.Chars.Count)
             {
                 //Singleton.Logger.Info("GetSubLine charIndex: {charIndex}, indexCount: {indexCount}, subLine.Chars.Count: {subLine.Chars.Count}");
                 return subLine;
             }
-
-            indexCount += subLine.Chars.Count;
         }
+
         Singleton.Logger.Error("GetSubLine failed to find. charIndex: {charIndex}, indexCount: {indexCount}");
         return SubLines[0];
     }

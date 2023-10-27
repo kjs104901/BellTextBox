@@ -22,8 +22,8 @@ public partial class TextBox
 
     private void ProcessInput(Vector2 viewPos, Vector2 viewSize)
     {
-        ProcessKeyboardInput();
         ProcessMouseInput();
+        ProcessKeyboardInput();
         ProcessViewInput(viewPos, viewSize);
         _backend.OnInputEnd();
     }
@@ -70,7 +70,7 @@ public partial class TextBox
 
             ActionManager.DoAction(new InputCharAction(EditDirection.Forward, keyboardInputChar));
         }
-        
+
         // IME
         if (false == string.IsNullOrEmpty(keyboardInput.ImeComposition))
         {
@@ -80,6 +80,7 @@ public partial class TextBox
                 CaretManager.RemoveCaretsSelection();
             }
         }
+
         if (_imeComposition != keyboardInput.ImeComposition)
         {
             _imeComposition = keyboardInput.ImeComposition;
@@ -272,24 +273,25 @@ public partial class TextBox
     private void ProcessMouseInput()
     {
         MouseInput mouseInput = _backend.GetMouseInput();
+        if (false == string.IsNullOrEmpty(_imeComposition))
+            return;
 
         ConvertCoordinates(mouseInput.Position,
             out int _,
             out LineCoordinates lineCoordinates,
             out bool isLineNumber,
             out bool isFold);
-        
+
         if (isFold)
         {
             if (MouseAction.Click == mouseInput.LeftAction)
             {
-                if (Folding.None != lineCoordinates.Line.Folding )
+                if (Folding.None != lineCoordinates.Line.Folding)
                 {
                     lineCoordinates.Line.Folding.Switch();
 
                     LineManager.RowsCache.SetDirty();
                     CaretManager.SetCaretDirty();
-
                     return;
                 }
             }
@@ -399,13 +401,13 @@ public partial class TextBox
     private int GetRowIndex(Vector2 viewCoordinates, int yOffset = 0)
     {
         float y = viewCoordinates.Y;
-        
+
         int rowIndex = (int)(y / FontManager.GetLineHeight()) + yOffset;
         if (rowIndex < 0)
             rowIndex = 0;
         if (rowIndex >= LineManager.Rows.Count)
             rowIndex = LineManager.Rows.Count - 1;
-        
+
         return rowIndex;
     }
 
@@ -419,22 +421,22 @@ public partial class TextBox
         lineCoordinates = new LineCoordinates { Line = Line.Empty, CharIndex = 0 };
         isLineNumber = false;
         isFold = false;
-        
+
         float x = viewCoordinates.X - LineNumberWidth - FoldWidth;
         if (x < -FoldWidth)
         {
             isLineNumber = true;
             return;
         }
-        
+
         if (LineManager.Rows.Count > rowIndex)
         {
             Row row = LineManager.Rows[rowIndex];
             Line line = row.SubLine.LineCoordinates.Line;
-            
+
             lineCoordinates.Line = line;
 
-            if (x < - FontManager.GetFontWhiteSpaceWidth())
+            if (x < -FontManager.GetFontWhiteSpaceWidth())
             {
                 if (Folding.None != line.Folding)
                 {
@@ -443,14 +445,8 @@ public partial class TextBox
                 }
             }
 
-            lineCoordinates.CharIndex = 0;
-            foreach (SubLine lineSubLine in line.SubLines)
-            {
-                if (row.SubLine.WrapIndex <= lineSubLine.WrapIndex)
-                    break;
-                lineCoordinates.CharIndex += lineSubLine.Chars.Count;
-            }
-            lineCoordinates.CharIndex += row.SubLine.GetCharIndex(x - row.IndentWidth);
+            lineCoordinates.CharIndex =
+                row.SubLine.LineCoordinates.CharIndex + row.SubLine.GetCharIndex(x - row.IndentWidth);
         }
     }
 }

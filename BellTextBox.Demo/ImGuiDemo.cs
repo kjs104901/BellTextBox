@@ -94,8 +94,7 @@ public class FontStyle : IComparable<FontStyle>
             var snapshot = sdl2Window.PumpEvents();
             if (!sdl2Window.Exists)
                 break;
-            imGuiRenderer.Update(deltaTime,
-                snapshot); // Feed the input events to our ImGui controller, which passes them through to ImGui.
+            imGuiRenderer.Update(deltaTime, snapshot);
 
             ImGui.SetNextWindowPos(new Vector2(0, 0));
             ImGui.SetNextWindowSize(new Vector2(sdl2Window.Width, sdl2Window.Height));
