@@ -25,12 +25,12 @@ public partial class TextBox
         ProcessMouseInput();
         ProcessKeyboardInput();
         ProcessViewInput(viewPos, viewSize);
-        _backend.OnInputEnd();
+        Backend.OnInputEnd();
     }
 
     private void ProcessKeyboardInput()
     {
-        KeyboardInput keyboardInput = _backend.GetKeyboardInput();
+        KeyboardInput keyboardInput = Backend.GetKeyboardInput();
 
         var hk = keyboardInput.HotKeys;
 
@@ -272,7 +272,7 @@ public partial class TextBox
 
     private void ProcessMouseInput()
     {
-        MouseInput mouseInput = _backend.GetMouseInput();
+        MouseInput mouseInput = Backend.GetMouseInput();
         if (false == string.IsNullOrEmpty(_imeComposition))
             return;
 
@@ -290,7 +290,7 @@ public partial class TextBox
                 {
                     lineCoordinates.Line.Folding.Switch();
 
-                    LineManager.RowsCache.SetDirty();
+                    RowManager.RowsCache.SetDirty();
                     CaretManager.SetCaretDirty();
                     return;
                 }
@@ -302,14 +302,14 @@ public partial class TextBox
         {
             if (isFold)
             {
-                _backend.SetMouseCursor(MouseCursor.Hand);
+                Backend.SetMouseCursor(MouseCursor.Hand);
             }
             else if (isLineNumber)
             {
             }
             else
             {
-                _backend.SetMouseCursor(MouseCursor.Beam);
+                Backend.SetMouseCursor(MouseCursor.Beam);
             }
         }
 
@@ -387,7 +387,7 @@ public partial class TextBox
                 line.SubLinesCache.SetDirty();
             }
 
-            LineManager.RowsCache.SetDirty();
+            RowManager.RowsCache.SetDirty();
         }
 
         if (WrapMode.Word == WrapMode || WrapMode.BreakWord == WrapMode)
@@ -395,7 +395,7 @@ public partial class TextBox
             PageSize.X = _viewSize.X;
         }
 
-        PageSize.Y = LineManager.Rows.Count * FontManager.GetLineHeight();
+        PageSize.Y = RowManager.Rows.Count * FontManager.GetLineHeight();
     }
 
     private int GetRowIndex(Vector2 viewCoordinates, int yOffset = 0)
@@ -405,8 +405,8 @@ public partial class TextBox
         int rowIndex = (int)(y / FontManager.GetLineHeight()) + yOffset;
         if (rowIndex < 0)
             rowIndex = 0;
-        if (rowIndex >= LineManager.Rows.Count)
-            rowIndex = LineManager.Rows.Count - 1;
+        if (rowIndex >= RowManager.Rows.Count)
+            rowIndex = RowManager.Rows.Count - 1;
 
         return rowIndex;
     }
@@ -429,9 +429,9 @@ public partial class TextBox
             return;
         }
 
-        if (LineManager.Rows.Count > rowIndex)
+        if (RowManager.Rows.Count > rowIndex)
         {
-            Row row = LineManager.Rows[rowIndex];
+            Row row = RowManager.Rows[rowIndex];
             Line line = row.SubLine.LineCoordinates.Line;
 
             lineCoordinates.Line = line;

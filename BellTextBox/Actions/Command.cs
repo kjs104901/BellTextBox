@@ -41,7 +41,7 @@ internal class InputCharCommand : Command
             
         chars.InsertRange(targetIndex, _chars);
         line.SetCharsDirty();
-        Singleton.LineManager.RowsCache.SetDirty();
+        Singleton.RowManager.RowsCache.SetDirty();
 
         if (EditDirection.Forward == _direction)
         {
@@ -103,7 +103,7 @@ internal class DeleteCharCommand : Command
             _deletedChars = chars.GetRange(targetIndex, _deletedCount).ToArray();
             chars.RemoveRange(targetIndex, _deletedCount);
             line.SetCharsDirty();
-            Singleton.LineManager.RowsCache.SetDirty();
+            Singleton.RowManager.RowsCache.SetDirty();
         }
         else if (EditDirection.Backward == _direction)
         {
@@ -113,7 +113,7 @@ internal class DeleteCharCommand : Command
             _deletedChars = chars.GetRange(targetIndex - _deletedCount, _deletedCount).ToArray();
             chars.RemoveRange(targetIndex - _deletedCount, _deletedCount);
             line.SetCharsDirty();
-            Singleton.LineManager.RowsCache.SetDirty();
+            Singleton.RowManager.RowsCache.SetDirty();
 
             for (int i = 0; i < _deletedCount; i++)
             {

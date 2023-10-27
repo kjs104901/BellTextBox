@@ -17,7 +17,7 @@ public partial class TextBox
         FontManager.UpdateReferenceSize();
         FoldWidth = FontManager.GetFontReferenceWidth() * 2;
 
-        _backend.RenderPage(PageSize, new Vector4(0.2f, 0.1f, 0.1f, 1.0f)); // TODO background color
+        Backend.RenderPage(PageSize, new Vector4(0.2f, 0.1f, 0.1f, 1.0f)); // TODO background color
         
         LineNumberWidth = StringPool<int>.Get(LineManager.Lines.Count).Sum(FontManager.GetFontWidth) + FontManager.GetFontReferenceWidth();
 
@@ -26,10 +26,10 @@ public partial class TextBox
 
         for (int i = rowStart; i <= rowEnd; i++)
         {
-            if (LineManager.Rows.Count <= i)
+            if (RowManager.Rows.Count <= i)
                 break;
 
-            Row row = LineManager.Rows[i];
+            Row row = RowManager.Rows[i];
 
             var lineY = i * FontManager.GetLineHeight();
             var lineTextStartY = lineY + FontManager.GetLineHeightOffset();
@@ -40,14 +40,14 @@ public partial class TextBox
 
             if (row.LineSelection.Selected)
             {
-                _backend.RenderRectangle(new Vector2(lineStartX + row.LineSelection.SelectionStart, lineTextStartY),
+                Backend.RenderRectangle(new Vector2(lineStartX + row.LineSelection.SelectionStart, lineTextStartY),
                     new Vector2(lineStartX + row.LineSelection.SelectionEnd, lineTextEndY),
                     Theme.LineSelectedBackgroundColor.ToVector());
             }
 
             foreach (var textBlockRender in row.TextBlockRenders)
             {
-                _backend.RenderText(
+                Backend.RenderText(
                     new Vector2(lineStartX + textBlockRender.PosX, lineTextStartY),
                     textBlockRender.Text,
                     textBlockRender.ColorStyle.ToVector());
@@ -57,19 +57,19 @@ public partial class TextBox
             {
                 if (whiteSpaceRender.C == ' ')
                 {
-                    _backend.RenderText(
+                    Backend.RenderText(
                         new Vector2(lineStartX + whiteSpaceRender.PosX, lineTextStartY),
                         "·",
                         Theme.LineWhiteSpaceFontColor.ToVector());
                 }
                 else if (whiteSpaceRender.C == '\t')
                 {
-                    _backend.RenderLine(
+                    Backend.RenderLine(
                         new Vector2(lineStartX + whiteSpaceRender.PosX,
                             lineTextStartY),
                         new Vector2(
                             lineStartX + whiteSpaceRender.PosX +
-                            _backend.GetCharWidth(' ') * 4, // TODO setting tab size
+                            Backend.GetCharWidth(' ') * 4, // TODO setting tab size
                             lineTextStartY),
                         Theme.LineWhiteSpaceFontColor.ToVector(),
                         1.0f);
@@ -81,21 +81,21 @@ public partial class TextBox
                 string lineIndex = StringPool<int>.Get(row.SubLine.LineCoordinates.Line.Index);
                 float lineIndexWidth = lineIndex.Sum(FontManager.GetFontWidth);
 
-                _backend.RenderText(new Vector2(LineNumberWidth - lineIndexWidth, lineTextStartY),
+                Backend.RenderText(new Vector2(LineNumberWidth - lineIndexWidth, lineTextStartY),
                     lineIndex,
                     Theme.DefaultFontColor.ToVector());
             }
             
             if (Folding.None != row.SubLine.LineCoordinates.Line.Folding)
             {
-                _backend.RenderText(new Vector2(LineNumberWidth, lineTextStartY),
+                Backend.RenderText(new Vector2(LineNumberWidth, lineTextStartY),
                     row.SubLine.LineCoordinates.Line.Folding.Folded ? " >" : " V",
                     Theme.DefaultFontColor.ToVector());
             }
 
             if (row.LineSelection.HasCaret)
             {
-                _backend.RenderLine(
+                Backend.RenderLine(
                     new Vector2(
                         lineStartX + row.LineSelection.CaretPosition - 1.0f,
                         lineTextStartY),
@@ -105,7 +105,7 @@ public partial class TextBox
                     Theme.DefaultFontColor.ToVector(),
                     2.0f);
 
-                _backend.RenderText(new Vector2(
+                Backend.RenderText(new Vector2(
                         lineStartX + row.LineSelection.CaretPosition,
                         lineTextStartY),
                     _imeComposition, Theme.DefaultFontColor.ToVector());
@@ -113,7 +113,7 @@ public partial class TextBox
 
             if (row.LineSelection.HasCaretAnchor)
             {
-                _backend.RenderLine(
+                Backend.RenderLine(
                     new Vector2(
                         lineStartX + row.LineSelection.CaretAnchorPosition - 1.0f,
                         lineTextStartY),

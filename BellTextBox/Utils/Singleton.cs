@@ -17,6 +17,7 @@ public static class Singleton
     public static CaretManager CaretManager => TextBox.CaretManager;
     public static FontManager FontManager => TextBox.FontManager;
     public static LineManager LineManager => TextBox.LineManager;
+    public static RowManager RowManager => TextBox.RowManager;
     public static FoldingManager FoldingManager => TextBox.FoldingManager;
     public static Logger Logger => TextBox.Logger;
 }

@@ -9,8 +9,8 @@ public class CaretManager
     internal void SetCaretDirty()
     {
         // TODO move to line manager
-        Singleton.LineManager.RowsCache.SetDirty();
-        foreach (Row row in Singleton.LineManager.Rows)
+        Singleton.RowManager.RowsCache.SetDirty();
+        foreach (Row row in Singleton.RowManager.Rows)
         {
             row.LineSelectionCache.SetDirty();
         }

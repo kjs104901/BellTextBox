@@ -10,7 +10,7 @@ public class FontManager
 
     public void UpdateReferenceSize()
     {
-        var fontSize = Singleton.TextBox._backend.GetFontSize();
+        var fontSize = Singleton.TextBox.Backend.GetFontSize();
         if (false == _fontDictionary.ContainsKey(fontSize))
             _fontDictionary.TryAdd(fontSize, new Font(fontSize));
         _fontCache = _fontDictionary[fontSize];

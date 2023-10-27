@@ -12,12 +12,13 @@ public partial class TextBox
     public readonly List<string> AutoCompleteList = new();
 
     public readonly Theme Theme;
-    public readonly IBackend _backend;
+    public readonly IBackend Backend;
     
     public readonly ActionManager ActionManager = new();
     public readonly CaretManager CaretManager = new();
     public readonly FontManager FontManager = new();
     public readonly LineManager LineManager = new();
+    public readonly RowManager RowManager = new();
     public readonly FoldingManager FoldingManager = new();
     public readonly Logger Logger = new ();
     
@@ -25,7 +26,7 @@ public partial class TextBox
 
     public TextBox(IBackend backend)
     {
-        _backend = backend;
+        Backend = backend;
 
         Theme = new DarkTheme();
     }
@@ -57,7 +58,7 @@ public partial class TextBox
             LineManager.Lines.Add(line);
         }
 
-        LineManager.RowsCache.SetDirty();
+        RowManager.RowsCache.SetDirty();
     }
 
     public string GetText()
