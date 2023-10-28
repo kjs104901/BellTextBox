@@ -58,7 +58,7 @@ internal class InputCharCommand : Command
 
     public override string GetDebugString()
     {
-        return "Input" + string.Join(' ', _chars);
+        return "Input " + string.Join(' ', _chars);
     }
 }
 
@@ -98,6 +98,8 @@ internal class DeleteCharCommand : Command
             chars.RemoveRange(targetIndex, _deletedCount);
             line.SetCharsDirty();
             Singleton.RowManager.RowsCache.SetDirty();
+            
+            caret.RemoveSelection();
         }
         else if (EditDirection.Backward == _direction)
         {
@@ -168,7 +170,7 @@ internal class SplitLineCommand : Command
             insertLineIndex = caret.Position.LineIndex + 1;
             Line newLine = Singleton.LineManager.InsertLine(insertLineIndex, restOfLine);
             
-            caret.Position = new Coordinates() { LineIndex = insertLineIndex, CharIndex = 0 };
+            caret.Position = new Coordinates(insertLineIndex, 0);
             caret.RemoveSelection();
         }
         else
@@ -182,7 +184,7 @@ internal class SplitLineCommand : Command
             Line newLine = Singleton.LineManager.InsertLine(insertLineIndex, restOfLine);
 
             int charIndex = restOfLine.Length;
-            caret.Position = new Coordinates() { LineIndex = insertLineIndex, CharIndex = charIndex };
+            caret.Position = new Coordinates(insertLineIndex, charIndex);
             caret.RemoveSelection();
         }
         

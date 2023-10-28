@@ -28,7 +28,10 @@ internal abstract class Action
     private bool RestoreCarets(List<Caret> carets)
     {
         Singleton.CaretManager.ClearCarets();
-        Singleton.CaretManager.AddCarets(carets);
+        foreach (var caret in carets)
+        {
+            Singleton.CaretManager.AddCaret(caret.Clone());
+        }
         return true;
     }
 
@@ -54,8 +57,41 @@ internal abstract class Action
         }
 
         SaveCarets(_endCarets);
+        
         if (Singleton.TextBox.IsDebugMode)
             _endText = Singleton.TextBox.GetText();
+
+        if (Singleton.TextBox.IsDebugMode)
+        {
+            bool isAllSame = true;
+            for (int i = 0; i < _endCarets.Count; i++)
+            {
+                Caret startCaret = _startCarets[i];
+                Caret endCaret = _endCarets[i];
+
+                if (Singleton.CaretManager.CheckValid(startCaret))
+                {
+                    if (false == startCaret.Position.IsSameAs(endCaret.Position))
+                        isAllSame = false;
+                    if (false == startCaret.AnchorPosition.IsSameAs(endCaret.AnchorPosition))
+                        isAllSame = false;
+                }
+                else
+                {
+                    isAllSame = false;
+                }
+                
+                if (false == Singleton.CaretManager.CheckValid(endCaret))
+                {
+                    Logger.Error($"DoCommands: invalid end caret: {endCaret.Position.LineIndex} {endCaret.Position.CharIndex} {endCaret.AnchorPosition.LineIndex} {endCaret.AnchorPosition.CharIndex}");
+                }
+            }
+
+            if (isAllSame)
+            {
+                Logger.Error("DoCommands: Carets not changed");
+            }
+        }
     }
 
     public void RedoCommands()
@@ -150,7 +186,7 @@ internal class DeleteSelection : Action
         if (false == caret.HasSelection)
             return commands;
 
-        if (caret.Position.IsBiggerThan(caret.AnchorPosition, Compare.ByChar))
+        if (caret.Position.IsBiggerThan(caret.AnchorPosition))
         {
             // Backward delete
             for (int i = caret.Position.LineIndex; i >= caret.AnchorPosition.LineIndex; i--)
@@ -172,14 +208,21 @@ internal class DeleteSelection : Action
                     deleteCount -= caret.AnchorPosition.CharIndex;
                 }
 
-                commands.Add(new DeleteCharCommand(EditDirection.Backward, deleteCount));
+                if (deleteCount > 0)
+                {
+                    commands.Add(new DeleteCharCommand(EditDirection.Backward, deleteCount));
+                }
+                else
+                {
+                    Logger.Warning("DeleteSelection: deleteCount is 0");
+                }
                 if (i > caret.AnchorPosition.LineIndex)
                 {
                     commands.Add(new MergeLineCommand(EditDirection.Backward));
                 }
             }
         }
-        if (caret.AnchorPosition.IsBiggerThan(caret.Position, Compare.ByChar))
+        if (caret.AnchorPosition.IsBiggerThan(caret.Position))
         {
             // Forward delete
             for (int i = caret.Position.LineIndex; i <= caret.AnchorPosition.LineIndex; i++)
@@ -201,7 +244,15 @@ internal class DeleteSelection : Action
                     deleteCount -= caret.Position.CharIndex;
                 }
 
-                commands.Add(new DeleteCharCommand(EditDirection.Forward, deleteCount));
+                if (deleteCount > 0)
+                {
+                    commands.Add(new DeleteCharCommand(EditDirection.Forward, deleteCount));
+                }
+                else
+                {
+                    Logger.Warning("DeleteSelection: deleteCount is 0");
+                }
+
                 if (i < caret.AnchorPosition.LineIndex)
                 {
                     commands.Add(new MergeLineCommand(EditDirection.Forward));

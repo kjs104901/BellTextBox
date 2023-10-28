@@ -22,6 +22,25 @@ public class LineManager
         return false;
     }
 
+    public bool GetSubLine(int lineIndex, int lineSubIndex, out LineSub lineSub)
+    {
+        lineSub = LineSub.None;
+        if (false == GetLine(lineIndex, out Line line))
+            return false;
+
+        if (line.LineSubs.Count <= lineSubIndex)
+            return false;
+
+        lineSub = line.LineSubs[lineSubIndex];
+        return true;
+    }
+    
+    public bool GetSubLine(Coordinates coordinates, out LineSub lineSub)
+    {
+        lineSub = LineSub.None;
+        return GetLine(coordinates.LineIndex, out Line line) && line.GetLineSub(coordinates.CharIndex, out lineSub);
+    }
+
     public Line InsertLine(int lineIndex, char[] lineChars)
     {
         Line newLine = new Line(lineIndex, lineChars);

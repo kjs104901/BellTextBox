@@ -188,6 +188,7 @@ public class Line
 
         return count;
     }
+    
 
     public bool GetLineSub(int charIndex, out LineSub foundLineSub)
     {

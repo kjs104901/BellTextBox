@@ -418,7 +418,7 @@ public partial class TextBox
         out bool isFold)
     {
         rowIndex = GetRowIndex(viewCoordinates);
-        coordinates = new Coordinates { LineIndex = 0, CharIndex = 0 };
+        coordinates = new Coordinates(0, 0);
         isLineNumber = false;
         isFold = false;
 
@@ -446,6 +446,8 @@ public partial class TextBox
                 }
                 coordinates.CharIndex =
                     row.LineSub.Coordinates.CharIndex + row.LineSub.GetCharIndex(x - row.IndentWidth);
+                
+                coordinates.LineSubIndex = row.LineSub.Coordinates.LineSubIndex;
             }
         }
     }

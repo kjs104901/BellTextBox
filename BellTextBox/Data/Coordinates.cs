@@ -2,90 +2,64 @@
 
 namespace Bell.Data;
 
-public enum Compare
-{
-    ByLine,
-    ByLineSub,
-    ByChar,
-}
-
 public struct Coordinates
 {
     public int LineIndex;
     public int CharIndex;
     
-    public bool IsSameAs(Coordinates other, Compare compare)
+    public int LineSubIndex;
+
+    public Coordinates(int lineIndex, int charIndex, int lineSubIndex = -1)
     {
-        if (Compare.ByLine == compare)
-        {
-            return LineIndex == other.LineIndex;
-        }
-        
-        if (false == Singleton.LineManager.GetLine(LineIndex, out Line line) ||
-            false == line.GetLineSub(CharIndex, out LineSub lineSub) ||
-            false == Singleton.LineManager.GetLine(other.LineIndex, out Line otherLine) ||
-            false == otherLine.GetLineSub(other.CharIndex, out LineSub otherLineSub))
+        LineIndex = lineIndex;
+        CharIndex = charIndex;
+        LineSubIndex = lineSubIndex;
+    }
+
+    public bool IsSameAs(Coordinates other)
+    {
+        if (false == Singleton.LineManager.GetSubLine(this, out LineSub lineSub) ||
+            false == Singleton.LineManager.GetSubLine(other,  out LineSub otherLineSub))
         {
             Logger.Error($"IsSameAs: failed to get line: {LineIndex} or {other.LineIndex}");
             return false;
         }
         
-        if (Compare.ByLineSub == compare)
-        {
-            if (LineIndex != other.LineIndex)
-                return false;
+        if (LineIndex != other.LineIndex)
+            return false;
             
-            return lineSub.LineSubIndex == otherLineSub.LineSubIndex;
-        }
+        if (lineSub.Coordinates.LineSubIndex != otherLineSub.Coordinates.LineSubIndex)
+            return false;
 
-        if (Compare.ByChar == compare)
-        {
-            if (LineIndex != other.LineIndex)
-                return false;
-            
-            if (lineSub.LineSubIndex != otherLineSub.LineSubIndex)
-                return false;
-
-            return CharIndex == other.CharIndex;
-        }
-        return true;
+        return CharIndex == other.CharIndex;
     }
 
-    public bool IsBiggerThan(Coordinates other, Compare compare)
+    public bool IsBiggerThan(Coordinates other)
     {
-        if (Compare.ByLine == compare)
-        {
-            return LineIndex > other.LineIndex;
-        }
-        
-        if (false == Singleton.LineManager.GetLine(LineIndex, out Line line) ||
-            false == line.GetLineSub(CharIndex, out LineSub lineSub) ||
-            false == Singleton.LineManager.GetLine(other.LineIndex, out Line otherLine) ||
-            false == otherLine.GetLineSub(other.CharIndex, out LineSub otherLineSub))
+        if (false == Singleton.LineManager.GetSubLine(this,  out LineSub lineSub) ||
+            false == Singleton.LineManager.GetSubLine(other,  out LineSub otherLineSub))
         {
             Logger.Error($"IsBiggerThan: failed to get line: {LineIndex} or {other.LineIndex}");
             return false;
         }
         
-        if (Compare.ByLineSub == compare)
-        {
-            if (LineIndex != other.LineIndex)
-                return LineIndex > other.LineIndex;
-            
-            return lineSub.LineSubIndex > otherLineSub.LineSubIndex;
-        }
-        
-        if (Compare.ByChar == compare)
-        {
-            if (LineIndex != other.LineIndex)
-                return LineIndex > other.LineIndex;
+        if (LineIndex != other.LineIndex)
+            return LineIndex > other.LineIndex;
 
-            if (lineSub.LineSubIndex != otherLineSub.LineSubIndex)
-                return lineSub.LineSubIndex > otherLineSub.LineSubIndex;
+        if (lineSub.Coordinates.LineSubIndex != otherLineSub.Coordinates.LineSubIndex)
+            return lineSub.Coordinates.LineSubIndex > otherLineSub.Coordinates.LineSubIndex;
             
-            return CharIndex > other.CharIndex;
-        }
-        
+        return CharIndex > other.CharIndex;
+    }
+
+    public bool IsValid()
+    {
+        if (false == Singleton.LineManager.GetLine(LineIndex, out Line line))
+            return false;
+
+        if (CharIndex < 0 || CharIndex > line.Chars.Count)
+            return false;
+
         return true;
     }
     
@@ -95,6 +69,16 @@ public struct Coordinates
         for (int i = 0; i < count; i++)
         {
             newCoordinates = newCoordinates.FindMoveSingle(caretMove);
+        }
+        
+        Logger.Info("FindMove: " + caretMove + " " + count + " " + newCoordinates.LineIndex + " " + newCoordinates.CharIndex);
+
+        if (IsValid())
+        {
+            if (IsSameAs(newCoordinates))
+            {
+                Logger.Warning($"FindMove: IsSameAs {caretMove} {count}");
+            }
         }
         return newCoordinates;
     }

@@ -78,7 +78,7 @@ public partial class TextBox
 
             if (LineManager.GetLine(row.LineSub.Coordinates.LineIndex, out Line line))
             {
-                if (row.LineSub.LineSubIndex == 0)
+                if (row.LineSub.Coordinates.LineSubIndex == 0)
                 {
                     string lineIndex = StringPool<int>.Get(line.Index);
                     float lineIndexWidth = lineIndex.Sum(FontManager.GetFontWidth);

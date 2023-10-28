@@ -13,19 +13,20 @@ public class CaretManager
         Singleton.RowManager.OnRowChanged();
     }
 
-    internal void AddCarets(List<Caret> carets)
+    internal void AddCaret(Coordinates coordinates)
     {
-        foreach (Caret caret in carets)
+        AddCaret(new Caret() { Position = coordinates, AnchorPosition = coordinates });
+    }
+    
+    internal void AddCaret(Caret caret)
+    {
+        if (false == CheckValid(caret))
         {
-            if (false == CheckValid(caret))
-            {
-                Logger.Error(
-                    $"AddCarets: invalid caret: {caret.Position.LineIndex} {caret.Position.CharIndex} {caret.AnchorPosition.LineIndex} {caret.AnchorPosition.CharIndex}");
-                continue;
-            }
-
-            _carets.Add(caret);
+            Logger.Error(
+                $"AddCaret: invalid caret: {caret.Position.LineIndex} {caret.Position.CharIndex} {caret.AnchorPosition.LineIndex} {caret.AnchorPosition.CharIndex}");
+            return;
         }
+        _carets.Add(caret);
         Singleton.RowManager.OnRowChanged();
     }
 
@@ -49,19 +50,6 @@ public class CaretManager
 
         Singleton.RowManager.OnRowChanged();
         return _carets[0];
-    }
-
-    internal void AddCaret(Coordinates coordinates)
-    {
-        Caret caret = new Caret() { Position = coordinates, AnchorPosition = coordinates };
-        if (false == CheckValid(caret))
-        {
-            Logger.Error(
-                $"AddCaret: invalid caret: {caret.Position.LineIndex} {caret.Position.CharIndex} {caret.AnchorPosition.LineIndex} {caret.AnchorPosition.CharIndex}");
-            return;
-        }
-        _carets.Add(caret);
-        Singleton.RowManager.OnRowChanged();
     }
 
     public void MoveCaretsPosition(CaretMove caretMove)
@@ -152,20 +140,14 @@ public class CaretManager
         */
     }
 
-    private bool CheckValid(Caret caret)
+    public bool CheckValid(Caret caret)
     {
-        if (false == Singleton.LineManager.GetLine(caret.Position.LineIndex, out Line line))
+        if (false == caret.Position.IsValid())  
             return false;
-
-        if (false == Singleton.LineManager.GetLine(caret.AnchorPosition.LineIndex, out Line anchorLine))
+        
+        if (false == caret.AnchorPosition.IsValid())  
             return false;
-
-        if (caret.Position.CharIndex < 0 || caret.Position.CharIndex > line.Chars.Count)
-            return false;
-
-        if (caret.AnchorPosition.CharIndex < 0 || caret.AnchorPosition.CharIndex > anchorLine.Chars.Count)
-            return false;
-
+        
         return true;
     }
 

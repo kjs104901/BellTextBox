@@ -25,21 +25,7 @@ public class Caret
     public Coordinates AnchorPosition;
     public Coordinates Position;
 
-    public bool HasSelection => !AnchorPosition.IsSameAs(Position, Compare.ByChar);
-
-    public void GetSortedPosition(out Coordinates start, out Coordinates end)
-    {
-        if (Position.IsBiggerThan(AnchorPosition, Compare.ByChar))
-        {
-            start = AnchorPosition;
-            end = Position;
-        }
-        else
-        {
-            start = Position;
-            end = AnchorPosition;
-        }
-    }
+    public bool HasSelection => !AnchorPosition.IsSameAs(Position);
 
     public void RemoveSelection()
     {
