@@ -332,7 +332,10 @@ public partial class TextBox
         {
             if (_shiftPressed)
             {
-                CaretManager.SingleCaret().AnchorPosition = coordinates;
+                if (CaretManager.GetFirstCaret(out Caret caret))
+                {
+                    caret.AnchorPosition = coordinates;
+                }
             }
             else if (_altPressed)
             {
@@ -340,12 +343,14 @@ public partial class TextBox
             }
             else
             {
-                CaretManager.SingleCaret(coordinates);
+                CaretManager.ClearCarets();
+                CaretManager.AddCaret(coordinates);
             }
         }
         else if (MouseAction.DoubleClick == mouseInput.LeftAction)
         {
-            CaretManager.SingleCaret(coordinates);
+            CaretManager.ClearCarets();
+            CaretManager.AddCaret(coordinates);
 
             if (_shiftPressed)
             {
@@ -368,7 +373,10 @@ public partial class TextBox
             }
             else
             {
-                CaretManager.SingleCaret(_mouseDragStartText).Position = coordinates;
+                if (CaretManager.GetFirstCaret(out Caret caret))
+                {
+                    caret.Position = coordinates;
+                }
             }
         }
         else if (MouseAction.Dragging == mouseInput.MiddleAction)

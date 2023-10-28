@@ -19,7 +19,7 @@ public partial class TextBox
 
         Backend.RenderPage(PageSize, new Vector4(0.2f, 0.1f, 0.1f, 1.0f)); // TODO background color
         
-        LineNumberWidth = StringPool<int>.Get(LineManager.Lines.Count).Sum(FontManager.GetFontWidth) + FontManager.GetFontReferenceWidth();
+        LineNumberWidth = (StringPool<int>.Get(LineManager.Lines.Count).Length + 1) * FontManager.GetFontNumberWidth();
 
         int rowStart = GetRowIndex(_viewPos, -3);
         int rowEnd = GetRowIndex(_viewPos + _viewSize, 3);

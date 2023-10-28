@@ -18,6 +18,7 @@ public class FontManager
 
     public float GetFontReferenceWidth() => GetFontWidth('#');
     public float GetFontWhiteSpaceWidth() => GetFontWidth(' ');
+    public float GetFontNumberWidth() => GetFontWidth('0');
 
     public float GetFontWidth(char c)
     {

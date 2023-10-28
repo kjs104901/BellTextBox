@@ -33,23 +33,20 @@ public class CaretManager
     internal int Count => _carets.Count;
     internal Caret GetCaret(int index) => _carets[index];
 
-    internal Caret SingleCaret(Coordinates coordinates = new())
+    internal bool GetFirstCaret(out Caret caret)
     {
         if (_carets.Count > 1)
+        {
             _carets.RemoveRange(1, _carets.Count - 1);
-
+        }
         if (_carets.Count > 0)
         {
-            _carets[0].Position = coordinates;
-            _carets[0].AnchorPosition = coordinates;
+            caret = _carets[0];
+            Singleton.RowManager.OnRowChanged();
+            return true;
         }
-        else
-        {
-            _carets.Add(new Caret() { Position = coordinates, AnchorPosition = coordinates });
-        }
-
-        Singleton.RowManager.OnRowChanged();
-        return _carets[0];
+        caret = Caret.None;
+        return false;
     }
 
     public void MoveCaretsPosition(CaretMove caretMove)
@@ -69,8 +66,7 @@ public class CaretManager
         }
         Singleton.RowManager.OnRowChanged();
     }
-
-
+    
     internal bool HasCaretsSelection()
     {
         foreach (Caret caret in _carets)

@@ -36,4 +36,6 @@ public class Caret
     }
 
     public Caret Clone() => new() { AnchorPosition = AnchorPosition, Position = Position };
+    
+    public static readonly Caret None = new Caret();
 }
