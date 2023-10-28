@@ -42,19 +42,15 @@ internal class Row
                 Logger.Error("UpdateLineSelection: failed to get line");
                 continue;
             }
-
-            Coordinates start = caret.Position;
-            Coordinates end = caret.AnchorPosition;
-            LineSub startLineSub = lineSub;
-            LineSub endLineSub = anchorLineSub;
-            if (caret.Position.IsBiggerThan(caret.AnchorPosition)) // Swap start and end
+            
+            caret.GetSorted(out Coordinates start, out Coordinates end);
+            if (false == LineManager.GetLineSub(start, out LineSub startLineSub) ||
+                false == LineManager.GetLineSub(end, out LineSub endLineSub))
             {
-                start = caret.AnchorPosition;
-                end = caret.Position;
-                startLineSub = anchorLineSub;
-                endLineSub = lineSub;
+                Logger.Error("UpdateLineSelection: failed to get line");
+                continue;
             }
-
+            
             if (caret.HasSelection)
             {
                 if (startLineSub == LineSub)

@@ -49,16 +49,27 @@ internal partial class CaretManager
         AddCaret_(new Caret() { Position = coordinates, AnchorPosition = coordinates });
     }
 
-    private void AddCaret_(Caret caret)
+    private void AddCaret_(Caret newCaret)
     {
-        if (false == CheckValid_(caret))
+        if (false == CheckValid_(newCaret))
         {
             Logger.Error(
-                $"AddCaret: invalid caret: {caret.Position.LineIndex} {caret.Position.CharIndex} {caret.AnchorPosition.LineIndex} {caret.AnchorPosition.CharIndex}");
+                $"AddCaret: invalid caret: {newCaret.Position.LineIndex} {newCaret.Position.CharIndex} {newCaret.AnchorPosition.LineIndex} {newCaret.AnchorPosition.CharIndex}");
             return;
         }
+        
+        newCaret.GetSorted(out Coordinates newStart, out Coordinates newEnd);
+        foreach (Caret caret in _carets)
+        {
+            caret.GetSorted(out Coordinates start, out Coordinates end);
 
-        _carets.Add(caret);
+            if (start.IsBiggerThanWithoutLineSub(newEnd) || newStart.IsBiggerThanWithoutLineSub(end))
+                continue;
+            
+            Logger.Info("AddCaret: already exist caret");
+            return;
+        }
+        _carets.Add(newCaret);
         RowManager.SetRowCacheDirty();
     }
 

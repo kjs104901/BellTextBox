@@ -80,6 +80,8 @@ internal partial class LineManager
         {
             Lines[i].ChangeLineIndex(i);
         }
+        
+        // TODO 캐럿 업데이트 필요
 
         RowManager.SetRowCacheDirty();
         return newLine;
@@ -94,6 +96,8 @@ internal partial class LineManager
         {
             Lines[i].ChangeLineIndex(i);
         }
+
+        // TODO 캐럿 업데이트 필요
 
         RowManager.SetRowCacheDirty();
     }

@@ -50,6 +50,14 @@ internal struct Coordinates
 
         return CharIndex > other.CharIndex;
     }
+    
+    internal bool IsBiggerThanWithoutLineSub(Coordinates other)
+    {
+        if (LineIndex != other.LineIndex)
+            return LineIndex > other.LineIndex;
+
+        return CharIndex > other.CharIndex;
+    }
 
     internal bool IsValid()
     {

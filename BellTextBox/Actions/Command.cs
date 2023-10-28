@@ -167,6 +167,8 @@ internal class SplitLineCommand : Command
             
             // TODO auto indent?
             
+            // TODO 캐럿 이동
+            
             insertLineIndex = caret.Position.LineIndex + 1;
             Line newLine = LineManager.InsertLine(insertLineIndex, restOfLine);
             
@@ -179,6 +181,8 @@ internal class SplitLineCommand : Command
             restOfLine = chars.GetRange(0, caret.Position.CharIndex).ToArray();
             chars.RemoveRange(0, caret.Position.CharIndex);
             line.SetCharsDirty();
+            
+            // TODO 캐럿 이동
             
             insertLineIndex = caret.Position.LineIndex;
             Line newLine = LineManager.InsertLine(insertLineIndex, restOfLine);
