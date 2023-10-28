@@ -63,9 +63,7 @@ public class RowManager
                 for (int i = 0; i < line.LineSubs.Count; i++)
                 {
                     LineSub lineSub = line.LineSubs[i];
-                    float indentWidth = i == 0 ? 0.0f : line.GetIndentWidth();
-                    
-                    Row row = new Row(indentWidth, lineSub);
+                    Row row = new Row(lineSub);
 
                     float startPosX = 0.0f;
                     float currPosX = 0.0f;

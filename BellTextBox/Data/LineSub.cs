@@ -10,11 +10,14 @@ public class LineSub
     public readonly List<char> Chars = new();
     public readonly List<float> CharWidths = new();
     
-    public static readonly LineSub None = new(-1, -1, -1);
+    public readonly float IndentWidth;
     
-    public LineSub(int lineIndex, int charIndex, int lineSubIndex)
+    public static readonly LineSub None = new(-1, -1, -1, 0.0f);
+    
+    public LineSub(int lineIndex, int charIndex, int lineSubIndex, float indentWidth)
     {
         Coordinates = new Coordinates(lineIndex, charIndex, lineSubIndex);
+        IndentWidth = indentWidth;
     }
     
     public int GetCharIndex(float position)

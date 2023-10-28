@@ -88,7 +88,16 @@ public class CaretManager
         {
             caret.AnchorPosition = caret.Position;
         }
+        Singleton.RowManager.OnRowChanged();
+    }
 
+    public void RemoveCaretsLineSub()
+    {
+        foreach (Caret caret in _carets)
+        {
+            caret.Position.LineSubIndex = -1;
+            caret.AnchorPosition.LineSubIndex = -1;
+        }
         Singleton.RowManager.OnRowChanged();
     }
 
@@ -157,8 +166,8 @@ public class CaretManager
         foreach (Caret caret in _carets)
         {
             sb.AppendLine("Caret:");
-            sb.AppendLine("\tPosition\t" + caret.Position.LineIndex + ":" + caret.Position.CharIndex);
-            sb.AppendLine("\tAnchorPosition\t" + caret.AnchorPosition.LineIndex + ":" + caret.AnchorPosition.CharIndex);
+            sb.AppendLine("\tPosition\t" + caret.Position.LineIndex + ":" + caret.Position.CharIndex + ":" + caret.Position.LineSubIndex);
+            sb.AppendLine("\tAnchorPosition\t" + caret.AnchorPosition.LineIndex + ":" + caret.AnchorPosition.CharIndex + ":" + caret.AnchorPosition.LineSubIndex);
         }
 
         return sb.ToString();

@@ -36,7 +36,7 @@ public partial class TextBox
             var lineEndY = (i + 1) * FontManager.GetLineHeight();
             var lineTextEndY = lineEndY - FontManager.GetLineHeightOffset();
 
-            var lineStartX = LineNumberWidth + FoldWidth + row.IndentWidth;
+            var lineStartX = LineNumberWidth + FoldWidth + row.LineSub.IndentWidth;
 
             if (row.LineSelection.Selected)
             {

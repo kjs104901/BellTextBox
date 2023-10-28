@@ -22,7 +22,7 @@ public class LineManager
         return false;
     }
 
-    public bool GetSubLine(int lineIndex, int lineSubIndex, out LineSub lineSub)
+    public bool GetLineSub(int lineIndex, int lineSubIndex, out LineSub lineSub)
     {
         lineSub = LineSub.None;
         if (false == GetLine(lineIndex, out Line line))
@@ -35,9 +35,11 @@ public class LineManager
         return true;
     }
     
-    public bool GetSubLine(Coordinates coordinates, out LineSub lineSub)
+    public bool GetLineSub(Coordinates coordinates, out LineSub lineSub)
     {
         lineSub = LineSub.None;
+        if (coordinates.LineSubIndex >= 0)
+            return GetLineSub(coordinates.LineIndex, coordinates.LineSubIndex, out lineSub);
         return GetLine(coordinates.LineIndex, out Line line) && line.GetLineSub(coordinates.CharIndex, out lineSub);
     }
 

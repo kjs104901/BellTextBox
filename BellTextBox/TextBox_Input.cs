@@ -387,6 +387,7 @@ public partial class TextBox
                 line.LineSubsCache.SetDirty();
             }
 
+            CaretManager.RemoveCaretsLineSub();
             RowManager.RowsCache.SetDirty();
         }
 
@@ -446,7 +447,7 @@ public partial class TextBox
                 }
                 coordinates.CharIndex =
                     row.LineSub.Coordinates.CharIndex +
-                    row.LineSub.GetCharIndex(x - row.IndentWidth);
+                    row.LineSub.GetCharIndex(x - row.LineSub.IndentWidth);
                 
                 coordinates.LineSubIndex = row.LineSub.Coordinates.LineSubIndex;
             }

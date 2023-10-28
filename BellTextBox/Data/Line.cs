@@ -137,7 +137,7 @@ public class Line
         lineSubs.Clear();
 
         int lineSubIndex = 0;
-        LineSub lineSub = new LineSub(Index, 0, lineSubIndex);
+        LineSub lineSub = new LineSub(Index, 0, lineSubIndex, 0.0f);
 
         for (int i = 0; i < Chars.Count; i++)
         {
@@ -152,7 +152,7 @@ public class Line
                 lineSubs.Add(lineSub);
 
                 lineSubIndex++;
-                lineSub = new LineSub(Index, i + 1, lineSubIndex);
+                lineSub = new LineSub(Index, i + 1, lineSubIndex, GetIndentWidth());
             }
         }
 

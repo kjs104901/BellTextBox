@@ -6,19 +6,16 @@ public class Row
 {
     public readonly List<TextBlockRender> TextBlockRenders = new();
     public readonly List<WhiteSpaceRender> WhiteSpaceRenders = new();
-
-    public float IndentWidth = 0.0f;
-
+    
     public LineSelection LineSelection => LineSelectionCache.Get();
     public readonly Cache<LineSelection> LineSelectionCache;
 
     public LineSub LineSub;
 
-    public Row(float indentWidth, LineSub lineSub)
+    public Row(LineSub lineSub)
     {
-        IndentWidth = indentWidth;
         LineSub = lineSub;
-
+        
         LineSelectionCache = new(new(), UpdateLineSelection);
     }
 
@@ -39,8 +36,8 @@ public class Row
         {
             Caret caret = Singleton.CaretManager.GetCaret(i);
 
-            if (false == Singleton.LineManager.GetSubLine(caret.AnchorPosition, out LineSub anchorLineSub) ||
-                false == Singleton.LineManager.GetSubLine(caret.Position, out LineSub lineSub))
+            if (false == Singleton.LineManager.GetLineSub(caret.AnchorPosition, out LineSub anchorLineSub) ||
+                false == Singleton.LineManager.GetLineSub(caret.Position, out LineSub lineSub))
             {
                 Logger.Error("UpdateLineSelection: failed to get line");
                 continue;
@@ -107,52 +104,22 @@ public class Row
                 }
             }
 
-            if (caret.AnchorPosition.LineSubIndex >= 0)
+            if (anchorLineSub == LineSub)
             {
-                if (caret.AnchorPosition.LineIndex == LineSub.Coordinates.LineIndex &&
-                    caret.AnchorPosition.LineSubIndex == LineSub.Coordinates.LineSubIndex)
-                {
-                    float anchorPosition = LineSub.GetCharPosition(caret.AnchorPosition);
-                    lineSelection.HasCaretAnchor = true;
-                    lineSelection.CaretAnchorPosition = anchorPosition;
-                    if (endLineSub == anchorLineSub && fakeSelected && lineSelection.CaretAnchorPosition < 1.0f)
-                        lineSelection.CaretAnchorPosition = Singleton.FontManager.GetFontWhiteSpaceWidth();
-                }
+                float anchorPosition = LineSub.GetCharPosition(caret.AnchorPosition);
+                lineSelection.HasCaretAnchor = true;
+                lineSelection.CaretAnchorPosition = anchorPosition;
+                if (endLineSub == anchorLineSub && fakeSelected && lineSelection.CaretAnchorPosition < 1.0f)
+                    lineSelection.CaretAnchorPosition = Singleton.FontManager.GetFontWhiteSpaceWidth();
             }
-            else
+            
+            if (lineSub == LineSub)
             {
-                if (anchorLineSub == LineSub)
-                {
-                    float anchorPosition = LineSub.GetCharPosition(caret.AnchorPosition);
-                    lineSelection.HasCaretAnchor = true;
-                    lineSelection.CaretAnchorPosition = anchorPosition;
-                    if (endLineSub == anchorLineSub && fakeSelected && lineSelection.CaretAnchorPosition < 1.0f)
-                        lineSelection.CaretAnchorPosition = Singleton.FontManager.GetFontWhiteSpaceWidth();
-                }
-            }
-
-            if (caret.Position.LineSubIndex >= 0)
-            {
-                if (caret.Position.LineIndex == LineSub.Coordinates.LineIndex && 
-                    caret.Position.LineSubIndex == LineSub.Coordinates.LineSubIndex)
-                {
-                    float caretPosition = LineSub.GetCharPosition(caret.Position);
-                    lineSelection.HasCaret = true;
-                    lineSelection.CaretPosition = caretPosition;
-                    if (endLineSub == lineSub && fakeSelected && lineSelection.CaretPosition < 1.0f)
-                        lineSelection.CaretPosition = Singleton.FontManager.GetFontWhiteSpaceWidth();
-                }
-            }
-            else
-            {
-                if (lineSub == LineSub)
-                {
-                    float caretPosition = LineSub.GetCharPosition(caret.Position);
-                    lineSelection.HasCaret = true;
-                    lineSelection.CaretPosition = caretPosition;
-                    if (endLineSub == lineSub && fakeSelected && lineSelection.CaretPosition < 1.0f)
-                        lineSelection.CaretPosition = Singleton.FontManager.GetFontWhiteSpaceWidth();
-                }
+                float caretPosition = LineSub.GetCharPosition(caret.Position);
+                lineSelection.HasCaret = true;
+                lineSelection.CaretPosition = caretPosition;
+                if (endLineSub == lineSub && fakeSelected && lineSelection.CaretPosition < 1.0f)
+                    lineSelection.CaretPosition = Singleton.FontManager.GetFontWhiteSpaceWidth();
             }
         }
         return lineSelection;
