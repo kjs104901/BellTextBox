@@ -445,7 +445,8 @@ public partial class TextBox
                     }
                 }
                 coordinates.CharIndex =
-                    row.LineSub.Coordinates.CharIndex + row.LineSub.GetCharIndex(x - row.IndentWidth);
+                    row.LineSub.Coordinates.CharIndex +
+                    row.LineSub.GetCharIndex(x - row.IndentWidth);
                 
                 coordinates.LineSubIndex = row.LineSub.Coordinates.LineSubIndex;
             }

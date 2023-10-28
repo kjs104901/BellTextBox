@@ -22,8 +22,9 @@ public class LineSub
         float current = 0.0f;
         for (var i = 0; i < CharWidths.Count; i++)
         {
-            current += CharWidths[i];
-            if (current > position)
+            float charWidth = CharWidths[i];
+            current += charWidth;
+            if (current > position + charWidth * 0.5f)
                 return i;
         }
         return CharWidths.Count;
