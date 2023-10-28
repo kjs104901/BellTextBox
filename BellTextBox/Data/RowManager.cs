@@ -29,7 +29,7 @@ internal partial class RowManager
         _rowsCache.SetDirty();
         foreach (Row row in Rows)
         {
-            row.LineSelectionCache.SetDirty();
+            row.RowSelectionCache.SetDirty();
         }
     }
 

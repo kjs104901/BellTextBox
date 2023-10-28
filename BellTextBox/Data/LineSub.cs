@@ -1,7 +1,4 @@
-﻿using Bell.Themes;
-using Bell.Utils;
-
-namespace Bell.Data;
+﻿namespace Bell.Data;
 
 internal class LineSub
 {
@@ -55,30 +52,4 @@ internal class LineSub
             return Coordinates.LineIndex > other.Coordinates.LineIndex;
         return Coordinates.LineSubIndex > other.Coordinates.LineSubIndex;
     }
-}
-
-internal struct LineSelection
-{
-    internal bool Selected;
-    internal float SelectionStart;
-    internal float SelectionEnd;
-
-    internal bool HasCaretAnchor;
-    internal float CaretAnchorPosition;
-    internal bool HasCaret;
-    internal float CaretPosition;
-}
-
-internal struct TextBlockRender
-{
-    internal string Text;
-    internal ColorStyle ColorStyle;
-
-    internal float PosX;
-}
-
-internal struct WhiteSpaceRender
-{
-    internal char C;
-    internal float PosX;
 }

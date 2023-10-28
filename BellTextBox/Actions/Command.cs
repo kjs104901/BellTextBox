@@ -34,7 +34,7 @@ internal class InputCharCommand : Command
             Logger.Error($"InputCharCommand: Line not found {caret.Position.LineIndex}");
             return;
         }
-        
+        // TODO 같은 줄 캐럿 이동
         line.Chars.InsertRange(caret.Position.CharIndex, _chars);
         line.SetCharsDirty();
         RowManager.SetRowCacheDirty();
@@ -95,6 +95,7 @@ internal class DeleteCharCommand : Command
                 _deletedCount = chars.Count - targetIndex;
 
             _deletedChars = chars.GetRange(targetIndex, _deletedCount).ToArray();
+            // TODO 같은 줄 캐럿 이동
             chars.RemoveRange(targetIndex, _deletedCount);
             line.SetCharsDirty();
             RowManager.SetRowCacheDirty();

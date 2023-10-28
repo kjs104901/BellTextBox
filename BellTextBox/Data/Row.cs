@@ -1,4 +1,5 @@
-﻿using Bell.Utils;
+﻿using Bell.Themes;
+using Bell.Utils;
 
 namespace Bell.Data;
 
@@ -6,29 +7,32 @@ internal class Row
 {
     internal readonly List<TextBlockRender> TextBlockRenders = new();
     internal readonly List<WhiteSpaceRender> WhiteSpaceRenders = new();
-    
-    internal LineSelection LineSelection => LineSelectionCache.Get();
-    internal readonly Cache<LineSelection> LineSelectionCache;
 
-    internal LineSub LineSub;
+    internal RowSelection RowSelection => RowSelectionCache.Get();
+    internal readonly Cache<RowSelection> RowSelectionCache;
+
+    internal readonly LineSub LineSub;
 
     internal Row(LineSub lineSub)
     {
         LineSub = lineSub;
-        
-        LineSelectionCache = new(new(), UpdateLineSelection);
+
+        RowSelectionCache = new(new RowSelection()
+            {
+                CaretPositions = new(),
+                CaretAnchorPositions = new()
+            },
+            UpdateRowSelection);
     }
 
-    private LineSelection UpdateLineSelection(LineSelection lineSelection)
+    private RowSelection UpdateRowSelection(RowSelection rowSelection)
     {
-        lineSelection.Selected = false;
-        lineSelection.SelectionStart = 0.0f;
-        lineSelection.SelectionEnd = 0.0f;
-
-        lineSelection.HasCaretAnchor = false;
-        lineSelection.CaretAnchorPosition = 0.0f;
-        lineSelection.HasCaret = false;
-        lineSelection.CaretPosition = 0.0f;
+        rowSelection.Selected = false;
+        rowSelection.SelectionStart = 0.0f;
+        rowSelection.SelectionEnd = 0.0f;
+        
+        rowSelection.CaretPositions.Clear();
+        rowSelection.CaretAnchorPositions.Clear();
 
         bool fakeSelected = false;
 
@@ -42,7 +46,7 @@ internal class Row
                 Logger.Error("UpdateLineSelection: failed to get line");
                 continue;
             }
-            
+
             caret.GetSorted(out Coordinates start, out Coordinates end);
             if (false == LineManager.GetLineSub(start, out LineSub startLineSub) ||
                 false == LineManager.GetLineSub(end, out LineSub endLineSub))
@@ -50,7 +54,7 @@ internal class Row
                 Logger.Error("UpdateLineSelection: failed to get line");
                 continue;
             }
-            
+
             if (caret.HasSelection)
             {
                 if (startLineSub == LineSub)
@@ -59,21 +63,21 @@ internal class Row
                     if (endLineSub == LineSub)
                     {
                         float endPosition = LineSub.GetCharPosition(end);
-                        lineSelection.SelectionStart = startPosition;
-                        lineSelection.SelectionEnd = endPosition;
-                        lineSelection.Selected = true;
+                        rowSelection.SelectionStart = startPosition;
+                        rowSelection.SelectionEnd = endPosition;
+                        rowSelection.Selected = true;
                     }
                     else if (endLineSub.IsBiggerThan(LineSub))
                     {
-                        lineSelection.SelectionStart = startPosition;
-                        lineSelection.SelectionEnd = LineSub.CharWidths.Sum();
-                        if (lineSelection.SelectionEnd < 1.0f)
+                        rowSelection.SelectionStart = startPosition;
+                        rowSelection.SelectionEnd = LineSub.CharWidths.Sum();
+                        if (rowSelection.SelectionEnd < 1.0f)
                         {
-                            lineSelection.SelectionEnd = FontManager.GetFontWhiteSpaceWidth();
+                            rowSelection.SelectionEnd = FontManager.GetFontWhiteSpaceWidth();
                             fakeSelected = true;
                         }
 
-                        lineSelection.Selected = true;
+                        rowSelection.Selected = true;
                     }
                 }
                 else if (LineSub.IsBiggerThan(startLineSub))
@@ -81,21 +85,21 @@ internal class Row
                     if (endLineSub == LineSub)
                     {
                         float endPosition = LineSub.GetCharPosition(end);
-                        lineSelection.SelectionStart = 0.0f;
-                        lineSelection.SelectionEnd = endPosition;
-                        lineSelection.Selected = true;
+                        rowSelection.SelectionStart = 0.0f;
+                        rowSelection.SelectionEnd = endPosition;
+                        rowSelection.Selected = true;
                     }
                     else if (endLineSub.IsBiggerThan(LineSub))
                     {
-                        lineSelection.SelectionStart = 0.0f;
-                        lineSelection.SelectionEnd = LineSub.CharWidths.Sum();
-                        if (lineSelection.SelectionEnd < 1.0f)
+                        rowSelection.SelectionStart = 0.0f;
+                        rowSelection.SelectionEnd = LineSub.CharWidths.Sum();
+                        if (rowSelection.SelectionEnd < 1.0f)
                         {
-                            lineSelection.SelectionEnd = FontManager.GetFontWhiteSpaceWidth();
+                            rowSelection.SelectionEnd = FontManager.GetFontWhiteSpaceWidth();
                             fakeSelected = true;
                         }
 
-                        lineSelection.Selected = true;
+                        rowSelection.Selected = true;
                     }
                 }
             }
@@ -103,21 +107,44 @@ internal class Row
             if (anchorLineSub == LineSub)
             {
                 float anchorPosition = LineSub.GetCharPosition(caret.AnchorPosition);
-                lineSelection.HasCaretAnchor = true;
-                lineSelection.CaretAnchorPosition = anchorPosition;
-                if (endLineSub == anchorLineSub && fakeSelected && lineSelection.CaretAnchorPosition < 1.0f)
-                    lineSelection.CaretAnchorPosition = FontManager.GetFontWhiteSpaceWidth();
+                if (endLineSub == anchorLineSub && fakeSelected && anchorPosition < 1.0f)
+                    anchorPosition = FontManager.GetFontWhiteSpaceWidth();
+                rowSelection.CaretAnchorPositions.Add(anchorPosition);
             }
-            
+
             if (lineSub == LineSub)
             {
                 float caretPosition = LineSub.GetCharPosition(caret.Position);
-                lineSelection.HasCaret = true;
-                lineSelection.CaretPosition = caretPosition;
-                if (endLineSub == lineSub && fakeSelected && lineSelection.CaretPosition < 1.0f)
-                    lineSelection.CaretPosition = FontManager.GetFontWhiteSpaceWidth();
+                if (endLineSub == lineSub && fakeSelected && caretPosition < 1.0f)
+                    caretPosition = FontManager.GetFontWhiteSpaceWidth();
+                rowSelection.CaretPositions.Add(caretPosition);
             }
         }
-        return lineSelection;
+
+        return rowSelection;
     }
+}
+
+internal struct RowSelection
+{
+    internal bool Selected;
+    internal float SelectionStart;
+    internal float SelectionEnd;
+
+    internal List<float> CaretPositions;
+    internal List<float> CaretAnchorPositions;
+}
+
+internal struct TextBlockRender
+{
+    internal string Text;
+    internal ColorStyle ColorStyle;
+
+    internal float PosX;
+}
+
+internal struct WhiteSpaceRender
+{
+    internal char C;
+    internal float PosX;
 }
