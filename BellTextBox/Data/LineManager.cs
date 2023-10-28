@@ -38,8 +38,11 @@ public class LineManager
     public bool GetLineSub(Coordinates coordinates, out LineSub lineSub)
     {
         lineSub = LineSub.None;
-        if (coordinates.LineSubIndex >= 0)
-            return GetLineSub(coordinates.LineIndex, coordinates.LineSubIndex, out lineSub);
+        if (coordinates.LineSubIndex >= 0 &&
+            GetLineSub(coordinates.LineIndex, coordinates.LineSubIndex, out lineSub))
+        {
+            return true;
+        }
         return GetLine(coordinates.LineIndex, out Line line) && line.GetLineSub(coordinates.CharIndex, out lineSub);
     }
 

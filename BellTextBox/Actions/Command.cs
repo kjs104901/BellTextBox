@@ -41,9 +41,9 @@ internal class InputCharCommand : Command
 
         if (EditDirection.Forward == _direction)
         {
-            caret.Position = caret.Position.FindMove(CaretMove.Right, _chars.Length);
-            caret.RemoveSelection();
+            caret.Position = caret.Position.FindMove(CaretMove.CharRight, _chars.Length);
         }
+        caret.RemoveSelection();
         
         Singleton.FoldingManager.FoldingListCache.SetDirty();
     }
@@ -58,7 +58,7 @@ internal class InputCharCommand : Command
 
     public override string GetDebugString()
     {
-        return "Input " + string.Join(' ', _chars);
+        return $"Input Char {string.Join(' ', _chars)} {_direction}";
     }
 }
 
@@ -111,13 +111,13 @@ internal class DeleteCharCommand : Command
             line.SetCharsDirty();
             Singleton.RowManager.RowsCache.SetDirty();
 
-            caret.Position = caret.Position.FindMove(CaretMove.Left, _deletedCount);
+            caret.Position = caret.Position.FindMove(CaretMove.CharLeft, _deletedCount);
             caret.RemoveSelection();
         }
 
         if (_count != _deletedCount)
         {
-            Logger.Warning($"DeleteCharCommand: _count != _deletedCount {_count} {_deletedCount}");
+            Logger.Error($"DeleteCharCommand: _count != _deletedCount {_count} {_deletedCount}");
         }
         Singleton.FoldingManager.FoldingListCache.SetDirty();
     }

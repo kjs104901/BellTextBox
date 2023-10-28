@@ -178,7 +178,7 @@ internal abstract class Action
     }
 }
 
-internal class DeleteSelection : Action
+internal class DeleteSelectionAction : Action
 {
     protected override List<Command> CreateCommands(Caret caret)
     {
@@ -193,7 +193,7 @@ internal class DeleteSelection : Action
             {
                 if (!Singleton.LineManager.GetLine(i, out Line lineToDelete))
                 {
-                    Logger.Error($"DeleteSelection: failed to get line: {i}");
+                    Logger.Error($"DeleteSelectionAction: failed to get line: {i}");
                     continue;
                 }
                 
@@ -214,7 +214,7 @@ internal class DeleteSelection : Action
                 }
                 else
                 {
-                    Logger.Warning("DeleteSelection: deleteCount is 0");
+                    Logger.Warning("DeleteSelectionAction: deleteCount is 0");
                 }
                 if (i > caret.AnchorPosition.LineIndex)
                 {
@@ -229,7 +229,7 @@ internal class DeleteSelection : Action
             {
                 if (!Singleton.LineManager.GetLine(i, out Line lineToDelete))
                 {
-                    Logger.Error($"DeleteSelection: failed to get line: {i}");
+                    Logger.Error($"DeleteSelectionAction: failed to get line: {i}");
                     continue;
                 }
                 
@@ -250,7 +250,7 @@ internal class DeleteSelection : Action
                 }
                 else
                 {
-                    Logger.Warning("DeleteSelection: deleteCount is 0");
+                    Logger.Warning("DeleteSelectionAction: deleteCount is 0");
                 }
 
                 if (i < caret.AnchorPosition.LineIndex)

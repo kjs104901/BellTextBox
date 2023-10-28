@@ -63,7 +63,7 @@ public partial class TextBox
 
             if (CaretManager.HasCaretsSelection())
             {
-                ActionManager.DoAction(new DeleteSelection());
+                ActionManager.DoAction(new DeleteSelectionAction());
                 CaretManager.RemoveCaretsSelection();
             }
 
@@ -75,7 +75,7 @@ public partial class TextBox
         {
             if (CaretManager.HasCaretsSelection())
             {
-                ActionManager.DoAction(new DeleteSelection());
+                ActionManager.DoAction(new DeleteSelectionAction());
                 CaretManager.RemoveCaretsSelection();
             }
         }
@@ -99,8 +99,11 @@ public partial class TextBox
         else if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.X)) // Cut
         {
             CaretManager.CopyClipboard();
-            ActionManager.DoAction(new DeleteSelection());
-            CaretManager.RemoveCaretsSelection();
+            if (CaretManager.HasCaretsSelection())
+            {
+                ActionManager.DoAction(new DeleteSelectionAction());
+                CaretManager.RemoveCaretsSelection();
+            }
         }
         else if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.A)) // Select All
         {
@@ -113,14 +116,17 @@ public partial class TextBox
             {
                 CaretManager.MoveCaretsAnchor(CaretMove.StartOfFile);
                 CaretManager.MoveCaretsPosition(CaretMove.EndOfFile);
-                ActionManager.DoAction(new DeleteSelection());
-                CaretManager.RemoveCaretsSelection();
+                if (CaretManager.HasCaretsSelection())
+                {
+                    ActionManager.DoAction(new DeleteSelectionAction());
+                    CaretManager.RemoveCaretsSelection();
+                }
             }
             else
             {
                 if (CaretManager.HasCaretsSelection())
                 {
-                    ActionManager.DoAction(new DeleteSelection());
+                    ActionManager.DoAction(new DeleteSelectionAction());
                     CaretManager.RemoveCaretsSelection();
                 }
                 else
@@ -139,7 +145,7 @@ public partial class TextBox
             {
                 if (CaretManager.HasCaretsSelection())
                 {
-                    ActionManager.DoAction(new DeleteSelection());
+                    ActionManager.DoAction(new DeleteSelectionAction());
                     CaretManager.RemoveCaretsSelection();
                 }
                 else
@@ -150,8 +156,11 @@ public partial class TextBox
         }
         else if (EnumFlag.Has(hk, HotKeys.Enter)) // Enter
         {
-            ActionManager.DoAction(new DeleteSelection());
-            CaretManager.RemoveCaretsSelection();
+            if (CaretManager.HasCaretsSelection())
+            {
+                ActionManager.DoAction(new DeleteSelectionAction());
+                CaretManager.RemoveCaretsSelection();
+            }
             ActionManager.DoAction(new EnterAction());
         }
         else if (EnumFlag.Has(hk, HotKeys.Tab)) // Tab

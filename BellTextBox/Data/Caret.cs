@@ -18,6 +18,9 @@ public enum CaretMove
 
     PageUp,
     PageDown,
+    
+    CharLeft,
+    CharRight,
 }
 
 public class Caret

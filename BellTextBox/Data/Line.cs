@@ -197,7 +197,7 @@ public class Line
         foreach (LineSub lineSub in LineSubs)
         {
             if (lineSub.Coordinates.CharIndex <= charIndex &&
-                charIndex <= lineSub.Coordinates.CharIndex + lineSub.Chars.Count)
+                charIndex <= lineSub.Coordinates.CharIndex + lineSub.Chars.Count + 1)
             {
                 foundLineSub = lineSub;
                 return true;

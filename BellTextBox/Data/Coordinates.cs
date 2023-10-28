@@ -20,7 +20,7 @@ public struct Coordinates
         if (false == Singleton.LineManager.GetLineSub(this, out LineSub lineSub) ||
             false == Singleton.LineManager.GetLineSub(other, out LineSub otherLineSub))
         {
-            Logger.Error($"IsSameAs: failed to get line: {LineIndex} or {other.LineIndex}");
+            Logger.Error($"IsSameAs: failed to get line sub: {LineIndex},{CharIndex} {other.LineIndex},{other.CharIndex}");
             return false;
         }
 
@@ -56,7 +56,7 @@ public struct Coordinates
         if (false == Singleton.LineManager.GetLine(LineIndex, out Line line))
             return false;
 
-        if (CharIndex < 0 || CharIndex > line.Chars.Count)
+        if (CharIndex < 0 || CharIndex > line.Chars.Count + 1)
             return false;
 
         return true;
@@ -144,6 +144,46 @@ public struct Coordinates
             }
 
             CharIndex--;
+            return this;
+        }
+
+        if (CaretMove.CharRight == caretMove)
+        {
+            if (false == Singleton.LineManager.GetLine(LineIndex, out Line line))
+                return this;
+            
+            // End of line
+            if (line.Chars.Count <= CharIndex)
+            {
+                // End of file
+                if (false == Singleton.LineManager.GetLine(LineIndex + 1, out Line nextLine))
+                    return this;
+                
+                LineIndex = nextLine.Index;
+                CharIndex = 0;
+                LineSubIndex = -1;
+            }
+            
+            CharIndex++;
+            LineSubIndex = -1;
+            return this;
+        }
+        
+        if (CaretMove.CharLeft == caretMove)
+        {
+            // Start of line
+            if (CharIndex <= 0)
+            {
+                // Start of file
+                if (false == Singleton.LineManager.GetLine(LineIndex - 1, out Line prevLine))
+                    return this;
+                
+                LineIndex = prevLine.Index;
+                CharIndex = prevLine.Chars.Count;
+                LineSubIndex = -1;
+            }
+            CharIndex--;
+            LineSubIndex = -1;
             return this;
         }
 
