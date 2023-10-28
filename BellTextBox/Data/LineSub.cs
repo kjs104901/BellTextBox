@@ -3,24 +3,24 @@ using Bell.Utils;
 
 namespace Bell.Data;
 
-public class LineSub
+internal class LineSub
 {
-    public Coordinates Coordinates;
+    internal Coordinates Coordinates;
 
-    public readonly List<char> Chars = new();
-    public readonly List<float> CharWidths = new();
+    internal readonly List<char> Chars = new();
+    internal readonly List<float> CharWidths = new();
     
-    public readonly float IndentWidth;
+    internal readonly float IndentWidth;
     
-    public static readonly LineSub None = new(-1, -1, -1, 0.0f);
+    internal static readonly LineSub None = new(-1, -1, -1, 0.0f);
     
-    public LineSub(int lineIndex, int charIndex, int lineSubIndex, float indentWidth)
+    internal LineSub(int lineIndex, int charIndex, int lineSubIndex, float indentWidth)
     {
         Coordinates = new Coordinates(lineIndex, charIndex, lineSubIndex);
         IndentWidth = indentWidth;
     }
     
-    public int GetCharIndex(float position)
+    internal int GetCharIndex(float position)
     {
         float current = 0.0f;
         for (var i = 0; i < CharWidths.Count; i++)
@@ -33,7 +33,7 @@ public class LineSub
         return CharWidths.Count;
     }
 
-    public float GetCharPosition(Coordinates coordinates)
+    internal float GetCharPosition(Coordinates coordinates)
     {
         int index = coordinates.CharIndex - Coordinates.CharIndex;
         if (index < 0)
@@ -49,7 +49,7 @@ public class LineSub
         return position;
     }
 
-    public bool IsBiggerThan(LineSub other)
+    internal bool IsBiggerThan(LineSub other)
     {
         if (Coordinates.LineIndex != other.Coordinates.LineIndex)
             return Coordinates.LineIndex > other.Coordinates.LineIndex;
@@ -57,28 +57,28 @@ public class LineSub
     }
 }
 
-public struct LineSelection
+internal struct LineSelection
 {
-    public bool Selected;
-    public float SelectionStart;
-    public float SelectionEnd;
+    internal bool Selected;
+    internal float SelectionStart;
+    internal float SelectionEnd;
 
-    public bool HasCaretAnchor;
-    public float CaretAnchorPosition;
-    public bool HasCaret;
-    public float CaretPosition;
+    internal bool HasCaretAnchor;
+    internal float CaretAnchorPosition;
+    internal bool HasCaret;
+    internal float CaretPosition;
 }
 
-public struct TextBlockRender
+internal struct TextBlockRender
 {
-    public string Text;
-    public ColorStyle ColorStyle;
+    internal string Text;
+    internal ColorStyle ColorStyle;
 
-    public float PosX;
+    internal float PosX;
 }
 
-public struct WhiteSpaceRender
+internal struct WhiteSpaceRender
 {
-    public char C;
-    public float PosX;
+    internal char C;
+    internal float PosX;
 }

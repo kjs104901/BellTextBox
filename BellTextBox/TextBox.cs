@@ -3,24 +3,20 @@ using Bell.Actions;
 using Bell.Data;
 using Bell.Themes;
 using Bell.Utils;
-using Action = Bell.Actions.Action;
 
 namespace Bell;
 
 public partial class TextBox
 {
-    public readonly List<string> AutoCompleteList = new();
+    internal readonly IBackend Backend;
 
-    public readonly Theme Theme;
-    public readonly IBackend Backend;
-    
-    public readonly ActionManager ActionManager = new();
-    public readonly CaretManager CaretManager = new();
-    public readonly FontManager FontManager = new();
-    public readonly LineManager LineManager = new();
-    public readonly RowManager RowManager = new();
-    public readonly FoldingManager FoldingManager = new();
-    public readonly Logger Logger = new ();
+    internal readonly ActionManager ActionManager = new();
+    internal readonly CaretManager CaretManager = new();
+    internal readonly FontManager FontManager = new();
+    internal readonly LineManager LineManager = new();
+    internal readonly RowManager RowManager = new();
+    internal readonly FoldingManager FoldingManager = new();
+    internal readonly Logger Logger = new ();
     
     private readonly StringBuilder _sb = new();
 
@@ -41,7 +37,7 @@ public partial class TextBox
 
     public List<string> GetLogs()
     {
-        return Logger.GetLogs().Select(i => $"[{i.Item1}] ({i.Item2}) {i.Item3}").ToList();
+        return Logger.GetLogs().Select(i => $"[{i.Item1}] {i.Item3}: ({i.Item2})").ToList();
     }
     
     public void SetText(string text)
@@ -59,7 +55,7 @@ public partial class TextBox
             LineManager.Lines.Add(line);
         }
         CaretManager.ClearCarets();
-        RowManager.RowsCache.SetDirty();
+        RowManager.SetRowCacheDirty();
     }
 
     public string GetText()

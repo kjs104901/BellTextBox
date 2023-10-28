@@ -5,49 +5,66 @@ using Bell.Utils;
 
 namespace Bell.Data;
 
-public class Line
+internal class Line
 {
-    public int Index = 0;
+    internal int Index;
 
-    // TODO private 고민
-    public readonly List<char> Chars = new();
+    internal readonly List<char> Chars = new();
 
-    public Folding Folding = Folding.None;
+    internal Folding Folding = Folding.None;
 
-    public string String => StringCache.Get();
-    public readonly Cache<string> StringCache;
+    internal string String => _stringCache.Get();
+    private readonly Cache<string> _stringCache;
 
-    public List<ColorStyle> Colors => ColorsCache.Get();
-    public readonly Cache<List<ColorStyle>> ColorsCache;
+    internal List<ColorStyle> Colors => _colorsCache.Get();
+    private readonly Cache<List<ColorStyle>> _colorsCache;
 
-    public HashSet<int> Cutoffs => CutoffsCache.Get();
-    public readonly Cache<HashSet<int>> CutoffsCache;
+    private HashSet<int> Cutoffs => _cutoffsCache.Get();
+    private readonly Cache<HashSet<int>> _cutoffsCache;
 
-    public List<LineSub> LineSubs => LineSubsCache.Get();
-    public readonly Cache<List<LineSub>> LineSubsCache;
+    internal List<LineSub> LineSubs => _lineSubsCache.Get();
+    private readonly Cache<List<LineSub>> _lineSubsCache;
 
     // buffer to avoid GC
     private readonly StringBuilder _sb = new();
 
-    public static readonly Line None = new(0, Array.Empty<char>());
+    internal static readonly Line None = new(0, Array.Empty<char>());
 
-    public Line(int index, char[] initialChars)
+    internal Line(int index, char[] initialChars)
     {
         Index = index;
         Chars.AddRange(initialChars);
 
-        ColorsCache = new(new(), UpdateColors);
-        CutoffsCache = new(new(), UpdateCutoff);
-        StringCache = new(string.Empty, UpdateString);
-        LineSubsCache = new(new List<LineSub>(), UpdateLineSubs);
+        _colorsCache = new(new(), UpdateColors);
+        _cutoffsCache = new(new(), UpdateCutoff);
+        _stringCache = new(string.Empty, UpdateString);
+        _lineSubsCache = new(new List<LineSub>(), UpdateLineSubs);
+    }
+    
+    internal void ChangeLineIndex(int newIndex)
+    {
+        if (Index == newIndex)
+            return;
+        
+        Index = newIndex;
+        foreach (LineSub lineSub in LineSubs)
+        {
+            lineSub.Coordinates.LineIndex = newIndex;
+        }
     }
 
-    public void SetCharsDirty()
+    internal void SetCharsDirty()
     {
-        ColorsCache.SetDirty();
-        CutoffsCache.SetDirty();
-        StringCache.SetDirty();
-        LineSubsCache.SetDirty();
+        _colorsCache.SetDirty();
+        _cutoffsCache.SetDirty();
+        _stringCache.SetDirty();
+        _lineSubsCache.SetDirty();
+    }
+    
+    internal void SetCutoffsDirty()
+    {
+        _cutoffsCache.SetDirty();
+        _lineSubsCache.SetDirty();
     }
 
     private List<ColorStyle> UpdateColors(List<ColorStyle> colors)
@@ -92,8 +109,8 @@ public class Line
 
         for (int i = 0; i < Chars.Count; i++)
         {
-            widthAccumulated += Singleton.FontManager.GetFontWidth(Chars[i]);
-            if (widthAccumulated + Singleton.FontManager.GetFontReferenceWidth() > lineWidth)
+            widthAccumulated += FontManager.GetFontWidth(Chars[i]);
+            if (widthAccumulated + FontManager.GetFontReferenceWidth() > lineWidth)
             {
                 if (Singleton.TextBox.WrapMode == WrapMode.BreakWord)
                 {
@@ -109,8 +126,8 @@ public class Line
                         if (char.IsWhiteSpace(Chars[i]))
                             break;
 
-                        backWidth += Singleton.FontManager.GetFontWidth(Chars[i]);
-                        if (backWidth + Singleton.FontManager.GetFontReferenceWidth() * 10 > lineWidth)
+                        backWidth += FontManager.GetFontWidth(Chars[i]);
+                        if (backWidth + FontManager.GetFontReferenceWidth() * 10 > lineWidth)
                             break; // Give up on word wrap. break word.
 
                         i--;
@@ -142,7 +159,7 @@ public class Line
         for (int i = 0; i < Chars.Count; i++)
         {
             char c = Chars[i];
-            float cWidth = Singleton.FontManager.GetFontWidth(c);
+            float cWidth = FontManager.GetFontWidth(c);
 
             lineSub.Chars.Add(c);
             lineSub.CharWidths.Add(cWidth);
@@ -160,7 +177,7 @@ public class Line
         return lineSubs;
     }
 
-    public int CountSubstrings(string findText)
+    internal int CountSubstrings(string findText)
     {
         int count = 0;
 
@@ -190,7 +207,7 @@ public class Line
     }
     
 
-    public bool GetLineSub(int charIndex, out LineSub foundLineSub)
+    internal bool GetLineSub(int charIndex, out LineSub foundLineSub)
     {
         foundLineSub = LineSub.None;
 
@@ -209,7 +226,7 @@ public class Line
         return false;
     }
 
-    public float GetIndentWidth()
+    private float GetIndentWidth()
     {
         if (Singleton.TextBox.WordWrapIndent)
             return Singleton.TextBox.CountTabStart(String) * Singleton.TextBox.GetTabRenderSize();

@@ -3,39 +3,47 @@ using Bell.Utils;
 
 namespace Bell.Data;
 
-public class RowManager
+// Interface
+internal partial class RowManager
 {
-    public List<Row> Rows => RowsCache.Get();
-    public readonly Cache<List<Row>> RowsCache;
-    
+    internal static List<Row> Rows => Singleton.TextBox.RowManager._rows;
+    internal static void SetRowCacheDirty() => Singleton.TextBox.RowManager.SetRowCacheDirty_();
+}
+
+// Implementation
+internal partial class RowManager
+{
+    private List<Row> _rows => _rowsCache.Get();
+    private readonly Cache<List<Row>> _rowsCache;
+
     // buffer to avoid GC
     private readonly List<char> _buffers = new();
-    
-    public RowManager()
+
+    internal RowManager()
     {
-        RowsCache = new Cache<List<Row>>(new List<Row>(), UpdateRows);
+        _rowsCache = new Cache<List<Row>>(new List<Row>(), UpdateRows);
     }
-    
-    public void OnRowChanged()
+
+    private void SetRowCacheDirty_()
     {
-        RowsCache.SetDirty();
+        _rowsCache.SetDirty();
         foreach (Row row in Rows)
         {
             row.LineSelectionCache.SetDirty();
         }
     }
-    
+
     private List<Row> UpdateRows(List<Row> rows)
     {
         rows.Clear();
 
         int foldingCount = 0;
-        foreach (Line line in Singleton.LineManager.Lines)
+        foreach (Line line in LineManager.Lines)
         {
             bool visible = true;
 
             line.Folding = Folding.None;
-            foreach (Folding folding in Singleton.FoldingManager.FoldingList)
+            foreach (Folding folding in FoldingManager.GetFoldingList())
             {
                 if (folding.End == line.Index)
                 {
@@ -67,7 +75,7 @@ public class RowManager
 
                     float startPosX = 0.0f;
                     float currPosX = 0.0f;
-                    
+
                     _buffers.Clear();
                     float buffersWidth = 0.0f;
 
@@ -83,7 +91,7 @@ public class RowManager
                         {
                             renderGroupColor = charColor;
                         }
-                        
+
                         if (renderGroupColor != charColor) // need new render group
                         {
                             row.TextBlockRenders.Add(new()
@@ -94,13 +102,13 @@ public class RowManager
                             });
 
                             startPosX += buffersWidth;
-                            
+
                             _buffers.Clear();
                             buffersWidth = 0.0f;
-                            
+
                             renderGroupColor = charColor;
                         }
-                        
+
                         _buffers.Add(c);
                         buffersWidth += charWidth;
 
@@ -108,6 +116,7 @@ public class RowManager
                         {
                             row.WhiteSpaceRenders.Add(new() { C = c, PosX = currPosX });
                         }
+
                         currPosX += charWidth;
                     }
 
@@ -121,6 +130,7 @@ public class RowManager
                             PosX = startPosX
                         });
                     }
+
                     rows.Add(row);
                 }
             }

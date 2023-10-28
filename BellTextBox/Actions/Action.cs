@@ -10,32 +10,32 @@ internal abstract class Action
 
     private readonly List<Caret> _startCarets = new();
     private readonly List<Caret> _endCarets = new();
-    
-    private string _startText;
-    private string _endText;
+
+    private string _startText = "";
+    private string _endText = "";
     
     protected abstract List<Command> CreateCommands(Caret caret);
 
     private void SaveCarets(List<Caret> carets)
     {
         carets.Clear();
-        for (int i = 0; i < Singleton.CaretManager.Count; i++)
+        for (int i = 0; i < CaretManager.Count; i++)
         {
-            carets.Add(Singleton.CaretManager.GetCaret(i).Clone());
+            carets.Add(CaretManager.GetCaret(i).Clone());
         }
     }
 
     private bool RestoreCarets(List<Caret> carets)
     {
-        Singleton.CaretManager.ClearCarets();
+        CaretManager.ClearCarets();
         foreach (var caret in carets)
         {
-            Singleton.CaretManager.AddCaret(caret.Clone());
+            CaretManager.AddCaret(caret.Clone());
         }
         return true;
     }
 
-    public void DoCommands()
+    internal void DoCommands()
     {
         _caretsCommands.Clear();
 
@@ -43,9 +43,9 @@ internal abstract class Action
         if (Singleton.TextBox.IsDebugMode)
             _startText = Singleton.TextBox.GetText();
 
-        for (int i = 0; i < Singleton.CaretManager.Count; i++)
+        for (int i = 0; i < CaretManager.Count; i++)
         {
-            Caret caret = Singleton.CaretManager.GetCaret(i);
+            Caret caret = CaretManager.GetCaret(i);
             var commands = CreateCommands(caret);
             _caretsCommands.Add(commands);
 
@@ -69,7 +69,7 @@ internal abstract class Action
                 Caret startCaret = _startCarets[i];
                 Caret endCaret = _endCarets[i];
 
-                if (Singleton.CaretManager.CheckValid(startCaret))
+                if (CaretManager.CheckValid(startCaret))
                 {
                     if (false == startCaret.Position.IsSameAs(endCaret.Position))
                         isAllSame = false;
@@ -81,7 +81,7 @@ internal abstract class Action
                     isAllSame = false;
                 }
                 
-                if (false == Singleton.CaretManager.CheckValid(endCaret))
+                if (false == CaretManager.CheckValid(endCaret))
                 {
                     Logger.Error($"DoCommands: invalid end caret: {endCaret.Position.LineIndex} {endCaret.Position.CharIndex} {endCaret.AnchorPosition.LineIndex} {endCaret.AnchorPosition.CharIndex}");
                 }
@@ -89,12 +89,12 @@ internal abstract class Action
 
             if (isAllSame)
             {
-                Logger.Error("DoCommands: Carets not changed");
+                Logger.Warning("DoCommands: Carets not changed");
             }
         }
     }
 
-    public void RedoCommands()
+    internal void RedoCommands()
     {
         if (false == RestoreCarets(_startCarets))
         {
@@ -108,7 +108,7 @@ internal abstract class Action
         for (int i = 0; i < _caretsCommands.Count; i++)
         {
             List<Command> commands = _caretsCommands[i];
-            Caret caret = Singleton.CaretManager.GetCaret(i);
+            Caret caret = CaretManager.GetCaret(i);
 
             foreach (Command command in commands)
             {
@@ -124,7 +124,7 @@ internal abstract class Action
             Logger.Error("RedoCommands: Text not match");
     }
 
-    public void UndoCommands()
+    internal void UndoCommands()
     {
         if (false == RestoreCarets(_endCarets))
         {
@@ -138,7 +138,7 @@ internal abstract class Action
         for (int i = _caretsCommands.Count - 1; i >= 0; i--)
         {
             List<Command> commands = _caretsCommands[i];
-            Caret caret = Singleton.CaretManager.GetCaret(i);
+            Caret caret = CaretManager.GetCaret(i);
 
             for (int j = commands.Count - 1; j >= 0; j--)
             {
@@ -155,14 +155,14 @@ internal abstract class Action
             Logger.Error("UndoCommands: Text not match");
     }
 
-    public bool IsAllSame<T>()
+    internal bool IsAllSame<T>()
     {
         return _caretsCommands
             .SelectMany(commands => commands)
             .All(command => command is T);
     }
 
-    public string GetDebugString()
+    internal string GetDebugString()
     {
         var sb = new StringBuilder();
         for (int i = 0; i < _caretsCommands.Count; i++)
@@ -191,7 +191,7 @@ internal class DeleteSelectionAction : Action
             // Backward delete
             for (int i = caret.Position.LineIndex; i >= caret.AnchorPosition.LineIndex; i--)
             {
-                if (!Singleton.LineManager.GetLine(i, out Line lineToDelete))
+                if (!LineManager.GetLine(i, out Line lineToDelete))
                 {
                     Logger.Error($"DeleteSelectionAction: failed to get line: {i}");
                     continue;
@@ -227,7 +227,7 @@ internal class DeleteSelectionAction : Action
             // Forward delete
             for (int i = caret.Position.LineIndex; i <= caret.AnchorPosition.LineIndex; i++)
             {
-                if (!Singleton.LineManager.GetLine(i, out Line lineToDelete))
+                if (!LineManager.GetLine(i, out Line lineToDelete))
                 {
                     Logger.Error($"DeleteSelectionAction: failed to get line: {i}");
                     continue;
@@ -269,7 +269,7 @@ internal class InputCharAction : Action
     private readonly EditDirection _direction;
     private readonly char _char;
 
-    public InputCharAction(EditDirection direction, char c)
+    internal InputCharAction(EditDirection direction, char c)
     {
         _direction = direction;
         _char = c;
@@ -287,7 +287,7 @@ internal class DeleteCharAction : Action
 {
     private readonly EditDirection _direction;
 
-    public DeleteCharAction(EditDirection direction)
+    internal DeleteCharAction(EditDirection direction)
     {
         _direction = direction;
     }
@@ -307,7 +307,7 @@ internal class DeleteCharAction : Action
         }
 
         // if caret is at the end of the line, merge line (forward)
-        if (false == Singleton.LineManager.GetLine(caret.Position.LineIndex, out Line line))
+        if (false == LineManager.GetLine(caret.Position.LineIndex, out Line line))
         {
             Logger.Error($"DeleteCharAction: failed to get line: {caret.Position.LineIndex}");
             return commands;
@@ -315,7 +315,7 @@ internal class DeleteCharAction : Action
         
         if (caret.Position.CharIndex == line.Chars.Count && _direction == EditDirection.Forward)
         {
-            if (caret.Position.LineIndex == Singleton.LineManager.Lines.Count - 1)
+            if (caret.Position.LineIndex == LineManager.Lines.Count - 1)
                 return commands;
 
             commands.Add(new MergeLineCommand(EditDirection.Forward));

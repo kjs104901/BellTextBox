@@ -1,16 +1,16 @@
 ﻿namespace Bell.Data;
 
-public class Folding
+internal class Folding
 {
-    public int Start;
-    public int End;
+    internal int Start;
+    internal int End;
     
-    public bool Folded;
+    internal bool Folded;
 
-    public void Switch()
+    internal void Switch()
     {
         Folded = !Folded;
     }
     
-    public static readonly Folding None = new Folding() { Start = -1, End = -1, Folded = false };
+    internal static readonly Folding None = new Folding() { Start = -1, End = -1, Folded = false };
 }

@@ -11,7 +11,7 @@ public partial class TextBox
     private Vector2 _viewPos;
     private Vector2 _viewSize;
 
-    public Vector2 PageSize;
+    internal Vector2 PageSize;
 
     private Coordinates _mouseDragStartText;
 
@@ -299,7 +299,7 @@ public partial class TextBox
                     if (Folding.None != line.Folding)
                     {
                         line.Folding.Switch();
-                        RowManager.OnRowChanged();
+                        RowManager.SetRowCacheDirty();
                         return;
                     }
                 }
@@ -388,7 +388,7 @@ public partial class TextBox
         _altPressed = false;
     }
 
-    protected void ProcessViewInput(Vector2 viewPos, Vector2 viewSize)
+    private void ProcessViewInput(Vector2 viewPos, Vector2 viewSize)
     {
         if (MathHelper.IsNotSame(viewPos.X, _viewPos.X) ||
             MathHelper.IsNotSame(viewPos.Y, _viewPos.Y) ||
@@ -400,12 +400,11 @@ public partial class TextBox
 
             foreach (Line line in LineManager.Lines)
             {
-                line.CutoffsCache.SetDirty();
-                line.LineSubsCache.SetDirty();
+                line.SetCutoffsDirty();
             }
 
             CaretManager.RemoveCaretsLineSub();
-            RowManager.RowsCache.SetDirty();
+            RowManager.SetRowCacheDirty();
         }
 
         if (WrapMode.Word == WrapMode || WrapMode.BreakWord == WrapMode)

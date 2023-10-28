@@ -2,17 +2,17 @@
 
 namespace Bell.Data;
 
-public class Row
+internal class Row
 {
-    public readonly List<TextBlockRender> TextBlockRenders = new();
-    public readonly List<WhiteSpaceRender> WhiteSpaceRenders = new();
+    internal readonly List<TextBlockRender> TextBlockRenders = new();
+    internal readonly List<WhiteSpaceRender> WhiteSpaceRenders = new();
     
-    public LineSelection LineSelection => LineSelectionCache.Get();
-    public readonly Cache<LineSelection> LineSelectionCache;
+    internal LineSelection LineSelection => LineSelectionCache.Get();
+    internal readonly Cache<LineSelection> LineSelectionCache;
 
-    public LineSub LineSub;
+    internal LineSub LineSub;
 
-    public Row(LineSub lineSub)
+    internal Row(LineSub lineSub)
     {
         LineSub = lineSub;
         
@@ -32,12 +32,12 @@ public class Row
 
         bool fakeSelected = false;
 
-        for (int i = 0; i < Singleton.CaretManager.Count; i++)
+        for (int i = 0; i < CaretManager.Count; i++)
         {
-            Caret caret = Singleton.CaretManager.GetCaret(i);
+            Caret caret = CaretManager.GetCaret(i);
 
-            if (false == Singleton.LineManager.GetLineSub(caret.AnchorPosition, out LineSub anchorLineSub) ||
-                false == Singleton.LineManager.GetLineSub(caret.Position, out LineSub lineSub))
+            if (false == LineManager.GetLineSub(caret.AnchorPosition, out LineSub anchorLineSub) ||
+                false == LineManager.GetLineSub(caret.Position, out LineSub lineSub))
             {
                 Logger.Error("UpdateLineSelection: failed to get line");
                 continue;
@@ -73,7 +73,7 @@ public class Row
                         lineSelection.SelectionEnd = LineSub.CharWidths.Sum();
                         if (lineSelection.SelectionEnd < 1.0f)
                         {
-                            lineSelection.SelectionEnd = Singleton.FontManager.GetFontWhiteSpaceWidth();
+                            lineSelection.SelectionEnd = FontManager.GetFontWhiteSpaceWidth();
                             fakeSelected = true;
                         }
 
@@ -95,7 +95,7 @@ public class Row
                         lineSelection.SelectionEnd = LineSub.CharWidths.Sum();
                         if (lineSelection.SelectionEnd < 1.0f)
                         {
-                            lineSelection.SelectionEnd = Singleton.FontManager.GetFontWhiteSpaceWidth();
+                            lineSelection.SelectionEnd = FontManager.GetFontWhiteSpaceWidth();
                             fakeSelected = true;
                         }
 
@@ -110,7 +110,7 @@ public class Row
                 lineSelection.HasCaretAnchor = true;
                 lineSelection.CaretAnchorPosition = anchorPosition;
                 if (endLineSub == anchorLineSub && fakeSelected && lineSelection.CaretAnchorPosition < 1.0f)
-                    lineSelection.CaretAnchorPosition = Singleton.FontManager.GetFontWhiteSpaceWidth();
+                    lineSelection.CaretAnchorPosition = FontManager.GetFontWhiteSpaceWidth();
             }
             
             if (lineSub == LineSub)
@@ -119,7 +119,7 @@ public class Row
                 lineSelection.HasCaret = true;
                 lineSelection.CaretPosition = caretPosition;
                 if (endLineSub == lineSub && fakeSelected && lineSelection.CaretPosition < 1.0f)
-                    lineSelection.CaretPosition = Singleton.FontManager.GetFontWhiteSpaceWidth();
+                    lineSelection.CaretPosition = FontManager.GetFontWhiteSpaceWidth();
             }
         }
         return lineSelection;

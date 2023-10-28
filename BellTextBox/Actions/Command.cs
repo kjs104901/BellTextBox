@@ -5,9 +5,9 @@ namespace Bell.Actions;
 
 internal abstract class Command
 {
-    public abstract void Do(Caret caret);
-    public abstract void Undo(Caret caret);
-    public abstract string GetDebugString();
+    internal abstract void Do(Caret caret);
+    internal abstract void Undo(Caret caret);
+    internal abstract string GetDebugString();
 }
 
 internal enum EditDirection
@@ -21,15 +21,15 @@ internal class InputCharCommand : Command
     private readonly EditDirection _direction;
     private readonly char[] _chars;
 
-    public InputCharCommand(EditDirection direction, char[] chars)
+    internal InputCharCommand(EditDirection direction, char[] chars)
     {
         _direction = direction;
         _chars = chars;
     }
 
-    public override void Do(Caret caret)
+    internal override void Do(Caret caret)
     {
-        if (false == Singleton.LineManager.GetLine(caret.Position.LineIndex, out Line line))
+        if (false == LineManager.GetLine(caret.Position.LineIndex, out Line line))
         {
             Logger.Error($"InputCharCommand: Line not found {caret.Position.LineIndex}");
             return;
@@ -37,7 +37,7 @@ internal class InputCharCommand : Command
         
         line.Chars.InsertRange(caret.Position.CharIndex, _chars);
         line.SetCharsDirty();
-        Singleton.RowManager.RowsCache.SetDirty();
+        RowManager.SetRowCacheDirty();
 
         if (EditDirection.Forward == _direction)
         {
@@ -45,10 +45,10 @@ internal class InputCharCommand : Command
         }
         caret.RemoveSelection();
         
-        Singleton.FoldingManager.FoldingListCache.SetDirty();
+        FoldingManager.SetCacheDirty();
     }
 
-    public override void Undo(Caret caret)
+    internal override void Undo(Caret caret)
     {
         if (EditDirection.Forward == _direction)
             new DeleteCharCommand(EditDirection.Backward, _chars.Length).Do(caret);
@@ -56,7 +56,7 @@ internal class InputCharCommand : Command
             new DeleteCharCommand(EditDirection.Forward, _chars.Length).Do(caret);
     }
 
-    public override string GetDebugString()
+    internal override string GetDebugString()
     {
         return $"Input Char {string.Join(' ', _chars)} {_direction}";
     }
@@ -70,15 +70,15 @@ internal class DeleteCharCommand : Command
     private int _deletedCount;
     private char[] _deletedChars = Array.Empty<char>();
 
-    public DeleteCharCommand(EditDirection direction, int count)
+    internal DeleteCharCommand(EditDirection direction, int count)
     {
         _direction = direction;
         _count = count;
     }
 
-    public override void Do(Caret caret)
+    internal override void Do(Caret caret)
     {
-        if (false == Singleton.LineManager.GetLine(caret.Position.LineIndex, out Line line))
+        if (false == LineManager.GetLine(caret.Position.LineIndex, out Line line))
         {
             Logger.Error($"DeleteCharCommand: Line not found {caret.Position.LineIndex}");
             return;
@@ -97,7 +97,7 @@ internal class DeleteCharCommand : Command
             _deletedChars = chars.GetRange(targetIndex, _deletedCount).ToArray();
             chars.RemoveRange(targetIndex, _deletedCount);
             line.SetCharsDirty();
-            Singleton.RowManager.RowsCache.SetDirty();
+            RowManager.SetRowCacheDirty();
             
             caret.RemoveSelection();
         }
@@ -109,7 +109,7 @@ internal class DeleteCharCommand : Command
             _deletedChars = chars.GetRange(targetIndex - _deletedCount, _deletedCount).ToArray();
             chars.RemoveRange(targetIndex - _deletedCount, _deletedCount);
             line.SetCharsDirty();
-            Singleton.RowManager.RowsCache.SetDirty();
+            RowManager.SetRowCacheDirty();
 
             caret.Position = caret.Position.FindMove(CaretMove.CharLeft, _deletedCount);
             caret.RemoveSelection();
@@ -119,10 +119,10 @@ internal class DeleteCharCommand : Command
         {
             Logger.Error($"DeleteCharCommand: _count != _deletedCount {_count} {_deletedCount}");
         }
-        Singleton.FoldingManager.FoldingListCache.SetDirty();
+        FoldingManager.SetCacheDirty();
     }
 
-    public override void Undo(Caret caret)
+    internal override void Undo(Caret caret)
     {
         if (EditDirection.Forward == _direction)
             new InputCharCommand(EditDirection.Backward, _deletedChars).Do(caret);
@@ -130,7 +130,7 @@ internal class DeleteCharCommand : Command
             new InputCharCommand(EditDirection.Forward, _deletedChars).Do(caret);
     }
 
-    public override string GetDebugString()
+    internal override string GetDebugString()
     {
         return $"Delete Char {_count} {_direction}";
     }
@@ -140,14 +140,14 @@ internal class SplitLineCommand : Command
 {
     private EditDirection _direction;
 
-    public SplitLineCommand(EditDirection direction)
+    internal SplitLineCommand(EditDirection direction)
     {
         _direction = direction;
     }
 
-    public override void Do(Caret caret)
+    internal override void Do(Caret caret)
     {
-        if (false == Singleton.LineManager.GetLine(caret.Position.LineIndex, out Line line))
+        if (false == LineManager.GetLine(caret.Position.LineIndex, out Line line))
         {
             Logger.Error($"SplitLineCommand: Line not found {caret.Position.LineIndex}");
             return;
@@ -168,7 +168,7 @@ internal class SplitLineCommand : Command
             // TODO auto indent?
             
             insertLineIndex = caret.Position.LineIndex + 1;
-            Line newLine = Singleton.LineManager.InsertLine(insertLineIndex, restOfLine);
+            Line newLine = LineManager.InsertLine(insertLineIndex, restOfLine);
             
             caret.Position = new Coordinates(insertLineIndex, 0);
             caret.RemoveSelection();
@@ -181,17 +181,16 @@ internal class SplitLineCommand : Command
             line.SetCharsDirty();
             
             insertLineIndex = caret.Position.LineIndex;
-            Line newLine = Singleton.LineManager.InsertLine(insertLineIndex, restOfLine);
+            Line newLine = LineManager.InsertLine(insertLineIndex, restOfLine);
 
             int charIndex = restOfLine.Length;
             caret.Position = new Coordinates(insertLineIndex, charIndex);
             caret.RemoveSelection();
         }
-        
-        Singleton.FoldingManager.FoldingListCache.SetDirty();
+        FoldingManager.SetCacheDirty();
     }
 
-    public override void Undo(Caret caret)
+    internal override void Undo(Caret caret)
     {
         // TODO auto indent?
         
@@ -201,7 +200,7 @@ internal class SplitLineCommand : Command
             new MergeLineCommand(EditDirection.Forward).Do(caret);
     }
 
-    public override string GetDebugString()
+    internal override string GetDebugString()
     {
         return $"Split Line {_direction}";
     }
@@ -211,14 +210,14 @@ internal class MergeLineCommand : Command
 {
     private EditDirection _direction;
 
-    public MergeLineCommand(EditDirection direction)
+    internal MergeLineCommand(EditDirection direction)
     {
         _direction = direction;
     }
 
-    public override void Do(Caret caret)
+    internal override void Do(Caret caret)
     {
-        if (false == Singleton.LineManager.GetLine(caret.Position.LineIndex, out Line line))
+        if (false == LineManager.GetLine(caret.Position.LineIndex, out Line line))
         {
             Logger.Error($"MergeLineCommand: Line not found {caret.Position.LineIndex}");
             return;
@@ -228,14 +227,14 @@ internal class MergeLineCommand : Command
         {
             int nextLineIndex = line.Index + 1;
             
-            if (false == Singleton.LineManager.GetLine(nextLineIndex, out Line nextLine))
+            if (false == LineManager.GetLine(nextLineIndex, out Line nextLine))
                 return;
                 
             line.Chars.AddRange(nextLine.Chars);
             line.SetCharsDirty();
 
             // TODO 정리?
-            foreach (Caret moveCaret in Singleton.CaretManager.GetCaretsInLine(nextLine))
+            foreach (Caret moveCaret in CaretManager.GetCaretsInLine(nextLine))
             {
                 moveCaret.Position.LineIndex = line.Index;
                 moveCaret.Position.CharIndex += line.Chars.Count;
@@ -243,17 +242,17 @@ internal class MergeLineCommand : Command
                 moveCaret.AnchorPosition.CharIndex += line.Chars.Count;
             }
             
-            Singleton.LineManager.RemoveLine(nextLineIndex);
+            LineManager.RemoveLine(nextLineIndex);
         }
         else if (EditDirection.Backward == _direction)
         {
             int currentLineIndex = line.Index;
             int prevLineIndex = line.Index - 1;
             
-            if (false == Singleton.LineManager.GetLine(prevLineIndex, out Line prevLine))
+            if (false == LineManager.GetLine(prevLineIndex, out Line prevLine))
                 return;
             
-            foreach (Caret moveCaret in Singleton.CaretManager.GetCaretsInLine(line))
+            foreach (Caret moveCaret in CaretManager.GetCaretsInLine(line))
             {
                 moveCaret.Position.LineIndex = prevLine.Index;
                 moveCaret.Position.CharIndex += prevLine.Chars.Count;
@@ -264,13 +263,12 @@ internal class MergeLineCommand : Command
             prevLine.Chars.AddRange(line.Chars);
             prevLine.SetCharsDirty();
             
-            Singleton.LineManager.RemoveLine(currentLineIndex);
+            LineManager.RemoveLine(currentLineIndex);
         }
-        
-        Singleton.FoldingManager.FoldingListCache.SetDirty();
+        FoldingManager.SetCacheDirty();
     }
 
-    public override void Undo(Caret caret)
+    internal override void Undo(Caret caret)
     {
         if (EditDirection.Forward == _direction)
             new SplitLineCommand(EditDirection.Backward).Do(caret);
@@ -278,7 +276,7 @@ internal class MergeLineCommand : Command
             new SplitLineCommand(EditDirection.Forward).Do(caret);
     }
 
-    public override string GetDebugString()
+    internal override string GetDebugString()
     {
         return $"Merge Line {_direction}";
     }
@@ -286,15 +284,15 @@ internal class MergeLineCommand : Command
 
 internal class IndentSelectionCommand : Command
 {
-    public override void Do(Caret caret)
+    internal override void Do(Caret caret)
     {
     }
 
-    public override void Undo(Caret caret)
+    internal override void Undo(Caret caret)
     {
     }
 
-    public override string GetDebugString()
+    internal override string GetDebugString()
     {
         return "Indent Selection";
     }
@@ -302,15 +300,15 @@ internal class IndentSelectionCommand : Command
 
 internal class UnindentSelectionCommand : Command
 {
-    public override void Do(Caret caret)
+    internal override void Do(Caret caret)
     {
     }
 
-    public override void Undo(Caret caret)
+    internal override void Undo(Caret caret)
     {
     }
 
-    public override string GetDebugString()
+    internal override string GetDebugString()
     {
         return "Unindent Selection";
     }

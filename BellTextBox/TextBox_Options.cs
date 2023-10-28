@@ -1,4 +1,6 @@
-﻿using Bell.Languages;
+﻿using Bell.Data;
+using Bell.Languages;
+using Bell.Themes;
 
 namespace Bell;
 
@@ -24,6 +26,8 @@ public enum TabMode
 
 public partial class TextBox
 {
+    public readonly Theme Theme;
+    
     public bool AutoIndent { get; set; } = true;
     public bool AutoComplete { get; set; } = true;
     public bool Overwrite { get; set; } = false;
@@ -46,8 +50,10 @@ public partial class TextBox
     public Language Language { get; set; } = Language.PlainText();
 
     public readonly bool IsDebugMode = true;
+    
+    public readonly List<string> AutoCompleteList = new();
 
-    public int CountTabStart(string line)
+    internal int CountTabStart(string line)
     {
         string tabString = GetTabString();
 
@@ -60,19 +66,19 @@ public partial class TextBox
         return count;
     }
 
-    public float GetTabRenderSize()
+    internal float GetTabRenderSize()
     {
         return FontManager.GetFontWhiteSpaceWidth() * TabSize;
     }
 
-    public string GetTabString()
+    internal string GetTabString()
     {
         if (TabMode.Space == TabMode)
             return new string(' ', TabSize);
         return "\t";
     }
-    
-    public string ReplaceTab(string text)
+
+    private string ReplaceTab(string text)
     {
         switch (TabMode)
         {
@@ -83,14 +89,14 @@ public partial class TextBox
         }
         return text;
     }
-    
-    public string ReplaceEol(string text)
+
+    private string ReplaceEol(string text)
     {
         return text.Replace("\r\n", "\n")
             .Replace("\r", "\n");
     }
-    
-    public string GetEolString()
+
+    private string GetEolString()
     {
         switch (EolMode)
         {

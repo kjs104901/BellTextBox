@@ -1,10 +1,10 @@
 ﻿namespace Bell.Utils;
 
-public static class StringPool<T> where T : notnull
+internal static class StringPool<T> where T : notnull
 {
     private static readonly Dictionary<T, string> Pool = new();
     
-    public static string Get(T key)
+    internal static string Get(T key)
     {
         if (Pool.TryGetValue(key, out string? value))
             return value;

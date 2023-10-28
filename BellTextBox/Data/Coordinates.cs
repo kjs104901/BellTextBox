@@ -2,23 +2,23 @@
 
 namespace Bell.Data;
 
-public struct Coordinates
+internal struct Coordinates
 {
-    public int LineIndex;
-    public int CharIndex;
-    public int LineSubIndex;
+    internal int LineIndex;
+    internal int CharIndex;
+    internal int LineSubIndex;
 
-    public Coordinates(int lineIndex, int charIndex, int lineSubIndex = -1)
+    internal Coordinates(int lineIndex, int charIndex, int lineSubIndex = -1)
     {
         LineIndex = lineIndex;
         CharIndex = charIndex;
         LineSubIndex = lineSubIndex;
     }
 
-    public bool IsSameAs(Coordinates other)
+    internal bool IsSameAs(Coordinates other)
     {
-        if (false == Singleton.LineManager.GetLineSub(this, out LineSub lineSub) ||
-            false == Singleton.LineManager.GetLineSub(other, out LineSub otherLineSub))
+        if (false == LineManager.GetLineSub(this, out LineSub lineSub) ||
+            false == LineManager.GetLineSub(other, out LineSub otherLineSub))
         {
             Logger.Error($"IsSameAs: failed to get line sub: {LineIndex},{CharIndex} {other.LineIndex},{other.CharIndex}");
             return false;
@@ -33,10 +33,10 @@ public struct Coordinates
         return CharIndex == other.CharIndex;
     }
 
-    public bool IsBiggerThan(Coordinates other)
+    internal bool IsBiggerThan(Coordinates other)
     {
-        if (false == Singleton.LineManager.GetLineSub(this, out LineSub lineSub) ||
-            false == Singleton.LineManager.GetLineSub(other, out LineSub otherLineSub))
+        if (false == LineManager.GetLineSub(this, out LineSub lineSub) ||
+            false == LineManager.GetLineSub(other, out LineSub otherLineSub))
         {
             Logger.Error($"IsBiggerThan: failed to get line: {LineIndex} or {other.LineIndex}");
             return false;
@@ -51,9 +51,9 @@ public struct Coordinates
         return CharIndex > other.CharIndex;
     }
 
-    public bool IsValid()
+    internal bool IsValid()
     {
-        if (false == Singleton.LineManager.GetLine(LineIndex, out Line line))
+        if (false == LineManager.GetLine(LineIndex, out Line line))
             return false;
 
         if (CharIndex < 0 || CharIndex > line.Chars.Count + 1)
@@ -62,7 +62,7 @@ public struct Coordinates
         return true;
     }
 
-    public Coordinates FindMove(CaretMove caretMove, int count = 1)
+    internal Coordinates FindMove(CaretMove caretMove, int count = 1)
     {
         Coordinates newCoordinates = this;
         for (int i = 0; i < count; i++)
@@ -84,18 +84,18 @@ public struct Coordinates
         return newCoordinates;
     }
 
-    private Coordinates FindMoveSingle(CaretMove caretMove)
+    internal Coordinates FindMoveSingle(CaretMove caretMove)
     {
         if (CaretMove.Right == caretMove)
         {
-            if (false == Singleton.LineManager.GetLine(LineIndex, out Line line))
+            if (false == LineManager.GetLine(LineIndex, out Line line))
                 return this;
 
             // End of line
             if (line.Chars.Count <= CharIndex)
             {
                 // End of file
-                if (false == Singleton.LineManager.GetLine(LineIndex + 1, out Line nextLine))
+                if (false == LineManager.GetLine(LineIndex + 1, out Line nextLine))
                     return this;
 
                 LineIndex = nextLine.Index;
@@ -105,9 +105,9 @@ public struct Coordinates
             }
 
             // Has next line sub
-            if (Singleton.LineManager.GetLineSub(this, out LineSub lineSub) &&
+            if (LineManager.GetLineSub(this, out LineSub lineSub) &&
                 CharIndex == lineSub.Coordinates.CharIndex + lineSub.Chars.Count &&
-                Singleton.LineManager.GetLineSub(LineIndex, lineSub.Coordinates.LineSubIndex + 1,
+                LineManager.GetLineSub(LineIndex, lineSub.Coordinates.LineSubIndex + 1,
                     out LineSub nextLineSub))
             {
                 LineSubIndex = nextLineSub.Coordinates.LineSubIndex;
@@ -124,7 +124,7 @@ public struct Coordinates
             if (CharIndex <= 0)
             {
                 // Start of file
-                if (false == Singleton.LineManager.GetLine(LineIndex - 1, out Line prevLine))
+                if (false == LineManager.GetLine(LineIndex - 1, out Line prevLine))
                     return this;
 
                 LineIndex = prevLine.Index;
@@ -134,9 +134,9 @@ public struct Coordinates
             }
 
             // Has prev line sub
-            if (Singleton.LineManager.GetLineSub(this, out LineSub lineSub) &&
+            if (LineManager.GetLineSub(this, out LineSub lineSub) &&
                 CharIndex == lineSub.Coordinates.CharIndex &&
-                Singleton.LineManager.GetLineSub(LineIndex, lineSub.Coordinates.LineSubIndex - 1,
+                LineManager.GetLineSub(LineIndex, lineSub.Coordinates.LineSubIndex - 1,
                     out LineSub prevLineSub))
             {
                 LineSubIndex = prevLineSub.Coordinates.LineSubIndex;
@@ -149,14 +149,14 @@ public struct Coordinates
 
         if (CaretMove.CharRight == caretMove)
         {
-            if (false == Singleton.LineManager.GetLine(LineIndex, out Line line))
+            if (false == LineManager.GetLine(LineIndex, out Line line))
                 return this;
             
             // End of line
             if (line.Chars.Count <= CharIndex)
             {
                 // End of file
-                if (false == Singleton.LineManager.GetLine(LineIndex + 1, out Line nextLine))
+                if (false == LineManager.GetLine(LineIndex + 1, out Line nextLine))
                     return this;
                 
                 LineIndex = nextLine.Index;
@@ -175,7 +175,7 @@ public struct Coordinates
             if (CharIndex <= 0)
             {
                 // Start of file
-                if (false == Singleton.LineManager.GetLine(LineIndex - 1, out Line prevLine))
+                if (false == LineManager.GetLine(LineIndex - 1, out Line prevLine))
                     return this;
                 
                 LineIndex = prevLine.Index;
@@ -190,9 +190,9 @@ public struct Coordinates
         if (CaretMove.Up == caretMove)
         {
             // Has prev line sub
-            if (Singleton.LineManager.GetLineSub(this, out LineSub lineSub) &&
+            if (LineManager.GetLineSub(this, out LineSub lineSub) &&
                 lineSub.Coordinates.LineSubIndex > 0 &&
-                Singleton.LineManager.GetLineSub(LineIndex, lineSub.Coordinates.LineSubIndex - 1,
+                LineManager.GetLineSub(LineIndex, lineSub.Coordinates.LineSubIndex - 1,
                     out LineSub prevLineSub))
             {
                 float indentDiff = lineSub.IndentWidth - prevLineSub.IndentWidth;
@@ -203,11 +203,11 @@ public struct Coordinates
             }
 
             // Start of file
-            if (false == Singleton.LineManager.GetLine(LineIndex - 1, out Line prevLine))
+            if (false == LineManager.GetLine(LineIndex - 1, out Line prevLine))
                 return this;
 
             // Last line sub of prev line
-            if (Singleton.LineManager.GetLineSub(prevLine.Index, prevLine.LineSubs.Count - 1,
+            if (LineManager.GetLineSub(prevLine.Index, prevLine.LineSubs.Count - 1,
                     out LineSub prevLineLastLineSub))
             {
                 float indentDiff = lineSub.IndentWidth - prevLineLastLineSub.IndentWidth;
@@ -224,10 +224,10 @@ public struct Coordinates
         if (CaretMove.Down == caretMove)
         {
             // Has next line sub
-            if (Singleton.LineManager.GetLineSub(this, out LineSub lineSub) &&
-                Singleton.LineManager.GetLine(LineIndex, out Line line) &&
+            if (LineManager.GetLineSub(this, out LineSub lineSub) &&
+                LineManager.GetLine(LineIndex, out Line line) &&
                 lineSub.Coordinates.LineSubIndex + 1 < line.LineSubs.Count &&
-                Singleton.LineManager.GetLineSub(LineIndex, lineSub.Coordinates.LineSubIndex + 1,
+                LineManager.GetLineSub(LineIndex, lineSub.Coordinates.LineSubIndex + 1,
                     out LineSub nextLineSub))
             {
                 float indentDiff = lineSub.IndentWidth - nextLineSub.IndentWidth;
@@ -238,11 +238,11 @@ public struct Coordinates
             }
 
             // End of file
-            if (false == Singleton.LineManager.GetLine(LineIndex + 1, out Line nextLine))
+            if (false == LineManager.GetLine(LineIndex + 1, out Line nextLine))
                 return this;
 
             // First line sub of next line
-            if (Singleton.LineManager.GetLineSub(nextLine.Index, 0, out LineSub nextLineFirstLineSub))
+            if (LineManager.GetLineSub(nextLine.Index, 0, out LineSub nextLineFirstLineSub))
             {
                 float indentDiff = lineSub.IndentWidth - nextLineFirstLineSub.IndentWidth;
                 int subCharIndex = nextLineFirstLineSub.GetCharIndex(lineSub.GetCharPosition(this) + indentDiff);
@@ -265,7 +265,7 @@ public struct Coordinates
 
         if (CaretMove.EndOfLine == caretMove)
         {
-            if (false == Singleton.LineManager.GetLine(LineIndex, out Line line))
+            if (false == LineManager.GetLine(LineIndex, out Line line))
                 return this;
 
             CharIndex = line.Chars.Count;
@@ -287,7 +287,7 @@ public struct Coordinates
 
         if (CaretMove.StartOfFile == caretMove)
         {
-            if (false == Singleton.LineManager.GetLine(0, out Line startLine))
+            if (false == LineManager.GetLine(0, out Line startLine))
                 return this;
 
             LineIndex = startLine.Index;
@@ -297,7 +297,7 @@ public struct Coordinates
 
         if (CaretMove.EndOfFile == caretMove)
         {
-            if (false == Singleton.LineManager.GetLine(Singleton.LineManager.Lines.Count - 1, out Line lastLine))
+            if (false == LineManager.GetLine(LineManager.Lines.Count - 1, out Line lastLine))
                 return this;
 
             LineIndex = lastLine.Index;

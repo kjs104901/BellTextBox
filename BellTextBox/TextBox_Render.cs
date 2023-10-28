@@ -6,8 +6,8 @@ namespace Bell;
 
 public partial class TextBox
 {
-    public float LineNumberWidth = 10.0f;
-    public float FoldWidth = 10.0f;
+    internal float LineNumberWidth = 10.0f;
+    internal float FoldWidth = 10.0f;
 
     public void Render(Vector2 viewPos, Vector2 viewSize)
     {

@@ -2,7 +2,7 @@
 
 namespace Bell.Actions;
 
-public class ActionManager
+internal class ActionManager
 {
     private const int HistoryCapacity = 1000;
     private readonly LinkedList<Action> _actionHistory = new();

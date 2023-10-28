@@ -2,13 +2,26 @@
 
 namespace Bell.Data;
 
-public class FontManager
+// Interface
+internal partial class FontManager
+{
+    internal static void UpdateReferenceSize() => Singleton.TextBox.FontManager.UpdateReferenceSize_();
+    internal static float GetFontReferenceWidth() => Singleton.TextBox.FontManager.GetFontReferenceWidth_();
+    internal static float GetFontWhiteSpaceWidth() => Singleton.TextBox.FontManager.GetFontWhiteSpaceWidth_();
+    internal static float GetFontNumberWidth() => Singleton.TextBox.FontManager.GetFontNumberWidth_();
+    internal static float GetFontWidth(char c) => Singleton.TextBox.FontManager.GetFontWidth_(c);
+    internal static float GetLineHeight() => Singleton.TextBox.FontManager.GetLineHeight_();
+    internal static float GetLineHeightOffset() => Singleton.TextBox.FontManager.GetLineHeightOffset_();
+}
+
+// Implementation
+internal partial class FontManager
 {
     private readonly Dictionary<float, Font> _fontDictionary = new();
 
     private Font _fontCache = new(10.0f);
 
-    public void UpdateReferenceSize()
+    private void UpdateReferenceSize_()
     {
         var fontSize = Singleton.TextBox.Backend.GetFontSize();
         if (false == _fontDictionary.ContainsKey(fontSize))
@@ -16,22 +29,22 @@ public class FontManager
         _fontCache = _fontDictionary[fontSize];
     }
 
-    public float GetFontReferenceWidth() => GetFontWidth('#');
-    public float GetFontWhiteSpaceWidth() => GetFontWidth(' ');
-    public float GetFontNumberWidth() => GetFontWidth('0');
+    private float GetFontReferenceWidth_() => GetFontWidth('#');
+    private float GetFontWhiteSpaceWidth_() => GetFontWidth(' ');
+    private float GetFontNumberWidth_() => GetFontWidth('0');
 
-    public float GetFontWidth(char c)
+    private float GetFontWidth_(char c)
     {
         // TODO handle \t width?
         return _fontCache.GetFontWidth(c);
     }
 
-    public float GetLineHeight()
+    private float GetLineHeight_()
     {
         return _fontCache.Size * Singleton.TextBox.LeadingHeight;
     }
 
-    public float GetLineHeightOffset()
+    private float GetLineHeightOffset_()
     {
         return ((_fontCache.Size * Singleton.TextBox.LeadingHeight) - _fontCache.Size) / 2.0f;
     }

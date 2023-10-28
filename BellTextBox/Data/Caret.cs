@@ -1,6 +1,6 @@
 ﻿namespace Bell.Data;
 
-public enum CaretMove
+internal enum CaretMove
 {
     None,
 
@@ -23,19 +23,19 @@ public enum CaretMove
     CharRight,
 }
 
-public class Caret
+internal class Caret
 {
-    public Coordinates AnchorPosition;
-    public Coordinates Position;
+    internal Coordinates AnchorPosition;
+    internal Coordinates Position;
 
-    public bool HasSelection => !AnchorPosition.IsSameAs(Position);
+    internal bool HasSelection => !AnchorPosition.IsSameAs(Position);
 
-    public void RemoveSelection()
+    internal void RemoveSelection()
     {
         AnchorPosition = Position;
     }
 
-    public Caret Clone() => new() { AnchorPosition = AnchorPosition, Position = Position };
+    internal Caret Clone() => new() { AnchorPosition = AnchorPosition, Position = Position };
     
-    public static readonly Caret None = new Caret();
+    internal static readonly Caret None = new Caret();
 }

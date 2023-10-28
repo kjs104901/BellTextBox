@@ -3,10 +3,32 @@ using Bell.Utils;
 
 namespace Bell.Data;
 
-public class LineManager
+// Interface
+internal partial class LineManager
 {
-    public List<Line> Lines = new();
-    public bool GetLine(int lineIndex, out Line line)
+    internal static List<Line> Lines => Singleton.TextBox.LineManager._lines;
+
+    internal static bool GetLine(int lineIndex, out Line line) =>
+        Singleton.TextBox.LineManager.GetLine_(lineIndex, out line);
+
+    internal static bool GetLineSub(int lineIndex, int lineSubIndex, out LineSub lineSub) =>
+        Singleton.TextBox.LineManager.GetLineSub_(lineIndex, lineSubIndex, out lineSub);
+
+    internal static bool GetLineSub(Coordinates coordinates, out LineSub lineSub) =>
+        Singleton.TextBox.LineManager.GetLineSub_(coordinates, out lineSub);
+
+    internal static Line InsertLine(int lineIndex, char[] lineChars) =>
+        Singleton.TextBox.LineManager.InsertLine_(lineIndex, lineChars);
+
+    internal static void RemoveLine(int removeLineIndex) => Singleton.TextBox.LineManager.RemoveLine_(removeLineIndex);
+}
+
+// Implementation
+internal partial class LineManager
+{
+    private readonly List<Line> _lines = new();
+
+    private bool GetLine_(int lineIndex, out Line line)
     {
         if (0 <= lineIndex && lineIndex < Lines.Count)
         {
@@ -15,6 +37,7 @@ public class LineManager
             {
                 Logger.Error($"LineManager Line.Index != lineIndex: {line.Index} != {lineIndex}");
             }
+
             return true;
         }
 
@@ -22,7 +45,7 @@ public class LineManager
         return false;
     }
 
-    public bool GetLineSub(int lineIndex, int lineSubIndex, out LineSub lineSub)
+    private bool GetLineSub_(int lineIndex, int lineSubIndex, out LineSub lineSub)
     {
         lineSub = LineSub.None;
         if (false == GetLine(lineIndex, out Line line))
@@ -34,8 +57,8 @@ public class LineManager
         lineSub = line.LineSubs[lineSubIndex];
         return true;
     }
-    
-    public bool GetLineSub(Coordinates coordinates, out LineSub lineSub)
+
+    private bool GetLineSub_(Coordinates coordinates, out LineSub lineSub)
     {
         lineSub = LineSub.None;
         if (coordinates.LineSubIndex >= 0 &&
@@ -43,10 +66,11 @@ public class LineManager
         {
             return true;
         }
+
         return GetLine(coordinates.LineIndex, out Line line) && line.GetLineSub(coordinates.CharIndex, out lineSub);
     }
 
-    public Line InsertLine(int lineIndex, char[] lineChars)
+    private Line InsertLine_(int lineIndex, char[] lineChars)
     {
         Line newLine = new Line(lineIndex, lineChars);
         Lines.Insert(lineIndex, newLine);
@@ -54,37 +78,23 @@ public class LineManager
         // Update line index
         for (int i = lineIndex; i < Lines.Count; i++)
         {
-            if (Lines[i].Index != i)
-            {
-                Lines[i].Index = i;
-                //foreach (LineSub lineSub in Lines[i].LineSubs)
-                //{
-                //    lineSub.Coordinates.LineIndex = i;
-                //}
-                Lines[i].LineSubsCache.SetDirty();
-            }
+            Lines[i].ChangeLineIndex(i);
         }
-        Singleton.RowManager.RowsCache.SetDirty();
+
+        RowManager.SetRowCacheDirty();
         return newLine;
     }
 
-    public void RemoveLine(int removeLineIndex)
+    private void RemoveLine_(int removeLineIndex)
     {
         Lines.RemoveAt(removeLineIndex);
 
         // Update line index
         for (int i = removeLineIndex; i < Lines.Count; i++)
         {
-            if (Lines[i].Index != i)
-            {
-                Lines[i].Index = i;
-                //foreach (LineSub lineSub in Lines[i].LineSubs)
-                //{
-                //    lineSub.Coordinates.LineIndex = i;
-                //}
-                Lines[i].LineSubsCache.SetDirty();
-            }
+            Lines[i].ChangeLineIndex(i);
         }
-        Singleton.RowManager.RowsCache.SetDirty();
+
+        RowManager.SetRowCacheDirty();
     }
 }

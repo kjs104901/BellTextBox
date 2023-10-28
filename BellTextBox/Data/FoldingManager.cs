@@ -3,14 +3,22 @@ using Bell.Utils;
 
 namespace Bell.Data;
 
-public class FoldingManager
+// Interface
+internal partial class FoldingManager
 {
-    public List<Folding> FoldingList => FoldingListCache.Get();
-    public readonly Cache<List<Folding>> FoldingListCache;
+    internal static List<Folding> GetFoldingList() => Singleton.TextBox.FoldingManager.FoldingList;
+    internal static void SetCacheDirty() => Singleton.TextBox.FoldingManager._foldingListCache.SetDirty();
+}
 
-    public FoldingManager()
+// Implementation
+internal partial class FoldingManager
+{
+    private List<Folding> FoldingList => _foldingListCache.Get();
+    private readonly Cache<List<Folding>> _foldingListCache;
+
+    internal FoldingManager()
     {
-        FoldingListCache = new Cache<List<Folding>>(new List<Folding>(), UpdateFoldingList);
+        _foldingListCache = new Cache<List<Folding>>(new List<Folding>(), UpdateFoldingList);
     }
 
     private List<Folding> UpdateFoldingList(List<Folding> foldingList)
@@ -25,7 +33,7 @@ public class FoldingManager
             foldingStacks[i].Clear();
         }
         
-        foreach (Line line in Singleton.LineManager.Lines)
+        foreach (Line line in LineManager.Lines)
         {
             for (int i = 0; i < Singleton.TextBox.Language.Foldings.Count; i++)
             {
@@ -52,7 +60,7 @@ public class FoldingManager
         {
             while (foldingStack.TryPop(out int start))
             {
-                int end = Singleton.LineManager.Lines.Count - 1;
+                int end = LineManager.Lines.Count - 1;
                 AddFolding(foldingList, start, end);
             }
         }
