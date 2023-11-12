@@ -17,8 +17,8 @@ internal partial class LineManager
     internal static bool GetLineSub(Coordinates coordinates, out LineSub lineSub) =>
         Singleton.TextBox.LineManager.GetLineSub_(coordinates, out lineSub);
 
-    internal static Line InsertLine(int lineIndex, char[] lineChars) =>
-        Singleton.TextBox.LineManager.InsertLine_(lineIndex, lineChars);
+    internal static Line InsertLine(int lineIndex) =>
+        Singleton.TextBox.LineManager.InsertLine_(lineIndex);
 
     internal static void RemoveLine(int removeLineIndex) => Singleton.TextBox.LineManager.RemoveLine_(removeLineIndex);
 }
@@ -70,9 +70,9 @@ internal partial class LineManager
         return GetLine(coordinates.LineIndex, out Line line) && line.GetLineSub(coordinates.CharIndex, out lineSub);
     }
 
-    private Line InsertLine_(int lineIndex, char[] lineChars)
+    private Line InsertLine_(int lineIndex)
     {
-        Line newLine = new Line(lineIndex, lineChars);
+        Line newLine = new Line(lineIndex);
         Lines.Insert(lineIndex, newLine);
 
         // Update line index

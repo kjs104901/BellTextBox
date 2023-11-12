@@ -17,10 +17,7 @@ internal enum CaretMove
     EndOfWord,
 
     PageUp,
-    PageDown,
-
-    CharLeft,
-    CharRight,
+    PageDown
 }
 
 internal class Caret

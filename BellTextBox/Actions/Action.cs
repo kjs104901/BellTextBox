@@ -22,6 +22,7 @@ internal abstract class Action
         for (int i = 0; i < CaretManager.Count; i++)
         {
             carets.Add(CaretManager.GetCaret(i).Clone());
+            Logger.Info("SaveCarets: " + carets[i].Position.LineIndex + " " + carets[i].Position.CharIndex + " " + carets[i].AnchorPosition.LineIndex + " " + carets[i].AnchorPosition.CharIndex);
         }
     }
 
@@ -31,6 +32,7 @@ internal abstract class Action
         foreach (var caret in carets)
         {
             CaretManager.AddCaret(caret.Clone());
+            Logger.Info("RestoreCarets: " + caret.Position.LineIndex + " " + caret.Position.CharIndex + " " + caret.AnchorPosition.LineIndex + " " + caret.AnchorPosition.CharIndex);
         }
         return true;
     }
@@ -51,8 +53,8 @@ internal abstract class Action
 
             foreach (Command command in commands)
             {
-                command.Do(caret);
                 Logger.Info($"DoCommands: {command.GetDebugString()}");
+                command.Do(caret);
             }
         }
 
@@ -112,9 +114,8 @@ internal abstract class Action
 
             foreach (Command command in commands)
             {
-                command.Do(caret);
-
                 Logger.Info($"RedoCommands: {command.GetDebugString()}");
+                command.Do(caret);
             }
         }
 
@@ -143,9 +144,8 @@ internal abstract class Action
             for (int j = commands.Count - 1; j >= 0; j--)
             {
                 Command command = commands[j];
-                command.Undo(caret);
-
                 Logger.Info($"UndoCommands: {command.GetDebugString()}");
+                command.Undo(caret);
             }
         }
 

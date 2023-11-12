@@ -5,7 +5,7 @@ namespace Bell.Actions;
 
 internal abstract class Command
 {
-    internal abstract void Do(Caret caret);
+    internal abstract void Do(Caret caret, bool isUndo = false);
     internal abstract void Undo(Caret caret);
     internal abstract string GetDebugString();
 }
@@ -27,7 +27,7 @@ internal class InputCharCommand : Command
         _chars = chars;
     }
 
-    internal override void Do(Caret caret)
+    internal override void Do(Caret caret, bool isUndo = false)
     {
         if (false == LineManager.GetLine(caret.Position.LineIndex, out Line line))
         {
@@ -41,7 +41,7 @@ internal class InputCharCommand : Command
 
         if (EditDirection.Forward == _direction)
         {
-            caret.Position = caret.Position.FindMove(CaretMove.CharRight, _chars.Length);
+            CaretManager.ShiftCaretChar(caret, _direction, _chars.Length, isUndo);
         }
         caret.RemoveSelection();
         
@@ -51,9 +51,9 @@ internal class InputCharCommand : Command
     internal override void Undo(Caret caret)
     {
         if (EditDirection.Forward == _direction)
-            new DeleteCharCommand(EditDirection.Backward, _chars.Length).Do(caret);
+            new DeleteCharCommand(EditDirection.Backward, _chars.Length).Do(caret, isUndo: true);
         else if (EditDirection.Backward == _direction)
-            new DeleteCharCommand(EditDirection.Forward, _chars.Length).Do(caret);
+            new DeleteCharCommand(EditDirection.Forward, _chars.Length).Do(caret, isUndo: true);
     }
 
     internal override string GetDebugString()
@@ -76,7 +76,7 @@ internal class DeleteCharCommand : Command
         _count = count;
     }
 
-    internal override void Do(Caret caret)
+    internal override void Do(Caret caret, bool isUndo = false)
     {
         if (false == LineManager.GetLine(caret.Position.LineIndex, out Line line))
         {
@@ -112,7 +112,7 @@ internal class DeleteCharCommand : Command
             line.SetCharsDirty();
             RowManager.SetRowCacheDirty();
 
-            caret.Position = caret.Position.FindMove(CaretMove.CharLeft, _deletedCount);
+            CaretManager.ShiftCaretChar(caret, _direction, _deletedCount, isUndo);
             caret.RemoveSelection();
         }
 
@@ -126,9 +126,9 @@ internal class DeleteCharCommand : Command
     internal override void Undo(Caret caret)
     {
         if (EditDirection.Forward == _direction)
-            new InputCharCommand(EditDirection.Backward, _deletedChars).Do(caret);
+            new InputCharCommand(EditDirection.Backward, _deletedChars).Do(caret, isUndo: true);
         else if (EditDirection.Backward == _direction)
-            new InputCharCommand(EditDirection.Forward, _deletedChars).Do(caret);
+            new InputCharCommand(EditDirection.Forward, _deletedChars).Do(caret, isUndo: true);
     }
 
     internal override string GetDebugString()
@@ -146,7 +146,7 @@ internal class SplitLineCommand : Command
         _direction = direction;
     }
 
-    internal override void Do(Caret caret)
+    internal override void Do(Caret caret, bool isUndo = false)
     {
         if (false == LineManager.GetLine(caret.Position.LineIndex, out Line line))
         {
@@ -168,12 +168,11 @@ internal class SplitLineCommand : Command
             
             // TODO auto indent?
             
-            // TODO 캐럿 이동
-            
             insertLineIndex = caret.Position.LineIndex + 1;
-            Line newLine = LineManager.InsertLine(insertLineIndex, restOfLine);
+            Line newLine = LineManager.InsertLine(insertLineIndex);
+            CaretManager.SplitLineCaret(caret, line, newLine, isUndo);
+            newLine.Chars.AddRange(restOfLine);
             
-            caret.Position = new Coordinates(insertLineIndex, 0);
             caret.RemoveSelection();
         }
         else
@@ -183,13 +182,11 @@ internal class SplitLineCommand : Command
             chars.RemoveRange(0, caret.Position.CharIndex);
             line.SetCharsDirty();
             
-            // TODO 캐럿 이동
-            
             insertLineIndex = caret.Position.LineIndex;
-            Line newLine = LineManager.InsertLine(insertLineIndex, restOfLine);
-
-            int charIndex = restOfLine.Length;
-            caret.Position = new Coordinates(insertLineIndex, charIndex);
+            Line newLine = LineManager.InsertLine(insertLineIndex);
+            CaretManager.SplitLineCaret(caret, line, newLine, isUndo);
+            newLine.Chars.AddRange(restOfLine);
+            
             caret.RemoveSelection();
         }
         FoldingManager.SetCacheDirty();
@@ -200,9 +197,9 @@ internal class SplitLineCommand : Command
         // TODO auto indent?
         
         if (EditDirection.Forward == _direction)
-            new MergeLineCommand(EditDirection.Backward).Do(caret);
+            new MergeLineCommand(EditDirection.Backward).Do(caret, isUndo: true);
         else if (EditDirection.Backward == _direction)
-            new MergeLineCommand(EditDirection.Forward).Do(caret);
+            new MergeLineCommand(EditDirection.Forward).Do(caret, isUndo: true);
     }
 
     internal override string GetDebugString()
@@ -220,7 +217,7 @@ internal class MergeLineCommand : Command
         _direction = direction;
     }
 
-    internal override void Do(Caret caret)
+    internal override void Do(Caret caret, bool isUndo = false)
     {
         if (false == LineManager.GetLine(caret.Position.LineIndex, out Line line))
         {
@@ -234,18 +231,11 @@ internal class MergeLineCommand : Command
             
             if (false == LineManager.GetLine(nextLineIndex, out Line nextLine))
                 return;
-                
+            
+            CaretManager.MergeLineCaret(line, nextLine, isUndo);
+            
             line.Chars.AddRange(nextLine.Chars);
             line.SetCharsDirty();
-
-            // TODO 정리?
-            foreach (Caret moveCaret in CaretManager.GetCaretsInLine(nextLine))
-            {
-                moveCaret.Position.LineIndex = line.Index;
-                moveCaret.Position.CharIndex += line.Chars.Count;
-                moveCaret.AnchorPosition.LineIndex = line.Index;
-                moveCaret.AnchorPosition.CharIndex += line.Chars.Count;
-            }
             
             LineManager.RemoveLine(nextLineIndex);
         }
@@ -257,13 +247,7 @@ internal class MergeLineCommand : Command
             if (false == LineManager.GetLine(prevLineIndex, out Line prevLine))
                 return;
             
-            foreach (Caret moveCaret in CaretManager.GetCaretsInLine(line))
-            {
-                moveCaret.Position.LineIndex = prevLine.Index;
-                moveCaret.Position.CharIndex += prevLine.Chars.Count;
-                moveCaret.AnchorPosition.LineIndex = prevLine.Index;
-                moveCaret.AnchorPosition.CharIndex += prevLine.Chars.Count;
-            }
+            CaretManager.MergeLineCaret(prevLine, line, isUndo);
                 
             prevLine.Chars.AddRange(line.Chars);
             prevLine.SetCharsDirty();
@@ -276,9 +260,9 @@ internal class MergeLineCommand : Command
     internal override void Undo(Caret caret)
     {
         if (EditDirection.Forward == _direction)
-            new SplitLineCommand(EditDirection.Backward).Do(caret);
+            new SplitLineCommand(EditDirection.Backward).Do(caret, isUndo: true);
         else if (EditDirection.Backward == _direction)
-            new SplitLineCommand(EditDirection.Forward).Do(caret);
+            new SplitLineCommand(EditDirection.Forward).Do(caret, isUndo: true);
     }
 
     internal override string GetDebugString()
@@ -289,7 +273,7 @@ internal class MergeLineCommand : Command
 
 internal class IndentSelectionCommand : Command
 {
-    internal override void Do(Caret caret)
+    internal override void Do(Caret caret, bool isUndo = false)
     {
     }
 
@@ -305,7 +289,7 @@ internal class IndentSelectionCommand : Command
 
 internal class UnindentSelectionCommand : Command
 {
-    internal override void Do(Caret caret)
+    internal override void Do(Caret caret, bool isUndo = false)
     {
     }
 

@@ -155,46 +155,6 @@ internal struct Coordinates
             return this;
         }
 
-        if (CaretMove.CharRight == caretMove)
-        {
-            if (false == LineManager.GetLine(LineIndex, out Line line))
-                return this;
-            
-            // End of line
-            if (line.Chars.Count <= CharIndex)
-            {
-                // End of file
-                if (false == LineManager.GetLine(LineIndex + 1, out Line nextLine))
-                    return this;
-                
-                LineIndex = nextLine.Index;
-                CharIndex = 0;
-                LineSubIndex = -1;
-            }
-            
-            CharIndex++;
-            LineSubIndex = -1;
-            return this;
-        }
-        
-        if (CaretMove.CharLeft == caretMove)
-        {
-            // Start of line
-            if (CharIndex <= 0)
-            {
-                // Start of file
-                if (false == LineManager.GetLine(LineIndex - 1, out Line prevLine))
-                    return this;
-                
-                LineIndex = prevLine.Index;
-                CharIndex = prevLine.Chars.Count;
-                LineSubIndex = -1;
-            }
-            CharIndex--;
-            LineSubIndex = -1;
-            return this;
-        }
-
         if (CaretMove.Up == caretMove)
         {
             // Has prev line sub

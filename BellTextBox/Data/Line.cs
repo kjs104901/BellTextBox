@@ -30,10 +30,11 @@ internal class Line
 
     internal static readonly Line None = new(0, Array.Empty<char>());
 
-    internal Line(int index, char[] initialChars)
+    internal Line(int index, char[]? initialChars = null)
     {
         Index = index;
-        Chars.AddRange(initialChars);
+        if (initialChars != null)
+            Chars.AddRange(initialChars);
 
         _colorsCache = new(new(), UpdateColors);
         _cutoffsCache = new(new(), UpdateCutoff);

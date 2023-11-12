@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Bell.Actions;
 using Bell.Utils;
 
 namespace Bell.Data;
@@ -30,13 +31,36 @@ internal partial class CaretManager
     internal static void CopyClipboard() => Singleton.TextBox.CaretManager.CopyClipboard_();
     internal static void PasteClipboard() => Singleton.TextBox.CaretManager.PasteClipboard_();
     internal static bool CheckValid(Caret caret) => Singleton.TextBox.CaretManager.CheckValid_(caret);
-    internal string GetDebugString() => Singleton.TextBox.CaretManager.GetDebugString_();
+    internal static string GetDebugString() => Singleton.TextBox.CaretManager.GetDebugString_();
+    
+    internal static void ShiftCaretChar(Caret caret, EditDirection direction, int count, bool isUndo) =>
+        Singleton.TextBox.CaretManager.ShiftCaretChar_(caret, direction, count, isUndo);
+    
+    internal static void MergeLineCaret(Line line, Line fromLine, bool isUndo) =>
+        Singleton.TextBox.CaretManager.MergeLineCaret_(line, fromLine, isUndo);
+    internal static void SplitLineCaret(Caret caret, Line line, Line toLine, bool isUndo) =>
+        Singleton.TextBox.CaretManager.SplitLineCaret_(caret, line, toLine, isUndo);
 }
 
 // Implementation
 internal partial class CaretManager
 {
     private readonly List<Caret> _carets = new();
+    private IEnumerable<Caret> ReversedCarets()
+    {
+        for (int i = _carets.Count-1; i >= 0; i--)
+        {
+            yield return _carets[i];
+        }
+    }
+
+    private IEnumerable<Caret> Carets()
+    {
+        for (int i = 0; i < _carets.Count; i++)
+        {
+            yield return _carets[i];
+        }
+    }
 
     private void ClearCarets_()
     {
@@ -216,4 +240,97 @@ internal partial class CaretManager
 
         return sb.ToString();
     }
+
+    private void ShiftCaretChar_(Caret caret, EditDirection direction, int count, bool isUndo)
+    {
+        int moveCount = count * (EditDirection.Forward == direction ? 1 : -1);
+
+        foreach (Caret c in isUndo ? ReversedCarets() : Carets())
+        {
+            if (c.Position.LineIndex == caret.Position.LineIndex)
+            {
+                if (caret.Position.CharIndex <= c.Position.CharIndex)
+                {
+                    c.Position.CharIndex += moveCount;
+                    
+                    if (c.Position.CharIndex < 0)
+                    {
+                        c.Position.CharIndex = 0;
+                    }
+                }
+            }
+
+            if (c.AnchorPosition.LineIndex == caret.Position.LineIndex)
+            {
+                if (caret.Position.CharIndex <= c.AnchorPosition.CharIndex)
+                {
+                    c.AnchorPosition.CharIndex += moveCount;
+                    
+                    if (c.AnchorPosition.CharIndex < 0)
+                    {
+                        c.AnchorPosition.CharIndex = 0;
+                    }
+                }
+            }
+            
+            Logger.Info("ShiftCaretChar: " + c.Position.LineIndex + " " + c.Position.CharIndex + " " + moveCount);
+        }
+    }
+
+    private void MergeLineCaret_(Line line, Line fromLine, bool isUndo)
+    {
+        foreach (Caret c in isUndo ? ReversedCarets() : Carets())
+        {
+            if (c.Position.LineIndex == fromLine.Index)
+            {
+                c.Position.LineIndex = line.Index;
+                c.Position.CharIndex += line.Chars.Count;
+            }
+
+            if (c.AnchorPosition.LineIndex == fromLine.Index)
+            {
+                c.AnchorPosition.LineIndex = line.Index;
+                c.AnchorPosition.CharIndex += line.Chars.Count;
+            }
+            
+            Logger.Info("MergeLineCaret: " + c.Position.LineIndex + " " + c.Position.CharIndex);
+        }
+    }
+
+    private void SplitLineCaret_(Caret caret, Line line, Line toLine, bool isUndo)
+    {
+        foreach (Caret c in isUndo ? ReversedCarets() : Carets())
+        {
+            if (c.Position.LineIndex == caret.Position.LineIndex)
+            {
+                if (caret.Position.CharIndex <= c.Position.CharIndex)
+                {
+                    c.Position.LineIndex = toLine.Index;
+                    c.Position.CharIndex -= line.Chars.Count;
+                    
+                    if (c.Position.CharIndex < 0)
+                    {
+                        c.Position.CharIndex = 0;
+                    }
+                }
+            }
+
+            if (c.AnchorPosition.LineIndex == caret.Position.LineIndex)
+            {
+                if (caret.Position.CharIndex <= c.AnchorPosition.CharIndex)
+                {
+                    c.AnchorPosition.LineIndex = toLine.Index;
+                    c.AnchorPosition.CharIndex -= line.Chars.Count;
+                    
+                    if (c.AnchorPosition.CharIndex < 0)
+                    {
+                        c.AnchorPosition.CharIndex = 0;
+                    }
+                }
+            }
+            
+            Logger.Info("SplitLineCaret: " + c.Position.LineIndex + " " + c.Position.CharIndex);
+        }
+    }
 }
+    
