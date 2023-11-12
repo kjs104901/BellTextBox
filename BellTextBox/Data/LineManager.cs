@@ -1,4 +1,5 @@
-﻿using Bell.Themes;
+﻿using Bell.Actions;
+using Bell.Themes;
 using Bell.Utils;
 
 namespace Bell.Data;
@@ -80,9 +81,8 @@ internal partial class LineManager
         {
             Lines[i].ChangeLineIndex(i);
         }
-        
-        // TODO 캐럿 업데이트 필요
 
+        CaretManager.ShiftCaretLine(lineIndex, EditDirection.Forward);
         RowManager.SetRowCacheDirty();
         return newLine;
     }
@@ -97,8 +97,7 @@ internal partial class LineManager
             Lines[i].ChangeLineIndex(i);
         }
 
-        // TODO 캐럿 업데이트 필요
-
+        CaretManager.ShiftCaretLine(removeLineIndex, EditDirection.Backward);
         RowManager.SetRowCacheDirty();
     }
 }

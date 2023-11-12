@@ -35,6 +35,8 @@ internal partial class CaretManager
     
     internal static void ShiftCaretChar(Caret caret, EditDirection direction, int count, bool isUndo) =>
         Singleton.TextBox.CaretManager.ShiftCaretChar_(caret, direction, count, isUndo);
+    internal static void ShiftCaretLine(int lineIndex, EditDirection direction) =>
+        Singleton.TextBox.CaretManager.ShiftCaretLine_(lineIndex, direction);
     
     internal static void MergeLineCaret(Line line, Line fromLine, bool isUndo) =>
         Singleton.TextBox.CaretManager.MergeLineCaret_(line, fromLine, isUndo);
@@ -274,6 +276,25 @@ internal partial class CaretManager
             }
             
             Logger.Info("ShiftCaretChar: " + c.Position.LineIndex + " " + c.Position.CharIndex + " " + moveCount);
+        }
+    }
+
+    private void ShiftCaretLine_(int lineIndex, EditDirection direction)
+    {
+        int moveCount = EditDirection.Forward == direction ? 1 : -1;
+        foreach (Caret c in Carets())
+        {
+            if (lineIndex < c.Position.LineIndex)
+            {
+                c.Position.LineIndex += moveCount;
+            }
+
+            if (lineIndex < c.AnchorPosition.LineIndex)
+            {
+                c.AnchorPosition.LineIndex += moveCount;
+            }
+            
+            Logger.Info("ShiftCaretLine: " + c.Position.LineIndex + " " + c.Position.CharIndex + " " + moveCount);
         }
     }
 
