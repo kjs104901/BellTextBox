@@ -33,36 +33,25 @@ internal partial class CaretManager
     internal static bool CheckValid(Caret caret) => Singleton.TextBox.CaretManager.CheckValid_(caret);
     internal static string GetDebugString() => Singleton.TextBox.CaretManager.GetDebugString_();
     
-    internal static void ShiftCaretChar(Caret caret, EditDirection direction, int count, bool isUndo) =>
-        Singleton.TextBox.CaretManager.ShiftCaretChar_(caret, direction, count, isUndo);
+    internal static void ShiftCaretChar(int lineIndex, int charIndex, EditDirection direction, int count) =>
+        Singleton.TextBox.CaretManager.ShiftCaretChar_(lineIndex, charIndex, direction, count);
+    internal static void InputCharCaret(Caret caret, int count) =>
+        Singleton.TextBox.CaretManager.InputCharCaret_(caret, count);
+    internal static void DeleteCharCaret(Caret caret, int count) =>
+        Singleton.TextBox.CaretManager.DeleteCharCaret_(caret, count);
+    
     internal static void ShiftCaretLine(int lineIndex, EditDirection direction) =>
         Singleton.TextBox.CaretManager.ShiftCaretLine_(lineIndex, direction);
-    
-    internal static void MergeLineCaret(Line line, Line fromLine, bool isUndo) =>
-        Singleton.TextBox.CaretManager.MergeLineCaret_(line, fromLine, isUndo);
-    internal static void SplitLineCaret(Caret caret, Line line, Line toLine, bool isUndo) =>
-        Singleton.TextBox.CaretManager.SplitLineCaret_(caret, line, toLine, isUndo);
+    internal static void MergeLineCaret(Line line, Line fromLine) =>
+        Singleton.TextBox.CaretManager.MergeLineCaret_(line, fromLine);
+    internal static void SplitLineCaret(Caret caret, Line line, Line toLine) =>
+        Singleton.TextBox.CaretManager.SplitLineCaret_(caret, line, toLine);
 }
 
 // Implementation
 internal partial class CaretManager
 {
     private readonly List<Caret> _carets = new();
-    private IEnumerable<Caret> ReversedCarets()
-    {
-        for (int i = _carets.Count-1; i >= 0; i--)
-        {
-            yield return _carets[i];
-        }
-    }
-
-    private IEnumerable<Caret> Carets()
-    {
-        for (int i = 0; i < _carets.Count; i++)
-        {
-            yield return _carets[i];
-        }
-    }
 
     private void ClearCarets_()
     {
@@ -83,18 +72,8 @@ internal partial class CaretManager
             return;
         }
         
-        newCaret.GetSorted(out Coordinates newStart, out Coordinates newEnd);
-        foreach (Caret caret in _carets)
-        {
-            caret.GetSorted(out Coordinates start, out Coordinates end);
-
-            if (start.IsBiggerThanWithoutLineSub(newEnd) || newStart.IsBiggerThanWithoutLineSub(end))
-                continue;
-            
-            Logger.Info("AddCaret: already exist caret");
-            return;
-        }
         _carets.Add(newCaret);
+        RemoveDuplicatedCarets_();
     }
 
     private bool GetFirstCaret_(out Caret caret)
@@ -120,6 +99,7 @@ internal partial class CaretManager
         {
             caret.Position = caret.Position.FindMove(caretMove);
         }
+        RemoveDuplicatedCarets_();
         RowManager.SetRowCacheDirty();
     }
 
@@ -129,6 +109,7 @@ internal partial class CaretManager
         {
             caret.AnchorPosition = caret.AnchorPosition.FindMove(caretMove);
         }
+        RemoveDuplicatedCarets_();
         RowManager.SetRowCacheDirty();
     }
 
@@ -148,6 +129,7 @@ internal partial class CaretManager
         {
             caret.AnchorPosition = caret.Position;
         }
+        RemoveDuplicatedCarets_();
         RowManager.SetRowCacheDirty();
     }
 
@@ -165,6 +147,7 @@ internal partial class CaretManager
     {
         _carets.Clear();
         // TODO select multiple lines
+        RemoveDuplicatedCarets_();
         RowManager.SetRowCacheDirty();
     }
 
@@ -235,46 +218,60 @@ internal partial class CaretManager
         return sb.ToString();
     }
 
-    private void ShiftCaretChar_(Caret caret, EditDirection direction, int count, bool isUndo)
+    private void ShiftCaretChar_(int lineIndex, int charIndex, EditDirection direction, int count)
     {
         int moveCount = count * (EditDirection.Forward == direction ? 1 : -1);
 
-        foreach (Caret c in isUndo ? ReversedCarets() : Carets())
+        foreach (Caret caret in _carets)
         {
-            if (c.Position.LineIndex == caret.Position.LineIndex)
+            if (caret.Position.LineIndex == lineIndex)
             {
-                if (caret.Position.CharIndex <= c.Position.CharIndex)
+                if (charIndex < caret.Position.CharIndex)
                 {
-                    c.Position.CharIndex += moveCount;
+                    caret.Position.CharIndex += moveCount;
                     
-                    if (c.Position.CharIndex < 0)
+                    if (caret.Position.CharIndex < 0)
                     {
-                        c.Position.CharIndex = 0;
+                        caret.Position.CharIndex = 0;
                     }
                 }
             }
 
-            if (c.AnchorPosition.LineIndex == caret.Position.LineIndex)
+            if (caret.AnchorPosition.LineIndex == lineIndex)
             {
-                if (caret.Position.CharIndex <= c.AnchorPosition.CharIndex)
+                if (charIndex < caret.AnchorPosition.CharIndex)
                 {
-                    c.AnchorPosition.CharIndex += moveCount;
+                    caret.AnchorPosition.CharIndex += moveCount;
                     
-                    if (c.AnchorPosition.CharIndex < 0)
+                    if (caret.AnchorPosition.CharIndex < 0)
                     {
-                        c.AnchorPosition.CharIndex = 0;
+                        caret.AnchorPosition.CharIndex = 0;
                     }
                 }
             }
             
-            Logger.Info("ShiftCaretChar: " + c.Position.LineIndex + " " + c.Position.CharIndex + " " + moveCount);
+            Logger.Info("ShiftCaretChar: " + caret.Position.LineIndex + " " + caret.Position.CharIndex + " " + moveCount);
         }
+        
+        RemoveDuplicatedCarets_();
+    }
+
+    private void InputCharCaret_(Caret caret, int count)
+    {
+        caret.Position.CharIndex += count;
+        RemoveDuplicatedCarets_();
+    }
+    
+    private void DeleteCharCaret_(Caret caret, int count)
+    {
+        caret.Position.CharIndex -= count;
+        RemoveDuplicatedCarets_();
     }
 
     private void ShiftCaretLine_(int lineIndex, EditDirection direction)
     {
         int moveCount = EditDirection.Forward == direction ? 1 : -1;
-        foreach (Caret c in Carets())
+        foreach (Caret c in _carets)
         {
             if (lineIndex < c.Position.LineIndex)
             {
@@ -288,11 +285,12 @@ internal partial class CaretManager
             
             Logger.Info("ShiftCaretLine: " + c.Position.LineIndex + " " + c.Position.CharIndex + " " + moveCount);
         }
+        RemoveDuplicatedCarets_();
     }
 
-    private void MergeLineCaret_(Line line, Line fromLine, bool isUndo)
+    private void MergeLineCaret_(Line line, Line fromLine)
     {
-        foreach (Caret c in isUndo ? ReversedCarets() : Carets())
+        foreach (Caret c in _carets)
         {
             if (c.Position.LineIndex == fromLine.Index)
             {
@@ -308,11 +306,12 @@ internal partial class CaretManager
             
             Logger.Info("MergeLineCaret: " + c.Position.LineIndex + " " + c.Position.CharIndex);
         }
+        RemoveDuplicatedCarets_();
     }
 
-    private void SplitLineCaret_(Caret caret, Line line, Line toLine, bool isUndo)
+    private void SplitLineCaret_(Caret caret, Line line, Line toLine)
     {
-        foreach (Caret c in isUndo ? ReversedCarets() : Carets())
+        foreach (Caret c in _carets)
         {
             if (c.Position.LineIndex == caret.Position.LineIndex)
             {
@@ -343,6 +342,30 @@ internal partial class CaretManager
             }
             
             Logger.Info("SplitLineCaret: " + c.Position.LineIndex + " " + c.Position.CharIndex);
+        }
+        RemoveDuplicatedCarets_();
+    }
+
+    private void RemoveDuplicatedCarets_()
+    {
+        for (int i = _carets.Count - 1; i >= 0; i--)
+        {
+            Caret caret = _carets[i];
+            caret.GetSorted(out Coordinates start, out Coordinates end);
+            
+            for (int j = i - 1; j >= 0; j--)
+            {
+                Caret priorityCaret = _carets[j];
+                priorityCaret.GetSorted(out Coordinates priorityStart, out Coordinates priorityEnd);
+                
+                // not overlapped
+                if (priorityStart.IsBiggerThanWithoutLineSub(end) || start.IsBiggerThanWithoutLineSub(priorityEnd))
+                    continue;
+                
+                // overlapped
+                _carets.RemoveAt(i);
+                Logger.Info("Overlapped caret has been removed");
+            }
         }
     }
 }

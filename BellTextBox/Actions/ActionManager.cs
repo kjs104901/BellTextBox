@@ -32,23 +32,28 @@ internal class ActionManager
 
         if (lastAction.IsAllSame<InputCharCommand>())
         {
-            UndoActionSequence<InputCharCommand>();
+            UndoActionSequence<InputCharCommand>(lastAction);
         }
         else if (lastAction.IsAllSame<DeleteCharCommand>())
         {
-            UndoActionSequence<DeleteCharCommand>();
+            UndoActionSequence<DeleteCharCommand>(lastAction);
         }
     }
-    
-    internal void UndoActionSequence<T>()
+
+    private void UndoActionSequence<T>(Action fromAction)
     {
         while (_actionHistory.Last != null &&
                _actionHistory.Last.Value.IsAllSame<T>())
         {
             var lastAction = _actionHistory.Last.Value;
+            if (false == fromAction.IsChained(lastAction))
+                break;
+            
             lastAction.UndoCommands();
             _actionHistory.RemoveLast();
             _actionRedoHistory.AddFirst(lastAction);
+
+            fromAction = lastAction;
         }
     }
 
@@ -64,23 +69,28 @@ internal class ActionManager
 
         if (firstAction.IsAllSame<InputCharCommand>())
         {
-            RedoActionSequence<InputCharCommand>();
+            RedoActionSequence<InputCharCommand>(firstAction);
         }
         else if (firstAction.IsAllSame<DeleteCharCommand>())
         {
-            RedoActionSequence<DeleteCharCommand>();
+            RedoActionSequence<DeleteCharCommand>(firstAction);
         }
     }
-    
-    internal void RedoActionSequence<T>()
+
+    private void RedoActionSequence<T>(Action toAction)
     {
         while (_actionRedoHistory.First != null &&
                _actionRedoHistory.First.Value.IsAllSame<T>())
         {
             var firstAction = _actionRedoHistory.First.Value;
+            if (false == firstAction.IsChained(toAction))
+                break;
+            
             firstAction.RedoCommands();
             _actionRedoHistory.RemoveFirst();
             _actionHistory.AddLast(firstAction);
+
+            toAction = firstAction;
         }
     }
 

@@ -96,6 +96,15 @@ public partial class TextBox
                 }
             }
 
+            foreach (float caretAnchorPosition in row.RowSelection.CaretAnchorPositions)
+            {
+                Backend.RenderLine(
+                    new Vector2(lineStartX + caretAnchorPosition - 1.0f, lineTextStartY),
+                    new Vector2(lineStartX + caretAnchorPosition - 1.0f, lineTextEndY),
+                    Theme.LineCommentFontColor.ToVector(),
+                    2.0f);
+            }
+            
             foreach (float caretPosition in row.RowSelection.CaretPositions)
             {
                 Backend.RenderLine(
@@ -106,15 +115,6 @@ public partial class TextBox
 
                 Backend.RenderText(new Vector2(lineStartX + caretPosition, lineTextStartY),
                     _imeComposition, Theme.DefaultFontColor.ToVector());
-            }
-
-            foreach (float caretAnchorPosition in row.RowSelection.CaretAnchorPositions)
-            {
-                Backend.RenderLine(
-                    new Vector2(lineStartX + caretAnchorPosition - 1.0f, lineTextStartY),
-                    new Vector2(lineStartX + caretAnchorPosition - 1.0f, lineTextEndY),
-                    Theme.LineCommentFontColor.ToVector(),
-                    2.0f);
             }
         }
     }

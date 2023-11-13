@@ -163,6 +163,26 @@ internal abstract class Action
             .All(command => command is T);
     }
 
+    internal bool IsChained(Action fromAction)
+    {
+        if (fromAction._endCarets.Count != _startCarets.Count)
+            return false;
+
+        for (int i = 0; i < _startCarets.Count; i++)
+        {
+            Caret fromEndCaret = fromAction._endCarets[i];
+            Caret startCaret = _startCarets[i];
+
+            if (false == fromEndCaret.Position.IsSameAs(startCaret.Position))
+                return false;
+
+            if (false == fromEndCaret.AnchorPosition.IsSameAs(startCaret.Position))
+                return false;
+        }
+
+        return true;
+    }
+
     internal string GetDebugString()
     {
         var sb = new StringBuilder();
@@ -192,7 +212,7 @@ internal class DeleteSelectionAction : Action
             // Backward delete
             for (int i = caret.Position.LineIndex; i >= caret.AnchorPosition.LineIndex; i--)
             {
-                if (!LineManager.GetLine(i, out Line lineToDelete))
+                if (false == LineManager.GetLine(i, out Line lineToDelete))
                 {
                     Logger.Error($"DeleteSelectionAction: failed to get line: {i}");
                     continue;
@@ -228,7 +248,7 @@ internal class DeleteSelectionAction : Action
             // Forward delete
             for (int i = caret.Position.LineIndex; i <= caret.AnchorPosition.LineIndex; i++)
             {
-                if (!LineManager.GetLine(i, out Line lineToDelete))
+                if (false == LineManager.GetLine(i, out Line lineToDelete))
                 {
                     Logger.Error($"DeleteSelectionAction: failed to get line: {i}");
                     continue;
@@ -260,7 +280,6 @@ internal class DeleteSelectionAction : Action
                 }
             }
         }
-
         return commands;
     }
 }
