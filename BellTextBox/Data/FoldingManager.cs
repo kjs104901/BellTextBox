@@ -18,7 +18,7 @@ internal partial class FoldingManager
 
     internal FoldingManager()
     {
-        _foldingListCache = new Cache<List<Folding>>(new List<Folding>(), UpdateFoldingList);
+        _foldingListCache = new Cache<List<Folding>>("Folding List", new List<Folding>(), UpdateFoldingList);
     }
 
     private List<Folding> UpdateFoldingList(List<Folding> foldingList)

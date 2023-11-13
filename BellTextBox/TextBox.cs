@@ -17,6 +17,7 @@ public partial class TextBox
     internal readonly RowManager RowManager = new();
     internal readonly FoldingManager FoldingManager = new();
     internal readonly Logger Logger = new ();
+    internal readonly CacheCounter CacheCounter = new();
     
     private readonly StringBuilder _sb = new();
 
@@ -32,6 +33,7 @@ public partial class TextBox
         var sb = new StringBuilder();
         sb.AppendLine(ActionManager.GetDebugString());
         sb.AppendLine(CaretManager.GetDebugString());
+        sb.AppendLine(CacheCounter.GetDebugString());
         return sb.ToString();
     }
 

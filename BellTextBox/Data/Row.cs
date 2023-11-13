@@ -17,7 +17,7 @@ internal class Row
     {
         LineSub = lineSub;
 
-        RowSelectionCache = new(new RowSelection()
+        RowSelectionCache = new("Row Selection", new RowSelection()
             {
                 CaretPositions = new(),
                 CaretAnchorPositions = new()

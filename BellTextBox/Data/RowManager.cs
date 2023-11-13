@@ -21,7 +21,7 @@ internal partial class RowManager
 
     internal RowManager()
     {
-        _rowsCache = new Cache<List<Row>>(new List<Row>(), UpdateRows);
+        _rowsCache = new Cache<List<Row>>("Rows", new List<Row>(), UpdateRows);
     }
 
     private void SetRowCacheDirty_()

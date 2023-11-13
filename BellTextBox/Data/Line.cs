@@ -36,10 +36,10 @@ internal class Line
         if (initialChars != null)
             Chars.AddRange(initialChars);
 
-        _colorsCache = new(new(), UpdateColors);
-        _cutoffsCache = new(new(), UpdateCutoff);
-        _stringCache = new(string.Empty, UpdateString);
-        _lineSubsCache = new(new List<LineSub>(), UpdateLineSubs);
+        _colorsCache = new("Colors", new(), UpdateColors);
+        _cutoffsCache = new("Cutoffs", new(), UpdateCutoff);
+        _stringCache = new("String", string.Empty, UpdateString);
+        _lineSubsCache = new("Line Subs", new List<LineSub>(), UpdateLineSubs);
     }
     
     internal void ChangeLineIndex(int newIndex)
