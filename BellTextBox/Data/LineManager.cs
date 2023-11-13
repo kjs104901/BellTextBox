@@ -81,9 +81,6 @@ internal partial class LineManager
         {
             Lines[i].ChangeLineIndex(i);
         }
-
-        CaretManager.ShiftCaretLine(lineIndex, EditDirection.Forward);
-        RowManager.SetRowCacheDirty();
         return newLine;
     }
 
@@ -96,8 +93,5 @@ internal partial class LineManager
         {
             Lines[i].ChangeLineIndex(i);
         }
-
-        CaretManager.ShiftCaretLine(removeLineIndex, EditDirection.Backward);
-        RowManager.SetRowCacheDirty();
     }
 }

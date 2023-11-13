@@ -169,9 +169,13 @@ internal class SplitLineCommand : Command
             // TODO auto indent?
             
             insertLineIndex = caret.Position.LineIndex + 1;
+            
             Line newLine = LineManager.InsertLine(insertLineIndex);
+            CaretManager.ShiftCaretLine(insertLineIndex, EditDirection.Forward);
             CaretManager.SplitLineCaret(caret, line, newLine, isUndo);
+            
             newLine.Chars.AddRange(restOfLine);
+            newLine.SetCharsDirty();
             
             caret.RemoveSelection();
         }
@@ -183,12 +187,17 @@ internal class SplitLineCommand : Command
             line.SetCharsDirty();
             
             insertLineIndex = caret.Position.LineIndex;
+            
             Line newLine = LineManager.InsertLine(insertLineIndex);
-            CaretManager.SplitLineCaret(caret, line, newLine, isUndo);
+            CaretManager.ShiftCaretLine(insertLineIndex, EditDirection.Forward);
+            
             newLine.Chars.AddRange(restOfLine);
+            newLine.SetCharsDirty();
             
             caret.RemoveSelection();
         }
+        
+        RowManager.SetRowCacheDirty();
         FoldingManager.SetCacheDirty();
     }
 
@@ -238,6 +247,7 @@ internal class MergeLineCommand : Command
             line.SetCharsDirty();
             
             LineManager.RemoveLine(nextLineIndex);
+            CaretManager.ShiftCaretLine(nextLineIndex, EditDirection.Backward);
         }
         else if (EditDirection.Backward == _direction)
         {
@@ -253,7 +263,10 @@ internal class MergeLineCommand : Command
             prevLine.SetCharsDirty();
             
             LineManager.RemoveLine(currentLineIndex);
+            CaretManager.ShiftCaretLine(currentLineIndex, EditDirection.Backward);
         }
+        
+        RowManager.SetRowCacheDirty();
         FoldingManager.SetCacheDirty();
     }
 

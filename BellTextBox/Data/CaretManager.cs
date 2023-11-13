@@ -67,7 +67,6 @@ internal partial class CaretManager
     private void ClearCarets_()
     {
         _carets.Clear();
-        RowManager.SetRowCacheDirty();
     }
 
     private void AddCaret_(Coordinates coordinates)
@@ -96,7 +95,6 @@ internal partial class CaretManager
             return;
         }
         _carets.Add(newCaret);
-        RowManager.SetRowCacheDirty();
     }
 
     private bool GetFirstCaret_(out Caret caret)
@@ -109,7 +107,6 @@ internal partial class CaretManager
         if (_carets.Count > 0)
         {
             caret = _carets[0];
-            RowManager.SetRowCacheDirty();
             return true;
         }
 
@@ -123,7 +120,6 @@ internal partial class CaretManager
         {
             caret.Position = caret.Position.FindMove(caretMove);
         }
-
         RowManager.SetRowCacheDirty();
     }
 
@@ -133,7 +129,6 @@ internal partial class CaretManager
         {
             caret.AnchorPosition = caret.AnchorPosition.FindMove(caretMove);
         }
-
         RowManager.SetRowCacheDirty();
     }
 
@@ -144,7 +139,6 @@ internal partial class CaretManager
             if (caret.HasSelection)
                 return true;
         }
-
         return false;
     }
 
@@ -154,7 +148,6 @@ internal partial class CaretManager
         {
             caret.AnchorPosition = caret.Position;
         }
-
         RowManager.SetRowCacheDirty();
     }
 
@@ -165,7 +158,6 @@ internal partial class CaretManager
             caret.Position.LineSubIndex = -1;
             caret.AnchorPosition.LineSubIndex = -1;
         }
-
         RowManager.SetRowCacheDirty();
     }
 

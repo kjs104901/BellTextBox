@@ -174,7 +174,7 @@ public partial class TextBox
         {
             if (EnumFlag.Has(hk, HotKeys.Shift))
             {
-                CaretManager.MoveCaretsAnchor(CaretMove.Up);
+                CaretManager.MoveCaretsPosition(CaretMove.Up);
             }
             else
             {
@@ -186,7 +186,7 @@ public partial class TextBox
         {
             if (EnumFlag.Has(hk, HotKeys.Shift))
             {
-                CaretManager.MoveCaretsAnchor(CaretMove.Down);
+                CaretManager.MoveCaretsPosition(CaretMove.Down);
             }
             else
             {
@@ -198,7 +198,7 @@ public partial class TextBox
         {
             if (EnumFlag.Has(hk, HotKeys.Shift))
             {
-                CaretManager.MoveCaretsAnchor(CaretMove.Left);
+                CaretManager.MoveCaretsPosition(CaretMove.Left);
             }
             else
             {
@@ -210,7 +210,7 @@ public partial class TextBox
         {
             if (EnumFlag.Has(hk, HotKeys.Shift))
             {
-                CaretManager.MoveCaretsAnchor(CaretMove.Right);
+                CaretManager.MoveCaretsPosition(CaretMove.Right);
             }
             else
             {
@@ -222,7 +222,7 @@ public partial class TextBox
         {
             if (EnumFlag.Has(hk, HotKeys.Shift))
             {
-                CaretManager.MoveCaretsAnchor(CaretMove.PageUp);
+                CaretManager.MoveCaretsPosition(CaretMove.PageUp);
             }
             else
             {
@@ -234,7 +234,7 @@ public partial class TextBox
         {
             if (EnumFlag.Has(hk, HotKeys.Shift))
             {
-                CaretManager.MoveCaretsAnchor(CaretMove.PageDown);
+                CaretManager.MoveCaretsPosition(CaretMove.PageDown);
             }
             else
             {
@@ -246,7 +246,7 @@ public partial class TextBox
         {
             if (EnumFlag.Has(hk, HotKeys.Shift))
             {
-                CaretManager.MoveCaretsAnchor(
+                CaretManager.MoveCaretsPosition(
                     EnumFlag.Has(hk, HotKeys.Ctrl) ? CaretMove.StartOfFile : CaretMove.StartOfLine);
             }
             else
@@ -261,7 +261,7 @@ public partial class TextBox
         {
             if (EnumFlag.Has(hk, HotKeys.Shift))
             {
-                CaretManager.MoveCaretsAnchor(
+                CaretManager.MoveCaretsPosition(
                     EnumFlag.Has(hk, HotKeys.Ctrl) ? CaretMove.EndOfFile : CaretMove.EndOfLine);
             }
             else
@@ -335,22 +335,26 @@ public partial class TextBox
                 if (CaretManager.GetFirstCaret(out Caret caret))
                 {
                     caret.AnchorPosition = coordinates;
+                    RowManager.SetRowCacheDirty();
                 }
             }
             else if (_altPressed)
             {
                 CaretManager.AddCaret(coordinates);
+                RowManager.SetRowCacheDirty();
             }
             else
             {
                 CaretManager.ClearCarets();
                 CaretManager.AddCaret(coordinates);
+                RowManager.SetRowCacheDirty();
             }
         }
         else if (MouseAction.DoubleClick == mouseInput.LeftAction)
         {
             CaretManager.ClearCarets();
             CaretManager.AddCaret(coordinates);
+            RowManager.SetRowCacheDirty();
 
             if (_shiftPressed)
             {
@@ -376,6 +380,7 @@ public partial class TextBox
                 if (CaretManager.GetFirstCaret(out Caret caret))
                 {
                     caret.Position = coordinates;
+                    RowManager.SetRowCacheDirty();
                 }
             }
         }

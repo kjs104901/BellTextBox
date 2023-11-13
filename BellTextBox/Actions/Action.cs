@@ -34,6 +34,7 @@ internal abstract class Action
             CaretManager.AddCaret(caret.Clone());
             Logger.Info("RestoreCarets: " + caret.Position.LineIndex + " " + caret.Position.CharIndex + " " + caret.AnchorPosition.LineIndex + " " + caret.AnchorPosition.CharIndex);
         }
+        RowManager.SetRowCacheDirty();
         return true;
     }
 
