@@ -42,8 +42,8 @@ internal partial class CaretManager
     
     internal static void ShiftCaretLine(int lineIndex, EditDirection direction) =>
         Singleton.TextBox.CaretManager.ShiftCaretLine_(lineIndex, direction);
-    internal static void MergeLineCaret(Line line, Line fromLine) =>
-        Singleton.TextBox.CaretManager.MergeLineCaret_(line, fromLine);
+    internal static void MergeLineCaret(Caret caret, Line line, Line fromLine) =>
+        Singleton.TextBox.CaretManager.MergeLineCaret_(caret, line, fromLine);
     internal static void SplitLineCaret(Caret caret, Line line, Line toLine) =>
         Singleton.TextBox.CaretManager.SplitLineCaret_(caret, line, toLine);
 }
@@ -259,12 +259,14 @@ internal partial class CaretManager
     private void InputCharCaret_(Caret caret, int count)
     {
         caret.Position.CharIndex += count;
+        caret.RemoveSelection();
         RemoveDuplicatedCarets_();
     }
     
     private void DeleteCharCaret_(Caret caret, int count)
     {
         caret.Position.CharIndex -= count;
+        caret.RemoveSelection();
         RemoveDuplicatedCarets_();
     }
 
@@ -288,7 +290,7 @@ internal partial class CaretManager
         RemoveDuplicatedCarets_();
     }
 
-    private void MergeLineCaret_(Line line, Line fromLine)
+    private void MergeLineCaret_(Caret caret, Line line, Line fromLine)
     {
         foreach (Caret c in _carets)
         {
@@ -306,6 +308,7 @@ internal partial class CaretManager
             
             Logger.Info("MergeLineCaret: " + c.Position.LineIndex + " " + c.Position.CharIndex);
         }
+        caret.RemoveSelection();
         RemoveDuplicatedCarets_();
     }
 
@@ -343,6 +346,7 @@ internal partial class CaretManager
             
             Logger.Info("SplitLineCaret: " + c.Position.LineIndex + " " + c.Position.CharIndex);
         }
+        caret.RemoveSelection();
         RemoveDuplicatedCarets_();
     }
 

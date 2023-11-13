@@ -43,7 +43,6 @@ internal class InputCharCommand : Command
         {
             CaretManager.InputCharCaret(caret, _chars.Length);
         }
-        caret.RemoveSelection();
 
         CaretManager.ShiftCaretChar(caret.Position.LineIndex, caret.Position.CharIndex, EditDirection.Forward, _chars.Length);
         
@@ -103,8 +102,6 @@ internal class DeleteCharCommand : Command
             RowManager.SetRowCacheDirty();
             
             CaretManager.ShiftCaretChar(caret.Position.LineIndex, caret.Position.CharIndex, EditDirection.Backward, _deletedCount);
-            
-            caret.RemoveSelection();
         }
         else if (EditDirection.Backward == _direction)
         {
@@ -118,7 +115,6 @@ internal class DeleteCharCommand : Command
 
             CaretManager.ShiftCaretChar(caret.Position.LineIndex, caret.Position.CharIndex, EditDirection.Backward, _deletedCount);
             CaretManager.DeleteCharCaret(caret, _deletedCount);
-            caret.RemoveSelection();
         }
 
         if (_count != _deletedCount)
@@ -179,8 +175,6 @@ internal class SplitLineCommand : Command
             CaretManager.ShiftCaretLine(insertLineIndex, EditDirection.Forward);
             CaretManager.SplitLineCaret(caret, line, newLine);
             
-            caret.RemoveSelection();
-            
             newLine.Chars.AddRange(restOfLine);
             newLine.SetCharsDirty();
         }
@@ -195,8 +189,6 @@ internal class SplitLineCommand : Command
             
             Line newLine = LineManager.InsertLine(insertLineIndex);
             CaretManager.ShiftCaretLine(insertLineIndex, EditDirection.Forward);
-            
-            caret.RemoveSelection();
             
             newLine.Chars.AddRange(restOfLine);
             newLine.SetCharsDirty();
@@ -246,7 +238,7 @@ internal class MergeLineCommand : Command
             if (false == LineManager.GetLine(nextLineIndex, out Line nextLine))
                 return;
             
-            CaretManager.MergeLineCaret(line, nextLine);
+            CaretManager.MergeLineCaret(caret, line, nextLine);
             
             line.Chars.AddRange(nextLine.Chars);
             line.SetCharsDirty();
@@ -262,7 +254,7 @@ internal class MergeLineCommand : Command
             if (false == LineManager.GetLine(prevLineIndex, out Line prevLine))
                 return;
             
-            CaretManager.MergeLineCaret(prevLine, line);
+            CaretManager.MergeLineCaret(caret, prevLine, line);
                 
             prevLine.Chars.AddRange(line.Chars);
             prevLine.SetCharsDirty();
