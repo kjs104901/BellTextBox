@@ -114,7 +114,8 @@ public class FontStyle : IComparable<FontStyle>
                 ImGui.InputTextMultiline("##Debug", ref debugString, (uint)debugString.Length, new Vector2(-1, -1));
                 
                 ImGui.TableNextColumn();
-                imGuiBellTextBox.Logs.ForEach(ImGui.Text);
+                string logString = string.Join("\n", imGuiBellTextBox.Logs);
+                ImGui.InputTextMultiline("##Logs", ref logString, (uint)logString.Length, new Vector2(-1, -1));
                 
                 ImGui.TableNextColumn();
                 ImGui.PushFont(imFontPtr);

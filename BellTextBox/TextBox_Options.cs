@@ -48,8 +48,6 @@ public partial class TextBox
     public float LeadingHeight { get; set; } = 1.2f;
     
     public Language Language { get; set; } = Language.PlainText();
-
-    public readonly bool IsDebugMode = true;
     
     public readonly List<string> AutoCompleteList = new();
 

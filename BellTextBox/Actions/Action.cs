@@ -43,7 +43,7 @@ internal abstract class Action
         _caretsCommands.Clear();
 
         SaveCarets(_startCarets);
-        if (Singleton.TextBox.IsDebugMode)
+        if (DevHelper.IsDebugMode)
             _startText = Singleton.TextBox.GetText();
 
         for (int i = 0; i < CaretManager.Count; i++)
@@ -61,11 +61,10 @@ internal abstract class Action
 
         SaveCarets(_endCarets);
         
-        if (Singleton.TextBox.IsDebugMode)
-            _endText = Singleton.TextBox.GetText();
-
-        if (Singleton.TextBox.IsDebugMode)
+        if (DevHelper.IsDebugMode)
         {
+            _endText = Singleton.TextBox.GetText();
+            
             bool isAllSame = true;
             for (int i = 0; i < _endCarets.Count; i++)
             {
@@ -105,8 +104,11 @@ internal abstract class Action
             return;
         }
 
-        if (Singleton.TextBox.IsDebugMode && Singleton.TextBox.GetText() != _startText)
-            Logger.Error("RedoCommands: Text not match");
+        if (DevHelper.IsDebugMode)
+        {
+            if (Singleton.TextBox.GetText() != _startText)
+                Logger.Error("RedoCommands: Text not match");
+        }
 
         for (int i = 0; i < _caretsCommands.Count; i++)
         {
@@ -121,9 +123,12 @@ internal abstract class Action
         }
 
         RestoreCarets(_endCarets);
-            
-        if (Singleton.TextBox.IsDebugMode && Singleton.TextBox.GetText() != _endText)
-            Logger.Error("RedoCommands: Text not match");
+
+        if (DevHelper.IsDebugMode)
+        {
+            if (Singleton.TextBox.GetText() != _endText)
+                Logger.Error("RedoCommands: Text not match");
+        }
     }
 
     internal void UndoCommands()
@@ -133,9 +138,12 @@ internal abstract class Action
             Logger.Error("UndoCommands: failed to restore end carets");
             return;
         }
-        
-        if (Singleton.TextBox.IsDebugMode && Singleton.TextBox.GetText() != _endText)
-            Logger.Error("UndoCommands: Text not match");
+
+        if (DevHelper.IsDebugMode)
+        {
+            if (Singleton.TextBox.GetText() != _endText)
+                Logger.Error("UndoCommands: Text not match");
+        }
 
         for (int i = _caretsCommands.Count - 1; i >= 0; i--)
         {
@@ -152,8 +160,11 @@ internal abstract class Action
 
         RestoreCarets(_startCarets);
         
-        if (Singleton.TextBox.IsDebugMode && Singleton.TextBox.GetText() != _startText)
-            Logger.Error("UndoCommands: Text not match");
+        if (DevHelper.IsDebugMode)
+        {
+            if (Singleton.TextBox.GetText() != _startText)
+                Logger.Error("UndoCommands: Text not match");
+        }
     }
 
     internal bool IsAllSame<T>()

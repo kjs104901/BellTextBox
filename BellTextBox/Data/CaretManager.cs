@@ -252,8 +252,6 @@ internal partial class CaretManager
             
             Logger.Info("ShiftCaretChar: " + caret.Position.LineIndex + " " + caret.Position.CharIndex + " " + moveCount);
         }
-        
-        RemoveDuplicatedCarets_();
     }
 
     private void InputCharCaret_(Caret caret, int count)
@@ -287,7 +285,6 @@ internal partial class CaretManager
             
             Logger.Info("ShiftCaretLine: " + c.Position.LineIndex + " " + c.Position.CharIndex + " " + moveCount);
         }
-        RemoveDuplicatedCarets_();
     }
 
     private void MergeLineCaret_(Caret caret, Line line, Line fromLine)

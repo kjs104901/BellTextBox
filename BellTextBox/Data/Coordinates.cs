@@ -35,10 +35,15 @@ internal struct Coordinates
 
     internal bool IsBiggerThan(Coordinates other)
     {
-        if (false == LineManager.GetLineSub(this, out LineSub lineSub) ||
-            false == LineManager.GetLineSub(other, out LineSub otherLineSub))
+        if (false == LineManager.GetLineSub(this, out LineSub lineSub))
         {
-            Logger.Error($"IsBiggerThan: failed to get line: {LineIndex} or {other.LineIndex}");
+            Logger.Error($"IsBiggerThan: failed to get line sub: {LineIndex}, {CharIndex}");
+            return false;
+        }
+        
+        if (false == LineManager.GetLineSub(other, out LineSub otherLineSub))
+        {
+            Logger.Error($"IsBiggerThan: failed to get line sub: {other.LineIndex}, {other.CharIndex}");
             return false;
         }
 

@@ -84,7 +84,10 @@ internal partial class RowManager
                     {
                         char c = lineSub.Chars[j];
 
-                        ColorStyle charColor = line.Colors[lineSub.Coordinates.CharIndex + j];
+                        ColorStyle charColor = Singleton.TextBox.Theme.DefaultFontColor;
+                        if (line.Colors.Count > lineSub.Coordinates.CharIndex + j)
+                            charColor = line.Colors[lineSub.Coordinates.CharIndex + j];
+                        
                         float charWidth = lineSub.CharWidths[j];
 
                         if (j == 0)

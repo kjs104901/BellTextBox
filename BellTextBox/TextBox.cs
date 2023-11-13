@@ -31,9 +31,9 @@ public partial class TextBox
     public string GetDebugString()
     {
         var sb = new StringBuilder();
-        sb.AppendLine(ActionManager.GetDebugString());
         sb.AppendLine(CaretManager.GetDebugString());
         sb.AppendLine(CacheCounter.GetDebugString());
+        sb.AppendLine(ActionManager.GetDebugString());
         return sb.ToString();
     }
 

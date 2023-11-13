@@ -73,15 +73,15 @@ internal class Line
         colors.Clear();
         if (Singleton.TextBox.SyntaxHighlightEnabled == false)
             return colors;
-
-        for (int i = 0; i < Chars.Count; i++)
+        
+        foreach (var c in Chars)
         {
             ColorStyle colorStyle;
-            if (char.IsLower(Chars[i]))
+            if (char.IsLower(c))
             {
                 colorStyle = Singleton.TextBox.Theme.BlockCommentFontColor;
             }
-            else if (false == char.IsAscii(Chars[i]))
+            else if (false == char.IsAscii(c))
             {
                 colorStyle = Singleton.TextBox.Theme.LineCommentFontColor;
             }
