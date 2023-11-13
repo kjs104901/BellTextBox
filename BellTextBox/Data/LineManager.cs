@@ -1,4 +1,5 @@
 ﻿using Bell.Actions;
+using Bell.Languages;
 using Bell.Themes;
 using Bell.Utils;
 
@@ -21,19 +22,23 @@ internal partial class LineManager
     internal static Line InsertLine(int lineIndex) =>
         Singleton.TextBox.LineManager.InsertLine_(lineIndex);
 
-    internal static void RemoveLine(int removeLineIndex) => Singleton.TextBox.LineManager.RemoveLine_(removeLineIndex);
+    internal static void RemoveLine(int removeLineIndex) =>
+        Singleton.TextBox.LineManager.RemoveLine_(removeLineIndex);
 }
 
 // Implementation
 internal partial class LineManager
 {
     private readonly List<Line> _lines = new();
+    
+    private readonly List<Language.Token[]> _linesTokens = new();
+    private readonly Stack<Language.Token> _tokens = new();
 
     private bool GetLine_(int lineIndex, out Line line)
     {
-        if (0 <= lineIndex && lineIndex < Lines.Count)
+        if (0 <= lineIndex && lineIndex < _lines.Count)
         {
-            line = Lines[lineIndex];
+            line = _lines[lineIndex];
             if (line.Index != lineIndex)
             {
                 Logger.Error($"LineManager Line.Index != lineIndex: {line.Index} != {lineIndex}");
@@ -74,24 +79,63 @@ internal partial class LineManager
     private Line InsertLine_(int lineIndex)
     {
         Line newLine = new Line(lineIndex);
-        Lines.Insert(lineIndex, newLine);
+        _lines.Insert(lineIndex, newLine);
 
         // Update line index
-        for (int i = lineIndex; i < Lines.Count; i++)
+        for (int i = lineIndex; i < _lines.Count; i++)
         {
-            Lines[i].ChangeLineIndex(i);
+            _lines[i].ChangeLineIndex(i);
         }
         return newLine;
     }
 
     private void RemoveLine_(int removeLineIndex)
     {
-        Lines.RemoveAt(removeLineIndex);
+        _lines.RemoveAt(removeLineIndex);
 
         // Update line index
-        for (int i = removeLineIndex; i < Lines.Count; i++)
+        for (int i = removeLineIndex; i < _lines.Count; i++)
         {
-            Lines[i].ChangeLineIndex(i);
+            _lines[i].ChangeLineIndex(i);
+        }
+    }
+    
+    private void UpdateLanguage_()
+    {
+        bool needUpdate = _lines.Count != _linesTokens.Count;
+        if (false == needUpdate)
+        {
+            for (int i = 0; i < _lines.Count; i++)
+            {
+                Line line = _lines[i];
+                Language.Token[] tokens = _linesTokens[i];
+                
+                if (false == tokens.SequenceEqual(line.LanguageTokens))
+                {
+                    needUpdate = true;
+                    break;
+                }
+            }
+        }
+
+        if (needUpdate)
+        {
+            _tokens.Clear();
+            foreach (Line line in _lines)
+            {
+                line.ClearSyntax();
+                
+                // 최상위 스택이 있다면 추가
+                line.AddSyntax(token);
+                
+                foreach (Language.Token token in line.LanguageTokens)
+                {
+                    _tokens.Push(token); // 스택으로 처리
+
+                    // 무시당하지 않은 스택 추가
+                    line.AddSyntax(token);
+                }
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text;
+using Bell.Languages;
 using Bell.Themes;
 using Bell.Utils;
 
@@ -25,6 +26,9 @@ internal class Line
     internal List<LineSub> LineSubs => _lineSubsCache.Get();
     private readonly Cache<List<LineSub>> _lineSubsCache;
 
+    internal List<Language.Token> LanguageTokens => _languageTokensCache.Get();
+    private readonly Cache<List<Language.Token>> _languageTokensCache;
+
     // buffer to avoid GC
     private readonly StringBuilder _sb = new();
 
@@ -40,6 +44,7 @@ internal class Line
         _cutoffsCache = new("Cutoffs", new(), UpdateCutoff);
         _stringCache = new("String", string.Empty, UpdateString);
         _lineSubsCache = new("Line Subs", new List<LineSub>(), UpdateLineSubs);
+        _languageTokensCache = new("Language Tokens", new(), UpdateLanguageTokens);
     }
     
     internal void ChangeLineIndex(int newIndex)
@@ -176,6 +181,11 @@ internal class Line
 
         lineSubs.Add(lineSub);
         return lineSubs;
+    }
+
+    private List<Language.Token> UpdateLanguageTokens(List<Language.Token> tokens)
+    {
+        return tokens;
     }
 
     internal int CountSubstrings(string findText)

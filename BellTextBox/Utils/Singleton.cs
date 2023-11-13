@@ -1,7 +1,4 @@
-﻿using Bell.Data;
-
-namespace Bell.Utils;
-
+﻿namespace Bell.Utils;
 
 internal static class Singleton
 {
@@ -11,10 +8,4 @@ internal static class Singleton
         get => ThreadLocalTextBox.Value ?? throw new Exception("No TextBox set");
         set => ThreadLocalTextBox.Value = value;
     }
-
-    internal static CaretManager CaretManager => TextBox.CaretManager;
-    internal static FontManager FontManager => TextBox.FontManager;
-    internal static LineManager LineManager => TextBox.LineManager;
-    internal static RowManager RowManager => TextBox.RowManager;
-    internal static FoldingManager FoldingManager => TextBox.FoldingManager;
 }
