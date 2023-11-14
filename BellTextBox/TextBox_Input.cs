@@ -53,10 +53,10 @@ public partial class TextBox
 
             if (keyboardInputChar == '\t')
             {
-                if (EnumFlag.Has(hk, HotKeys.Shift))
-                    ActionManager.DoAction(new UnTabAction());
-                else
-                    ActionManager.DoAction(new TabAction());
+                //if (EnumFlag.Has(hk, HotKeys.Shift))
+                //    ActionManager.DoAction(new UnTabAction());
+                //else
+                //    ActionManager.DoAction(new TabAction());
                 continue;
             }
 
@@ -167,10 +167,10 @@ public partial class TextBox
         }
         else if (EnumFlag.Has(hk, HotKeys.Tab)) // Tab
         {
-            if (EnumFlag.Has(hk, HotKeys.Shift))
-                ActionManager.DoAction(new UnTabAction());
-            else
-                ActionManager.DoAction(new TabAction());
+            //if (EnumFlag.Has(hk, HotKeys.Shift))
+            //    ActionManager.DoAction(new UnTabAction());
+            //else
+            //    ActionManager.DoAction(new TabAction());
         }
         else if (EnumFlag.Has(hk, HotKeys.UpArrow)) // Move Up
         {
