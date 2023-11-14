@@ -15,8 +15,7 @@ internal class Row
 
         RowSelectionCache = new("Row Selection", new RowSelection()
             {
-                CaretPositions = new(),
-                CaretAnchorPositions = new()
+                CaretPositions = new()
             },
             UpdateRowSelection);
     }
@@ -28,9 +27,6 @@ internal class Row
         rowSelection.SelectionEnd = 0.0f;
         
         rowSelection.CaretPositions.Clear();
-        rowSelection.CaretAnchorPositions.Clear();
-
-        bool fakeSelected = false;
 
         for (int i = 0; i < CaretManager.Count; i++)
         {
@@ -70,7 +66,6 @@ internal class Row
                         if (rowSelection.SelectionEnd < 1.0f)
                         {
                             rowSelection.SelectionEnd = FontManager.GetFontWhiteSpaceWidth();
-                            fakeSelected = true;
                         }
 
                         rowSelection.Selected = true;
@@ -92,7 +87,6 @@ internal class Row
                         if (rowSelection.SelectionEnd < 1.0f)
                         {
                             rowSelection.SelectionEnd = FontManager.GetFontWhiteSpaceWidth();
-                            fakeSelected = true;
                         }
 
                         rowSelection.Selected = true;
@@ -100,20 +94,9 @@ internal class Row
                 }
             }
 
-            if (anchorLineSub == LineSub)
-            {
-                float anchorPosition = LineSub.GetCharPosition(caret.AnchorPosition);
-                if (endLineSub == anchorLineSub && fakeSelected && anchorPosition < 1.0f)
-                    anchorPosition = FontManager.GetFontWhiteSpaceWidth();
-                rowSelection.CaretAnchorPositions.Add(anchorPosition);
-            }
-
             if (lineSub == LineSub)
             {
-                float caretPosition = LineSub.GetCharPosition(caret.Position);
-                if (endLineSub == lineSub && fakeSelected && caretPosition < 1.0f)
-                    caretPosition = FontManager.GetFontWhiteSpaceWidth();
-                rowSelection.CaretPositions.Add(caretPosition);
+                rowSelection.CaretPositions.Add(caret.Position);
             }
         }
 
@@ -127,6 +110,5 @@ internal struct RowSelection
     internal float SelectionStart;
     internal float SelectionEnd;
 
-    internal List<float> CaretPositions;
-    internal List<float> CaretAnchorPositions;
+    internal List<Coordinates> CaretPositions;
 }

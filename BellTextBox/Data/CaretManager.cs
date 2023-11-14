@@ -383,6 +383,8 @@ internal partial class CaretManager
                 Logger.Info("Overlapped caret has been removed");
             }
         }
+        
+        Singleton.TextBox.CaretBlinkStopwatch.Restart();
     }
 }
     

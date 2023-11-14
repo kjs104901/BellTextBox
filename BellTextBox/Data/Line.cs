@@ -122,7 +122,7 @@ internal class Line
             
             foreach (Match match in regex.Matches(String))
             {
-                for (int i = match.Index; i < match.Index + match.Length; i++)
+                for (int i = match.Index; i < match.Index + match.Length && i < colors.Count; i++)
                 {
                     colors[i] = colorStyle;
                 }
@@ -131,7 +131,7 @@ internal class Line
 
         foreach (var range in CommentRanges)
         {
-            for (int i = range.Item1; i < range.Item2; i++)
+            for (int i = range.Item1; i < range.Item2 && i < colors.Count; i++)
             {
                 colors[i] = Singleton.TextBox.Language.CommentStyle;
             }
@@ -139,38 +139,11 @@ internal class Line
 
         foreach (var range in StringRanges)
         {
-            for (int i = range.Item1; i < range.Item2; i++)
+            for (int i = range.Item1; i < range.Item2 && i < colors.Count; i++)
             {
                 colors[i] = Singleton.TextBox.Language.StringStyle;
             }
         }
-
-        //foreach (Language.Token token in SyntaxList)
-        //{
-        //    charIndex = token.LineIndex == Index ? token.CharIndex : 0;
-        //}
-        
-        /*
-        foreach (var c in _chars)
-        {
-            ColorStyle colorStyle;
-            if (char.IsLower(c))
-            {
-                colorStyle = Singleton.TextBox.Theme.BlockCommentFontColor;
-            }
-            else if (false == char.IsAscii(c))
-            {
-                colorStyle = Singleton.TextBox.Theme.LineCommentFontColor;
-            }
-            else
-            {
-                colorStyle = Singleton.TextBox.Theme.DefaultFontColor;
-            }
-
-            colors.Add(colorStyle);
-        }
-        */
-        
         return colors;
     }
     

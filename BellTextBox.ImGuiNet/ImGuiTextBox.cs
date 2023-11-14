@@ -36,15 +36,15 @@ public class ImGuiTextBox
 
         Vector2 viewPos = new Vector2(ImGui.GetScrollX(), ImGui.GetScrollY());
         Vector2 viewSize = new Vector2(contentSize.X - ImGui.GetStyle().ScrollbarSize, contentSize.Y);
-
+        
+        _textBox.Render(viewPos, viewSize);
         try
         {
-            _textBox.Render(viewPos, viewSize);
+            
         }
         catch (Exception e)
         {
             ImGui.TextColored(new Vector4(1.0f, 0.0f, 0.0f, 1.0f), e.ToString());
-            throw;
         }
 
         ImGui.End();

@@ -10,6 +10,7 @@ internal partial class FontManager
     internal static float GetFontWhiteSpaceWidth() => Singleton.TextBox.FontManager.GetFontWhiteSpaceWidth_();
     internal static float GetFontNumberWidth() => Singleton.TextBox.FontManager.GetFontNumberWidth_();
     internal static float GetFontWidth(char c) => Singleton.TextBox.FontManager.GetFontWidth_(c);
+    internal static float GetFontWidth(string str) => Singleton.TextBox.FontManager.GetFontWidth_(str);
     internal static float GetLineHeight() => Singleton.TextBox.FontManager.GetLineHeight_();
     internal static float GetLineHeightOffset() => Singleton.TextBox.FontManager.GetLineHeightOffset_();
 }
@@ -37,6 +38,11 @@ internal partial class FontManager
     {
         // TODO handle \t width?
         return _fontCache.GetFontWidth(c);
+    }
+    
+    private float GetFontWidth_(string str)
+    {
+        return str.Sum(GetFontWidth_);
     }
 
     private float GetLineHeight_()
