@@ -16,9 +16,6 @@ internal partial class RowManager
     private List<Row> _rows => _rowsCache.Get();
     private readonly Cache<List<Row>> _rowsCache;
 
-    // buffer to avoid GC
-    private readonly List<char> _buffers = new();
-
     internal RowManager()
     {
         _rowsCache = new Cache<List<Row>>("Rows", new List<Row>(), UpdateRows);
@@ -43,7 +40,7 @@ internal partial class RowManager
             bool visible = true;
 
             line.Folding = Folding.None;
-            foreach (Folding folding in FoldingManager.GetFoldingList())
+            foreach (Folding folding in LineManager.FoldingList)
             {
                 if (folding.End == line.Index)
                 {
@@ -68,73 +65,9 @@ internal partial class RowManager
 
             if (visible)
             {
-                for (int i = 0; i < line.LineSubs.Count; i++)
+                foreach (var lineSub in line.LineSubs)
                 {
-                    LineSub lineSub = line.LineSubs[i];
-                    Row row = new Row(lineSub);
-
-                    float startPosX = 0.0f;
-                    float currPosX = 0.0f;
-
-                    _buffers.Clear();
-                    float buffersWidth = 0.0f;
-
-                    ColorStyle renderGroupColor = ColorStyle.None;
-                    for (int j = 0; j < lineSub.Chars.Count; j++)
-                    {
-                        char c = lineSub.Chars[j];
-
-                        ColorStyle charColor = Singleton.TextBox.Theme.DefaultFontColor;
-                        if (line.Colors.Count > lineSub.Coordinates.CharIndex + j)
-                            charColor = line.Colors[lineSub.Coordinates.CharIndex + j];
-                        
-                        float charWidth = lineSub.CharWidths[j];
-
-                        if (j == 0)
-                        {
-                            renderGroupColor = charColor;
-                        }
-
-                        if (renderGroupColor != charColor) // need new render group
-                        {
-                            row.TextBlockRenders.Add(new()
-                            {
-                                Text = String.Concat(_buffers),
-                                ColorStyle = renderGroupColor,
-                                PosX = startPosX
-                            });
-
-                            startPosX += buffersWidth;
-
-                            _buffers.Clear();
-                            buffersWidth = 0.0f;
-
-                            renderGroupColor = charColor;
-                        }
-
-                        _buffers.Add(c);
-                        buffersWidth += charWidth;
-
-                        if (Singleton.TextBox.ShowingWhitespace && char.IsWhiteSpace(c))
-                        {
-                            row.WhiteSpaceRenders.Add(new() { C = c, PosX = currPosX });
-                        }
-
-                        currPosX += charWidth;
-                    }
-
-                    // Add remains
-                    if (_buffers.Count > 0)
-                    {
-                        row.TextBlockRenders.Add(new()
-                        {
-                            Text = String.Concat(_buffers),
-                            ColorStyle = renderGroupColor,
-                            PosX = startPosX
-                        });
-                    }
-
-                    rows.Add(row);
+                    rows.Add(new Row(lineSub));
                 }
             }
         }

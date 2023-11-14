@@ -5,9 +5,6 @@ namespace Bell.Data;
 
 internal class Row
 {
-    internal readonly List<TextBlockRender> TextBlockRenders = new();
-    internal readonly List<WhiteSpaceRender> WhiteSpaceRenders = new();
-
     internal RowSelection RowSelection => RowSelectionCache.Get();
     internal readonly Cache<RowSelection> RowSelectionCache;
 
@@ -133,18 +130,4 @@ internal struct RowSelection
 
     internal List<float> CaretPositions;
     internal List<float> CaretAnchorPositions;
-}
-
-internal struct TextBlockRender
-{
-    internal string Text;
-    internal ColorStyle ColorStyle;
-
-    internal float PosX;
-}
-
-internal struct WhiteSpaceRender
-{
-    internal char C;
-    internal float PosX;
 }

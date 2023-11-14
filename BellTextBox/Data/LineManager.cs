@@ -9,6 +9,7 @@ namespace Bell.Data;
 internal partial class LineManager
 {
     internal static List<Line> Lines => Singleton.TextBox.LineManager._lines;
+    internal static List<Folding> FoldingList => Singleton.TextBox.LineManager._foldingList;
 
     internal static bool GetLine(int lineIndex, out Line line) =>
         Singleton.TextBox.LineManager.GetLine_(lineIndex, out line);
@@ -37,10 +38,14 @@ internal partial class LineManager
 {
     private readonly List<Line> _lines = new();
 
-    private readonly List<Language.Token[]> _linesTokens = new();
+    private readonly List<Folding> _foldingList = new();
+    private readonly Dictionary<int, Stack<int>> _foldingStacks = new();
+
     private readonly Stack<Language.Token> _tokens = new();
 
     private bool _isLanguageDirty = true;
+    private DateTime _languageUpdateTime = DateTime.Now;
+    private const int LanguageUpdateInterval = 100;
 
     private bool GetLine_(int lineIndex, out Line line)
     {
@@ -112,13 +117,23 @@ internal partial class LineManager
     private void SetLanguageDirty_()
     {
         _isLanguageDirty = true;
+        _languageUpdateTime = DateTime.Now.AddMilliseconds(LanguageUpdateInterval);
     }
 
     private void UpdateLanguage_()
     {
-        if (false == _isLanguageDirty)
+        if (false == _isLanguageDirty || _languageUpdateTime > DateTime.Now)
             return;
 
+        _foldingList.Clear();
+        int foldingTypeCount = Singleton.TextBox.Language.Tokens[Language.TokenType.FoldingStart].Count;
+        for (int i = 0; i < foldingTypeCount; i++)
+        {
+            if (_foldingStacks.ContainsKey(i) == false)
+                _foldingStacks.TryAdd(i, new Stack<int>());
+            _foldingStacks[i].Clear();
+        }
+        
         _tokens.Clear();
         foreach (Line line in _lines)
         {
@@ -176,6 +191,41 @@ internal partial class LineManager
             {
                 _tokens.Pop();
             }
+            
+            // Folding 계산
+            foreach (Language.Token token in line.SyntaxList)
+            {
+                if (token.Type == Language.TokenType.FoldingStart)
+                {
+                    _foldingStacks[token.TokenIndex].Push(line.Index);
+                }
+                else if (token.Type == Language.TokenType.FoldingEnd)
+                {
+                    if (_foldingStacks[token.TokenIndex].TryPop(out int start))
+                    {
+                        int end = line.Index;
+                        if (start < end)
+                        {
+                            _foldingList.Add(new Folding() { Start = start, End = end, Folded = false });
+                        }
+                    }
+                }
+            }
         }
+            
+        // 남은 Folding 넣어주기
+        foreach (Stack<int> foldingStack in _foldingStacks.Values)
+        {
+            while (foldingStack.TryPop(out int start))
+            {
+                int end = Lines.Count - 1;
+                if (start < end)
+                {
+                    _foldingList.Add(new Folding() { Start = start, End = end, Folded = false });
+                }
+            }
+        }
+        
+        _isLanguageDirty = false;
     }
 }

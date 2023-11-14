@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using Bell.Data;
+using Bell.Themes;
 using Bell.Utils;
 
 namespace Bell;
@@ -22,7 +23,7 @@ public partial class TextBox
         LineNumberWidth = (StringPool<int>.Get(LineManager.Lines.Count).Length + 1) * FontManager.GetFontNumberWidth();
 
         LineManager.UpdateLanguage();
-        
+
         int rowStart = GetRowIndex(_viewPos, -3);
         int rowEnd = GetRowIndex(_viewPos + _viewSize, 3);
 
@@ -47,39 +48,45 @@ public partial class TextBox
                     Theme.LineSelectedBackgroundColor.ToVector());
             }
 
-            foreach (var textBlockRender in row.TextBlockRenders)
-            {
-                Backend.RenderText(
-                    new Vector2(lineStartX + textBlockRender.PosX, lineTextStartY),
-                    textBlockRender.Text,
-                    textBlockRender.ColorStyle.ToVector());
-            }
-
-            foreach (var whiteSpaceRender in row.WhiteSpaceRenders)
-            {
-                if (whiteSpaceRender.C == ' ')
-                {
-                    Backend.RenderText(
-                        new Vector2(lineStartX + whiteSpaceRender.PosX, lineTextStartY),
-                        "·",
-                        Theme.LineWhiteSpaceFontColor.ToVector());
-                }
-                else if (whiteSpaceRender.C == '\t')
-                {
-                    Backend.RenderLine(
-                        new Vector2(lineStartX + whiteSpaceRender.PosX,
-                            lineTextStartY),
-                        new Vector2(
-                            lineStartX + whiteSpaceRender.PosX +
-                            Backend.GetCharWidth(' ') * 4, // TODO setting tab size
-                            lineTextStartY),
-                        Theme.LineWhiteSpaceFontColor.ToVector(),
-                        1.0f);
-                }
-            }
-
             if (LineManager.GetLine(row.LineSub.Coordinates.LineIndex, out Line line))
             {
+                float currPosX = 0.0f;
+
+                for (int j = 0; j < row.LineSub.Chars.Count; j++)
+                {
+                    char rowChar = row.LineSub.Chars[j];
+                    int rowCharIndex = row.LineSub.Coordinates.CharIndex + j;
+                    float rowCharWidth = row.LineSub.CharWidths[j];
+
+                    ColorStyle charColor = Singleton.TextBox.Theme.DefaultFontColor;
+                    if (line.Colors.Count > rowCharIndex)
+                        charColor = line.Colors[rowCharIndex];
+                    if (charColor == ColorStyle.None)
+                        charColor = Singleton.TextBox.Theme.DefaultFontColor;
+                    
+                    Backend.RenderText(new Vector2(lineStartX + currPosX, lineTextStartY),
+                        StringPool<char>.Get(rowChar), charColor.ToVector());
+                    
+                    if (rowChar == ' ')
+                    {
+                        Backend.RenderText(
+                            new Vector2(lineStartX + currPosX, lineTextStartY),
+                            "·",
+                            Theme.LineWhiteSpaceFontColor.ToVector());
+                    }
+                    else if (rowChar == '\t')
+                    {
+                        Backend.RenderLine(
+                            new Vector2(lineStartX + currPosX, lineTextStartY),
+                            new Vector2(lineStartX + currPosX + Backend.GetCharWidth(' ') * 4, // TODO setting tab size
+                                lineTextStartY),
+                            Theme.LineWhiteSpaceFontColor.ToVector(),
+                            1.0f);
+                    }
+
+                    currPosX += rowCharWidth;
+                }
+
                 if (row.LineSub.Coordinates.LineSubIndex == 0)
                 {
                     string lineIndex = StringPool<int>.Get(line.Index);
@@ -106,7 +113,7 @@ public partial class TextBox
                     Theme.LineCommentFontColor.ToVector(),
                     2.0f);
             }
-            
+
             foreach (float caretPosition in row.RowSelection.CaretPositions)
             {
                 Backend.RenderLine(

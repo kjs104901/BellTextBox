@@ -43,8 +43,6 @@ internal class InputCharCommand : Command
             CaretManager.InputCharCaret(caret, _chars.Length);
         }
         CaretManager.ShiftCaretChar(caret.Position.LineIndex, caret.Position.CharIndex, EditDirection.Forward, _chars.Length);
-        
-        FoldingManager.SetCacheDirty();
     }
 
     internal override void Undo(Caret caret)
@@ -113,7 +111,6 @@ internal class DeleteCharCommand : Command
         {
             Logger.Error($"DeleteCharCommand: _count != _deletedCount {_count} {_deletedCount}");
         }
-        FoldingManager.SetCacheDirty();
     }
 
     internal override void Undo(Caret caret)
@@ -179,7 +176,6 @@ internal class SplitLineCommand : Command
         }
         
         RowManager.SetRowCacheDirty();
-        FoldingManager.SetCacheDirty();
     }
 
     internal override void Undo(Caret caret)
@@ -224,7 +220,8 @@ internal class MergeLineCommand : Command
             
             CaretManager.MergeLineCaret(caret, line, nextLine);
             
-            line.AppendChars(nextLine.RemoveChars(0, nextLine.CharsCount));
+            line.InsertChars(line.CharsCount,
+                nextLine.RemoveChars(0, nextLine.CharsCount));
             
             LineManager.RemoveLine(nextLineIndex);
             CaretManager.ShiftCaretLine(nextLineIndex, EditDirection.Backward);
@@ -239,14 +236,14 @@ internal class MergeLineCommand : Command
             
             CaretManager.MergeLineCaret(caret, prevLine, line);
                 
-            prevLine.AppendChars(line.RemoveChars(0, line.CharsCount));
+            prevLine.InsertChars(prevLine.CharsCount,
+                line.RemoveChars(0, line.CharsCount));
             
             LineManager.RemoveLine(currentLineIndex);
             CaretManager.ShiftCaretLine(currentLineIndex, EditDirection.Backward);
         }
         
         RowManager.SetRowCacheDirty();
-        FoldingManager.SetCacheDirty();
     }
 
     internal override void Undo(Caret caret)

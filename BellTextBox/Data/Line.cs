@@ -41,7 +41,7 @@ internal class Line
     {
         Index = index;
         
-        _colorsCache = new("Colors", new(), UpdateColors);
+        _colorsCache = new("Colors", new(), UpdateColors, SlowUpdateColors);
         _cutoffsCache = new("Cutoffs", new(), UpdateCutoff);
         _stringCache = new("String", string.Empty, UpdateString);
         _lineSubsCache = new("Line Subs", new List<LineSub>(), UpdateLineSubs);
@@ -62,30 +62,34 @@ internal class Line
     internal void InsertChars(int charIndex, char[] chars)
     {
         _chars.InsertRange(charIndex, chars);
+        Colors.InsertRange(charIndex, new ColorStyle[chars.Length]);
+        
         SetCharsDirty();
-    }
-    
-    internal void AppendChars(char[] chars)
-    {
-        _chars.AddRange(chars);
-        SetCharsDirty();
+        SetCutoffsDirty();
+        UpdateTokens();
     }
     
     internal char[] RemoveChars(int charIndex, int count)
     {
         var removed = _chars.GetRange(charIndex, count).ToArray();
         _chars.RemoveRange(charIndex, count);
+        
+        if (Colors.Count > charIndex + count)
+            Colors.RemoveRange(charIndex, count);
+        else
+            Colors.RemoveRange(charIndex, Colors.Count - charIndex);
+        
         SetCharsDirty();
+        SetCutoffsDirty();
+        UpdateTokens();
+        
         return removed;
     }
 
-    private void SetCharsDirty()
+    internal void SetCharsDirty()
     {
         _colorsCache.SetDirty();
-        _cutoffsCache.SetDirty();
         _stringCache.SetDirty();
-        _lineSubsCache.SetDirty();
-        UpdateTokens();
     }
     
     internal void SetCutoffsDirty()
@@ -95,6 +99,11 @@ internal class Line
     }
 
     private List<ColorStyle> UpdateColors(List<ColorStyle> colors)
+    {
+        return colors;
+    }
+
+    private List<ColorStyle> SlowUpdateColors(List<ColorStyle> colors)
     {
         colors.Clear();
         if (Singleton.TextBox.SyntaxHighlightEnabled == false)
@@ -118,7 +127,6 @@ internal class Line
 
             colors.Add(colorStyle);
         }
-
         return colors;
     }
 

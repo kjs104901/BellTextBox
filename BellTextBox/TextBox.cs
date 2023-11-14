@@ -15,7 +15,6 @@ public partial class TextBox
     internal readonly FontManager FontManager = new();
     internal readonly LineManager LineManager = new();
     internal readonly RowManager RowManager = new();
-    internal readonly FoldingManager FoldingManager = new();
     internal readonly Logger Logger = new ();
     internal readonly CacheCounter CacheCounter = new();
     
