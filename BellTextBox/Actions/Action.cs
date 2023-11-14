@@ -229,7 +229,7 @@ internal class DeleteSelectionAction : Action
                     continue;
                 }
                 
-                int deleteCount = lineToDelete.Chars.Count;
+                int deleteCount = lineToDelete.CharsCount;
                 if (i == caret.Position.LineIndex)
                 {
                     deleteCount = caret.Position.CharIndex;
@@ -265,7 +265,7 @@ internal class DeleteSelectionAction : Action
                     continue;
                 }
                 
-                int deleteCount = lineToDelete.Chars.Count;
+                int deleteCount = lineToDelete.CharsCount;
                 if (i == caret.AnchorPosition.LineIndex)
                 {
                     deleteCount = caret.AnchorPosition.CharIndex;
@@ -344,7 +344,7 @@ internal class DeleteCharAction : Action
             return commands;
         }
         
-        if (caret.Position.CharIndex == line.Chars.Count && _direction == EditDirection.Forward)
+        if (caret.Position.CharIndex == line.CharsCount && _direction == EditDirection.Forward)
         {
             if (caret.Position.LineIndex == LineManager.Lines.Count - 1)
                 return commands;

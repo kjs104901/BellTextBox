@@ -13,12 +13,14 @@ public partial class TextBox
 
     internal Vector2 PageSize;
 
-    private Coordinates _mouseDragStartText;
+    private Vector2 _mouseDragStart;
 
     private bool _shiftPressed;
     private bool _altPressed;
 
     private string _imeComposition = "";
+
+    private const float ScrollSpeed = 10.0f;
 
     private void ProcessInput(Vector2 viewPos, Vector2 viewSize)
     {
@@ -325,7 +327,7 @@ public partial class TextBox
         if (MouseAction.Click == mouseInput.LeftAction ||
             MouseAction.Click == mouseInput.MiddleAction)
         {
-            _mouseDragStartText = coordinates;
+            _mouseDragStart = mouseInput.Position;
         }
 
         if (MouseAction.Click == mouseInput.LeftAction)
@@ -373,7 +375,11 @@ public partial class TextBox
         {
             if (_altPressed)
             {
-                CaretManager.SelectRectangle(_mouseDragStartText, coordinates);
+                ConvertCoordinatesRange(_mouseDragStart, mouseInput.Position,
+                    out List<(Coordinates, Coordinates)> ranges,
+                    out bool isReversed);
+                
+                CaretManager.SelectRectangle(ranges, isReversed);
             }
             else
             {
@@ -386,9 +392,29 @@ public partial class TextBox
         }
         else if (MouseAction.Dragging == mouseInput.MiddleAction)
         {
-            CaretManager.SelectRectangle(_mouseDragStartText, coordinates);
-        }
+            ConvertCoordinatesRange(_mouseDragStart, mouseInput.Position,
+                out List<(Coordinates, Coordinates)> ranges,
+                out bool isReversed);
 
+            CaretManager.SelectRectangle(ranges, isReversed);
+        }
+        
+        if (MouseAction.Dragging == mouseInput.LeftAction ||
+            MouseAction.Dragging == mouseInput.MiddleAction)
+        {
+            if (mouseInput.Position.Y - _viewPos.Y < 0)
+                Backend.SetScrollY(Backend.GetScrollY() - ScrollSpeed);
+            
+            else if (mouseInput.Position.Y - _viewPos.Y > _viewSize.Y)
+                Backend.SetScrollY(Backend.GetScrollY() + ScrollSpeed);
+            
+            if (mouseInput.Position.X - _viewPos.X < 0)
+                Backend.SetScrollX(Backend.GetScrollX() - ScrollSpeed);
+            
+            else if (mouseInput.Position.X - _viewPos.X > _viewSize.X)
+                Backend.SetScrollX(Backend.GetScrollX() + ScrollSpeed);
+        }
+        
         _shiftPressed = false;
         _altPressed = false;
     }
@@ -471,6 +497,48 @@ public partial class TextBox
                     row.LineSub.GetCharIndex(x - row.LineSub.IndentWidth);
                 
                 coordinates.LineSubIndex = row.LineSub.Coordinates.LineSubIndex;
+            }
+        }
+    }
+    
+    private void ConvertCoordinatesRange(Vector2 a, Vector2 b,
+        out List<ValueTuple<Coordinates, Coordinates>> ranges,
+        out bool isReversed)
+    {
+        ranges = new List<(Coordinates, Coordinates)>();
+        
+        isReversed = b.X < a.X;
+        Vector2 from = new Vector2() { X = Math.Min(a.X, b.X), Y = Math.Min(a.Y, b.Y) };
+        Vector2 to = new Vector2() { X = Math.Max(a.X, b.X), Y = Math.Max(a.Y, b.Y) };
+        
+        int fromRow = GetRowIndex(from);
+        int toRow = GetRowIndex(to);
+        
+        float fromX = from.X - LineNumberWidth - FoldWidth;
+        float toX = to.X - LineNumberWidth - FoldWidth;
+
+        for (int i = fromRow; i <= toRow; i++)
+        {
+            if (RowManager.Rows.Count <= i)
+                break;
+            
+            Row row = RowManager.Rows[i];
+            if (LineManager.GetLine(row.LineSub.Coordinates.LineIndex, out Line line))
+            {
+                int lineIndex = line.Index;
+                int lineSubIndex = row.LineSub.Coordinates.LineSubIndex;
+                
+                int fromCharIndex =
+                    row.LineSub.Coordinates.CharIndex +
+                    row.LineSub.GetCharIndex(fromX - row.LineSub.IndentWidth);
+                int toCharIndex =
+                    row.LineSub.Coordinates.CharIndex +
+                    row.LineSub.GetCharIndex(toX - row.LineSub.IndentWidth);
+                
+                ranges.Add(new (
+                    new Coordinates() { LineIndex = lineIndex, LineSubIndex = lineSubIndex, CharIndex = fromCharIndex},
+                    new Coordinates() { LineIndex = lineIndex, LineSubIndex = lineSubIndex, CharIndex = toCharIndex}
+                ));
             }
         }
     }

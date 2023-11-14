@@ -6,7 +6,9 @@ public partial class Language
     {
         Language language = new();
         
-        language.Foldings.Add(("{", "}"));
+        language.AddFolding("{", "}");
+        language.AddLineComment("//");
+        language.AddString("\"");
         
         return language;
     }

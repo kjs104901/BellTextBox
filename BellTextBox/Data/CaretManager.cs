@@ -24,8 +24,8 @@ internal partial class CaretManager
     internal static void RemoveCaretsSelection() => Singleton.TextBox.CaretManager.RemoveCaretsSelection_();
     internal static void RemoveCaretsLineSub() => Singleton.TextBox.CaretManager.RemoveCaretsLineSub_();
 
-    internal static void SelectRectangle(Coordinates startPosition, Coordinates endPosition) =>
-        Singleton.TextBox.CaretManager.SelectRectangle_(startPosition, endPosition);
+    internal static void SelectRectangle(List<ValueTuple<Coordinates, Coordinates>> ranges, bool isReversed) =>
+        Singleton.TextBox.CaretManager.SelectRectangle_(ranges, isReversed);
 
     internal static List<Caret> GetCaretsInLine(Line line) => Singleton.TextBox.CaretManager.GetCaretsInLine_(line);
     internal static void CopyClipboard() => Singleton.TextBox.CaretManager.CopyClipboard_();
@@ -143,10 +143,25 @@ internal partial class CaretManager
         RowManager.SetRowCacheDirty();
     }
 
-    private void SelectRectangle_(Coordinates startPosition, Coordinates endPosition)
+    private void SelectRectangle_(List<ValueTuple<Coordinates, Coordinates>> ranges, bool isReversed)
     {
         _carets.Clear();
-        // TODO select multiple lines
+        bool hasSelection = ranges.Any(range => range.Item1.CharIndex != range.Item2.CharIndex);
+
+        foreach ((Coordinates, Coordinates) range in ranges)
+        {
+            if (hasSelection)
+            {
+                if (range.Item1.CharIndex == range.Item2.CharIndex)
+                    continue;
+            }
+            
+            _carets.Add(new Caret()
+            {
+                Position = isReversed ? range.Item1 : range.Item2,
+                AnchorPosition = isReversed ? range.Item2 : range.Item1
+            });
+        }
         RemoveDuplicatedCarets_();
         RowManager.SetRowCacheDirty();
     }
@@ -294,13 +309,13 @@ internal partial class CaretManager
             if (c.Position.LineIndex == fromLine.Index)
             {
                 c.Position.LineIndex = line.Index;
-                c.Position.CharIndex += line.Chars.Count;
+                c.Position.CharIndex += line.CharsCount;
             }
 
             if (c.AnchorPosition.LineIndex == fromLine.Index)
             {
                 c.AnchorPosition.LineIndex = line.Index;
-                c.AnchorPosition.CharIndex += line.Chars.Count;
+                c.AnchorPosition.CharIndex += line.CharsCount;
             }
             
             Logger.Info("MergeLineCaret: " + c.Position.LineIndex + " " + c.Position.CharIndex);
@@ -318,7 +333,7 @@ internal partial class CaretManager
                 if (caret.Position.CharIndex <= c.Position.CharIndex)
                 {
                     c.Position.LineIndex = toLine.Index;
-                    c.Position.CharIndex -= line.Chars.Count;
+                    c.Position.CharIndex -= line.CharsCount;
                     
                     if (c.Position.CharIndex < 0)
                     {
@@ -332,7 +347,7 @@ internal partial class CaretManager
                 if (caret.Position.CharIndex <= c.AnchorPosition.CharIndex)
                 {
                     c.AnchorPosition.LineIndex = toLine.Index;
-                    c.AnchorPosition.CharIndex -= line.Chars.Count;
+                    c.AnchorPosition.CharIndex -= line.CharsCount;
                     
                     if (c.AnchorPosition.CharIndex < 0)
                     {

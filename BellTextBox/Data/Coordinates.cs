@@ -69,7 +69,7 @@ internal struct Coordinates
         if (false == LineManager.GetLine(LineIndex, out Line line))
             return false;
 
-        if (CharIndex < 0 || CharIndex > line.Chars.Count + 1)
+        if (CharIndex < 0 || CharIndex > line.CharsCount + 1)
             return false;
 
         return true;
@@ -105,7 +105,7 @@ internal struct Coordinates
                 return this;
 
             // End of line
-            if (line.Chars.Count <= CharIndex)
+            if (line.CharsCount <= CharIndex)
             {
                 // End of file
                 if (false == LineManager.GetLine(LineIndex + 1, out Line nextLine))
@@ -141,7 +141,7 @@ internal struct Coordinates
                     return this;
 
                 LineIndex = prevLine.Index;
-                CharIndex = prevLine.Chars.Count;
+                CharIndex = prevLine.CharsCount;
                 LineSubIndex = -1;
                 return this;
             }
@@ -241,7 +241,7 @@ internal struct Coordinates
             if (false == LineManager.GetLine(LineIndex, out Line line))
                 return this;
 
-            CharIndex = line.Chars.Count;
+            CharIndex = line.CharsCount;
             LineSubIndex = -1;
             return this;
         }
@@ -274,7 +274,7 @@ internal struct Coordinates
                 return this;
 
             LineIndex = lastLine.Index;
-            CharIndex = lastLine.Chars.Count();
+            CharIndex = lastLine.CharsCount;
             return this;
         }
 

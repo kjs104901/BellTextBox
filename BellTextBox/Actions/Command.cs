@@ -34,16 +34,14 @@ internal class InputCharCommand : Command
             Logger.Error($"InputCharCommand: Line not found {caret.Position.LineIndex}");
             return;
         }
-        // TODO 같은 줄 캐럿 이동
-        line.Chars.InsertRange(caret.Position.CharIndex, _chars);
-        line.SetCharsDirty();
+        
+        line.InsertChars(caret.Position.CharIndex, _chars);
         RowManager.SetRowCacheDirty();
 
         if (EditDirection.Forward == _direction)
         {
             CaretManager.InputCharCaret(caret, _chars.Length);
         }
-
         CaretManager.ShiftCaretChar(caret.Position.LineIndex, caret.Position.CharIndex, EditDirection.Forward, _chars.Length);
         
         FoldingManager.SetCacheDirty();
@@ -87,18 +85,14 @@ internal class DeleteCharCommand : Command
 
         _deletedCount = _count;
             
-        List<char> chars = line.Chars;
         int targetIndex = caret.Position.CharIndex;
             
         if (EditDirection.Forward == _direction)
         {
-            if (targetIndex + _deletedCount > chars.Count)
-                _deletedCount = chars.Count - targetIndex;
-
-            _deletedChars = chars.GetRange(targetIndex, _deletedCount).ToArray();
-            // TODO 같은 줄 캐럿 이동
-            chars.RemoveRange(targetIndex, _deletedCount);
-            line.SetCharsDirty();
+            if (targetIndex + _deletedCount > line.CharsCount)
+                _deletedCount = line.CharsCount - targetIndex;
+            
+            _deletedChars = line.RemoveChars(targetIndex, _deletedCount);
             RowManager.SetRowCacheDirty();
             
             CaretManager.ShiftCaretChar(caret.Position.LineIndex, caret.Position.CharIndex, EditDirection.Backward, _deletedCount);
@@ -108,9 +102,7 @@ internal class DeleteCharCommand : Command
             if (targetIndex - _deletedCount < 0)
                 _deletedCount = targetIndex;
                 
-            _deletedChars = chars.GetRange(targetIndex - _deletedCount, _deletedCount).ToArray();
-            chars.RemoveRange(targetIndex - _deletedCount, _deletedCount);
-            line.SetCharsDirty();
+            _deletedChars = line.RemoveChars(targetIndex - _deletedCount, _deletedCount);
             RowManager.SetRowCacheDirty();
 
             CaretManager.ShiftCaretChar(caret.Position.LineIndex, caret.Position.CharIndex, EditDirection.Backward, _deletedCount);
@@ -158,14 +150,10 @@ internal class SplitLineCommand : Command
         char[] restOfLine;
         int insertLineIndex;
 
-        List<char> chars = line.Chars;
-        
         if (EditDirection.Forward == _direction)
         {
             // Get forward rest of line
-            restOfLine = chars.GetRange(caret.Position.CharIndex, chars.Count - caret.Position.CharIndex).ToArray();
-            chars.RemoveRange(caret.Position.CharIndex, chars.Count - caret.Position.CharIndex);
-            line.SetCharsDirty();
+            restOfLine = line.RemoveChars(caret.Position.CharIndex, line.CharsCount - caret.Position.CharIndex);
             
             // TODO auto indent?
             
@@ -175,23 +163,19 @@ internal class SplitLineCommand : Command
             CaretManager.ShiftCaretLine(insertLineIndex, EditDirection.Forward);
             CaretManager.SplitLineCaret(caret, line, newLine);
             
-            newLine.Chars.AddRange(restOfLine);
-            newLine.SetCharsDirty();
+            newLine.InsertChars(0, restOfLine);
         }
         else
         {
             // Get backward rest of line
-            restOfLine = chars.GetRange(0, caret.Position.CharIndex).ToArray();
-            chars.RemoveRange(0, caret.Position.CharIndex);
-            line.SetCharsDirty();
+            restOfLine = line.RemoveChars(0, caret.Position.CharIndex);
             
             insertLineIndex = caret.Position.LineIndex;
             
             Line newLine = LineManager.InsertLine(insertLineIndex);
             CaretManager.ShiftCaretLine(insertLineIndex, EditDirection.Forward);
             
-            newLine.Chars.AddRange(restOfLine);
-            newLine.SetCharsDirty();
+            newLine.InsertChars(0, restOfLine);
         }
         
         RowManager.SetRowCacheDirty();
@@ -240,8 +224,7 @@ internal class MergeLineCommand : Command
             
             CaretManager.MergeLineCaret(caret, line, nextLine);
             
-            line.Chars.AddRange(nextLine.Chars);
-            line.SetCharsDirty();
+            line.AppendChars(nextLine.RemoveChars(0, nextLine.CharsCount));
             
             LineManager.RemoveLine(nextLineIndex);
             CaretManager.ShiftCaretLine(nextLineIndex, EditDirection.Backward);
@@ -256,8 +239,7 @@ internal class MergeLineCommand : Command
             
             CaretManager.MergeLineCaret(caret, prevLine, line);
                 
-            prevLine.Chars.AddRange(line.Chars);
-            prevLine.SetCharsDirty();
+            prevLine.AppendChars(line.RemoveChars(0, line.CharsCount));
             
             LineManager.RemoveLine(currentLineIndex);
             CaretManager.ShiftCaretLine(currentLineIndex, EditDirection.Backward);

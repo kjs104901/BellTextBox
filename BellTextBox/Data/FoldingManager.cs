@@ -24,7 +24,7 @@ internal partial class FoldingManager
     private List<Folding> UpdateFoldingList(List<Folding> foldingList)
     {
         foldingList.Clear();
-
+        /*
         Dictionary<int, Stack<int>> foldingStacks = new();
         for (int i = 0; i < Singleton.TextBox.Language.Foldings.Count; i++)
         {
@@ -64,7 +64,7 @@ internal partial class FoldingManager
                 AddFolding(foldingList, start, end);
             }
         }
-        
+        */
         return foldingList;
     }
 

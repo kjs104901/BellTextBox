@@ -53,8 +53,10 @@ public partial class TextBox
         int i = 0;
         foreach (string lineText in text.Split('\n'))
         {
-            Line line = new Line(i++, lineText.ToArray());
+            Line line = new Line(i++);
             LineManager.Lines.Add(line);
+            
+            line.InsertChars(0, lineText.ToCharArray());
         }
         CaretManager.ClearCarets();
         RowManager.SetRowCacheDirty();

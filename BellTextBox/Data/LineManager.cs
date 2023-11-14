@@ -24,15 +24,23 @@ internal partial class LineManager
 
     internal static void RemoveLine(int removeLineIndex) =>
         Singleton.TextBox.LineManager.RemoveLine_(removeLineIndex);
+
+    internal static void SetLanguageDirty() =>
+        Singleton.TextBox.LineManager.SetLanguageDirty_();
+
+    internal static void UpdateLanguage() =>
+        Singleton.TextBox.LineManager.UpdateLanguage_();
 }
 
 // Implementation
 internal partial class LineManager
 {
     private readonly List<Line> _lines = new();
-    
+
     private readonly List<Language.Token[]> _linesTokens = new();
     private readonly Stack<Language.Token> _tokens = new();
+
+    private bool _isLanguageDirty = true;
 
     private bool GetLine_(int lineIndex, out Line line)
     {
@@ -86,6 +94,7 @@ internal partial class LineManager
         {
             _lines[i].ChangeLineIndex(i);
         }
+
         return newLine;
     }
 
@@ -99,42 +108,73 @@ internal partial class LineManager
             _lines[i].ChangeLineIndex(i);
         }
     }
-    
+
+    private void SetLanguageDirty_()
+    {
+        _isLanguageDirty = true;
+    }
+
     private void UpdateLanguage_()
     {
-        bool needUpdate = _lines.Count != _linesTokens.Count;
-        if (false == needUpdate)
+        if (false == _isLanguageDirty)
+            return;
+
+        _tokens.Clear();
+        foreach (Line line in _lines)
         {
-            for (int i = 0; i < _lines.Count; i++)
+            line.SyntaxList.Clear();
+
+            foreach (Language.Token token in line.Tokens)
             {
-                Line line = _lines[i];
-                Language.Token[] tokens = _linesTokens[i];
-                
-                if (false == tokens.SequenceEqual(line.LanguageTokens))
+                if (_tokens.TryPeek(out Language.Token top))
                 {
-                    needUpdate = true;
-                    break;
+                    // 이전 토큰이 끝나지 않은 경우 continue로 토큰 무시
+                    if (top.Type == Language.TokenType.BlockCommentStart)
+                    {
+                        if (token.Type != Language.TokenType.BlockCommentEnd ||
+                            token.TokenIndex != top.TokenIndex)
+                            continue;
+
+                        _tokens.Pop();
+                        line.SyntaxList.Add(token);
+                        continue;
+                    }
+
+                    if (top.Type == Language.TokenType.MultilineStringStart)
+                    {
+                        if (token.Type != Language.TokenType.MultilineStringEnd ||
+                            token.TokenIndex != top.TokenIndex)
+                            continue;
+
+                        _tokens.Pop();
+                        line.SyntaxList.Add(token);
+                        continue;
+                    }
+
+                    if (top.Type == Language.TokenType.String &&
+                        token.Type == Language.TokenType.String &&
+                        token.TokenIndex == top.TokenIndex)
+                    {
+                        _tokens.Pop();
+                        line.SyntaxList.Add(token);
+                        continue;
+                    }
+
+                    if (top.Type == Language.TokenType.LineComment)
+                    {
+                        continue;
+                    }
                 }
+
+                _tokens.Push(token);
+                line.SyntaxList.Add(token);
             }
-        }
 
-        if (needUpdate)
-        {
-            _tokens.Clear();
-            foreach (Line line in _lines)
+            // 라인을 넘을 수 없는 토큰은 제거
+            while (_tokens.TryPeek(out Language.Token lineTop) &&
+                   (lineTop.Type == Language.TokenType.LineComment || lineTop.Type == Language.TokenType.String))
             {
-                line.ClearSyntax();
-                
-                // 최상위 스택이 있다면 추가
-                line.AddSyntax(token);
-                
-                foreach (Language.Token token in line.LanguageTokens)
-                {
-                    _tokens.Push(token); // 스택으로 처리
-
-                    // 무시당하지 않은 스택 추가
-                    line.AddSyntax(token);
-                }
+                _tokens.Pop();
             }
         }
     }

@@ -166,6 +166,26 @@ public class ImGuiBackend : IBackend
         return ImGui.GetClipboardText();
     }
 
+    public void SetScrollX(float scrollX)
+    {
+        ImGui.SetScrollX(scrollX);
+    }
+
+    public float GetScrollX()
+    {
+        return ImGui.GetScrollX();
+    }
+
+    public void SetScrollY(float scrollY)
+    {
+        ImGui.SetScrollY(scrollY);
+    }
+
+    public float GetScrollY()
+    {
+        return ImGui.GetScrollY();
+    }
+
     public float GetCharWidth(char c)
     {
         return ImGui.GetFont().GetCharAdvance(c);

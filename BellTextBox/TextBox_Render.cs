@@ -21,6 +21,8 @@ public partial class TextBox
 
         LineNumberWidth = (StringPool<int>.Get(LineManager.Lines.Count).Length + 1) * FontManager.GetFontNumberWidth();
 
+        LineManager.UpdateLanguage();
+        
         int rowStart = GetRowIndex(_viewPos, -3);
         int rowEnd = GetRowIndex(_viewPos + _viewSize, 3);
 

@@ -10,7 +10,9 @@ internal class Line
 {
     internal int Index;
 
-    internal readonly List<char> Chars = new();
+    internal int CharsCount => _chars.Count;
+    
+    private readonly List<char> _chars = new();
 
     internal Folding Folding = Folding.None;
 
@@ -26,25 +28,23 @@ internal class Line
     internal List<LineSub> LineSubs => _lineSubsCache.Get();
     private readonly Cache<List<LineSub>> _lineSubsCache;
 
-    internal List<Language.Token> LanguageTokens => _languageTokensCache.Get();
-    private readonly Cache<List<Language.Token>> _languageTokensCache;
-
+    private List<Language.Token> _oldTokens = new();
+    internal List<Language.Token> Tokens = new();
+    internal List<Language.Token> SyntaxList = new();
+    
     // buffer to avoid GC
     private readonly StringBuilder _sb = new();
 
-    internal static readonly Line None = new(0, Array.Empty<char>());
+    internal static readonly Line None = new(0);
 
-    internal Line(int index, char[]? initialChars = null)
+    internal Line(int index)
     {
         Index = index;
-        if (initialChars != null)
-            Chars.AddRange(initialChars);
-
+        
         _colorsCache = new("Colors", new(), UpdateColors);
         _cutoffsCache = new("Cutoffs", new(), UpdateCutoff);
         _stringCache = new("String", string.Empty, UpdateString);
         _lineSubsCache = new("Line Subs", new List<LineSub>(), UpdateLineSubs);
-        _languageTokensCache = new("Language Tokens", new(), UpdateLanguageTokens);
     }
     
     internal void ChangeLineIndex(int newIndex)
@@ -58,13 +58,34 @@ internal class Line
             lineSub.Coordinates.LineIndex = newIndex;
         }
     }
+    
+    internal void InsertChars(int charIndex, char[] chars)
+    {
+        _chars.InsertRange(charIndex, chars);
+        SetCharsDirty();
+    }
+    
+    internal void AppendChars(char[] chars)
+    {
+        _chars.AddRange(chars);
+        SetCharsDirty();
+    }
+    
+    internal char[] RemoveChars(int charIndex, int count)
+    {
+        var removed = _chars.GetRange(charIndex, count).ToArray();
+        _chars.RemoveRange(charIndex, count);
+        SetCharsDirty();
+        return removed;
+    }
 
-    internal void SetCharsDirty()
+    private void SetCharsDirty()
     {
         _colorsCache.SetDirty();
         _cutoffsCache.SetDirty();
         _stringCache.SetDirty();
         _lineSubsCache.SetDirty();
+        UpdateTokens();
     }
     
     internal void SetCutoffsDirty()
@@ -79,7 +100,7 @@ internal class Line
         if (Singleton.TextBox.SyntaxHighlightEnabled == false)
             return colors;
         
-        foreach (var c in Chars)
+        foreach (var c in _chars)
         {
             ColorStyle colorStyle;
             if (char.IsLower(c))
@@ -113,9 +134,9 @@ internal class Line
 
         float widthAccumulated = 0.0f;
 
-        for (int i = 0; i < Chars.Count; i++)
+        for (int i = 0; i < _chars.Count; i++)
         {
-            widthAccumulated += FontManager.GetFontWidth(Chars[i]);
+            widthAccumulated += FontManager.GetFontWidth(_chars[i]);
             if (widthAccumulated + FontManager.GetFontReferenceWidth() > lineWidth)
             {
                 if (Singleton.TextBox.WrapMode == WrapMode.BreakWord)
@@ -129,10 +150,10 @@ internal class Line
                     float backWidth = 0.0f;
                     while (i > 0)
                     {
-                        if (char.IsWhiteSpace(Chars[i]))
+                        if (char.IsWhiteSpace(_chars[i]))
                             break;
 
-                        backWidth += FontManager.GetFontWidth(Chars[i]);
+                        backWidth += FontManager.GetFontWidth(_chars[i]);
                         if (backWidth + FontManager.GetFontReferenceWidth() * 10 > lineWidth)
                             break; // Give up on word wrap. break word.
 
@@ -151,7 +172,7 @@ internal class Line
     private string UpdateString(string _)
     {
         _sb.Clear();
-        _sb.Append(CollectionsMarshal.AsSpan(Chars));
+        _sb.Append(CollectionsMarshal.AsSpan(_chars));
         return _sb.ToString();
     }
 
@@ -162,9 +183,9 @@ internal class Line
         int lineSubIndex = 0;
         LineSub lineSub = new LineSub(Index, 0, lineSubIndex, 0.0f);
 
-        for (int i = 0; i < Chars.Count; i++)
+        for (int i = 0; i < _chars.Count; i++)
         {
-            char c = Chars[i];
+            char c = _chars[i];
             float cWidth = FontManager.GetFontWidth(c);
 
             lineSub.Chars.Add(c);
@@ -183,16 +204,33 @@ internal class Line
         return lineSubs;
     }
 
-    private List<Language.Token> UpdateLanguageTokens(List<Language.Token> tokens)
+    private void UpdateTokens()
     {
-        return tokens;
-    }
+        Tokens.Clear();
 
+        for (int i = 0; i < String.Length; i++)
+        {
+            if (Singleton.TextBox.Language.FindMatching(String, i,
+                    out string matchedStr, out Language.Token matchedToken))
+            {
+                Tokens.Add(matchedToken);
+                i += matchedStr.Length;
+            }
+        }
+        
+        if (false == _oldTokens.SequenceEqual(Tokens))
+        {
+            _oldTokens.Clear();
+            _oldTokens.AddRange(Tokens);
+            LineManager.SetLanguageDirty();
+        }
+    }
+    
     internal int CountSubstrings(string findText)
     {
         int count = 0;
 
-        int textLength = Chars.Count;
+        int textLength = _chars.Count;
         int findTextLength = findText.Length;
 
         for (int i = 0; i <= textLength - findTextLength; i++)
@@ -200,7 +238,7 @@ internal class Line
             bool isMatch = true;
             for (int j = 0; j < findTextLength; j++)
             {
-                if (Chars[i + j] != findText[j])
+                if (_chars[i + j] != findText[j])
                 {
                     isMatch = false;
                     break;

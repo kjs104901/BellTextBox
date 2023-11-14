@@ -16,6 +16,11 @@ public interface IBackend
 
     public void SetClipboard(string text);
     public string GetClipboard();
+    
+    public void SetScrollX(float scrollX);
+    public float GetScrollX();
+    public void SetScrollY(float scrollY);
+    public float GetScrollY();
 
     public float GetCharWidth(char c);
     public float GetFontSize();
