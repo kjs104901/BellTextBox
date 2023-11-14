@@ -184,7 +184,7 @@ internal partial class CaretManager
             {
                 if (LineManager.GetLine(row.LineSub.Coordinates.LineIndex, out Line line))
                 {
-                    string text = line.GetText(row.RowSelection.SelectionStartChar, row.RowSelection.SelectionEndChar);
+                    string text = line.GetSubString(row.RowSelection.SelectionStartChar, row.RowSelection.SelectionEndChar);
                     _clipboard.Add(text);
                 }
             }

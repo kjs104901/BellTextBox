@@ -321,7 +321,7 @@ internal class Line
         return true;
     }
 
-    public string GetText(int startCharIndex, int endCharIndex)
+    public string GetSubString(int startCharIndex, int endCharIndex)
     {
         if (startCharIndex > endCharIndex)
             return string.Empty;
