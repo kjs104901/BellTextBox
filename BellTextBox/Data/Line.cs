@@ -1,7 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text;
 using Bell.Languages;
-using Bell.Themes;
 using Bell.Utils;
 
 namespace Bell.Data;
@@ -28,9 +27,9 @@ internal class Line
     internal List<LineSub> LineSubs => _lineSubsCache.Get();
     private readonly Cache<List<LineSub>> _lineSubsCache;
 
-    private List<Language.Token> _oldTokens = new();
-    internal List<Language.Token> Tokens = new();
-    internal List<Language.Token> SyntaxList = new();
+    private readonly List<Language.Token> _oldTokens = new();
+    internal readonly List<Language.Token> Tokens = new();
+    internal readonly List<Language.Token> SyntaxList = new();
     
     // buffer to avoid GC
     private readonly StringBuilder _sb = new();
@@ -109,6 +108,12 @@ internal class Line
         if (Singleton.TextBox.SyntaxHighlightEnabled == false)
             return colors;
         
+        if (_chars.Count > TextBox.SyntaxGiveUpThreshold)
+            return colors;
+        
+        colors.AddRange(new ColorStyle[_chars.Count]);
+        
+        /*
         foreach (var c in _chars)
         {
             ColorStyle colorStyle;
@@ -127,6 +132,8 @@ internal class Line
 
             colors.Add(colorStyle);
         }
+        */
+        
         return colors;
     }
 
@@ -218,11 +225,13 @@ internal class Line
 
         for (int i = 0; i < String.Length; i++)
         {
-            if (Singleton.TextBox.Language.FindMatching(String, i,
+            if (Singleton.TextBox.Language.FindMatching(String,
+                    Index, i,
                     out string matchedStr, out Language.Token matchedToken))
             {
                 Tokens.Add(matchedToken);
                 i += matchedStr.Length;
+                i--; // Ignore i++ in for loop
             }
         }
         
@@ -234,36 +243,6 @@ internal class Line
         }
     }
     
-    internal int CountSubstrings(string findText)
-    {
-        int count = 0;
-
-        int textLength = _chars.Count;
-        int findTextLength = findText.Length;
-
-        for (int i = 0; i <= textLength - findTextLength; i++)
-        {
-            bool isMatch = true;
-            for (int j = 0; j < findTextLength; j++)
-            {
-                if (_chars[i + j] != findText[j])
-                {
-                    isMatch = false;
-                    break;
-                }
-            }
-
-            if (isMatch)
-            {
-                count++;
-                i += findTextLength - 1; // Skip the length of substring to avoid overlapping counts
-            }
-        }
-
-        return count;
-    }
-    
-
     internal bool GetLineSub(int charIndex, out LineSub foundLineSub)
     {
         foundLineSub = LineSub.None;
@@ -288,5 +267,15 @@ internal class Line
         if (Singleton.TextBox.WordWrapIndent)
             return Singleton.TextBox.CountTabStart(String) * Singleton.TextBox.GetTabRenderSize();
         return 0.0f;
+    }
+
+    internal ColorStyle GetColorStyle(int charIndex)
+    {
+        ColorStyle charColor = Singleton.TextBox.Language.DefaultStyle;
+        if (Colors.Count > charIndex)
+            charColor = Colors[charIndex];
+        if (charColor == ColorStyle.None)
+            charColor = Singleton.TextBox.Language.DefaultStyle;
+        return charColor;
     }
 }

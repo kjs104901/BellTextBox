@@ -1,6 +1,5 @@
 ﻿using Bell.Data;
 using Bell.Languages;
-using Bell.Themes;
 
 namespace Bell;
 
@@ -26,8 +25,6 @@ public enum TabMode
 
 public partial class TextBox
 {
-    public readonly Theme Theme;
-    
     public bool AutoIndent { get; set; } = true;
     public bool AutoComplete { get; set; } = true;
     public bool Overwrite { get; set; } = false;
@@ -45,10 +42,21 @@ public partial class TextBox
     public bool SyntaxHighlightEnabled { get; set; } = true;
     public bool ShowingWhitespace { get; set; } = true;
     
+    internal const int SyntaxGiveUpThreshold = 1000;
+    
     public float LeadingHeight { get; set; } = 1.2f;
     
-    public Language Language { get; set; } = Language.PlainText();
-    
+    private Language _language = Language.PlainText();
+    public Language Language
+    {
+        get => _language;
+        set
+        {
+            _language = value;
+            LineManager.SetLanguageDirty();
+        }
+    }
+
     public readonly List<string> AutoCompleteList = new();
 
     internal int CountTabStart(string line)

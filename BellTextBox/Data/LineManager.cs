@@ -1,6 +1,5 @@
 ﻿using Bell.Actions;
 using Bell.Languages;
-using Bell.Themes;
 using Bell.Utils;
 
 namespace Bell.Data;
@@ -31,6 +30,9 @@ internal partial class LineManager
 
     internal static void UpdateLanguage() =>
         Singleton.TextBox.LineManager.UpdateLanguage_();
+    
+    internal static void ShiftFoldingLine(int lineIndex, EditDirection direction) =>
+        Singleton.TextBox.LineManager.ShiftFoldingLine_(lineIndex, direction);
 }
 
 // Implementation
@@ -125,7 +127,9 @@ internal partial class LineManager
         if (false == _isLanguageDirty || _languageUpdateTime > DateTime.Now)
             return;
 
+        // TODO: hold folding list and update only changed folding
         _foldingList.Clear();
+        
         int foldingTypeCount = Singleton.TextBox.Language.Tokens[Language.TokenType.FoldingStart].Count;
         for (int i = 0; i < foldingTypeCount; i++)
         {
@@ -138,6 +142,16 @@ internal partial class LineManager
         foreach (Line line in _lines)
         {
             line.SyntaxList.Clear();
+
+            if (_tokens.TryPop(out Language.Token prevTop))
+            {
+                // 이전 라인이 안 끝난 경우 추가
+                if (prevTop.Type == Language.TokenType.BlockCommentStart ||
+                    prevTop.Type == Language.TokenType.MultilineStringStart)
+                {
+                    line.SyntaxList.Add(prevTop);
+                }
+            }
 
             foreach (Language.Token token in line.Tokens)
             {
@@ -229,5 +243,24 @@ internal partial class LineManager
         }
         
         _isLanguageDirty = false;
+    }
+
+    private void ShiftFoldingLine_(int lineIndex, EditDirection direction)
+    {
+        int moveCount = EditDirection.Forward == direction ? 1 : -1;
+        foreach (Folding folding in _foldingList)
+        {
+            if (lineIndex <= folding.Start)
+            {
+                folding.Start += moveCount;
+            }
+
+            if (lineIndex <= folding.End)
+            {
+                folding.End += moveCount;
+            }
+            
+            Logger.Info("ShiftFoldingLine: " + folding.Start + " " + folding.End + " " + moveCount);
+        }
     }
 }

@@ -159,6 +159,8 @@ internal class SplitLineCommand : Command
             Line newLine = LineManager.InsertLine(insertLineIndex);
             CaretManager.ShiftCaretLine(insertLineIndex, EditDirection.Forward);
             CaretManager.SplitLineCaret(caret, line, newLine);
+
+            LineManager.ShiftFoldingLine(insertLineIndex, EditDirection.Forward);
             
             newLine.InsertChars(0, restOfLine);
         }
@@ -171,6 +173,8 @@ internal class SplitLineCommand : Command
             
             Line newLine = LineManager.InsertLine(insertLineIndex);
             CaretManager.ShiftCaretLine(insertLineIndex, EditDirection.Forward);
+            
+            LineManager.ShiftFoldingLine(insertLineIndex, EditDirection.Forward);
             
             newLine.InsertChars(0, restOfLine);
         }
@@ -225,6 +229,8 @@ internal class MergeLineCommand : Command
             
             LineManager.RemoveLine(nextLineIndex);
             CaretManager.ShiftCaretLine(nextLineIndex, EditDirection.Backward);
+            
+            LineManager.ShiftFoldingLine(nextLineIndex, EditDirection.Backward);
         }
         else if (EditDirection.Backward == _direction)
         {
@@ -241,6 +247,8 @@ internal class MergeLineCommand : Command
             
             LineManager.RemoveLine(currentLineIndex);
             CaretManager.ShiftCaretLine(currentLineIndex, EditDirection.Backward);
+            
+            LineManager.ShiftFoldingLine(currentLineIndex, EditDirection.Backward);
         }
         
         RowManager.SetRowCacheDirty();

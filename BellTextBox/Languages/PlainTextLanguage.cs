@@ -10,6 +10,11 @@ public partial class Language
         language.AddLineComment("//");
         language.AddString("\"");
         
+        language.DefaultStyle = new ColorStyle(0.4f, 0.8f, 0.2f, 1.0f);
+        language.CommentStyle = new ColorStyle(0.3f, 0.5f, 0.2f, 1.0f);
+        language.StringStyle = new ColorStyle(0.2f, 0.3f, 0.3f, 1.0f);
+        language.FoldingStyle = new ColorStyle(0.1f, 0.8f, 0.6f, 1.0f);
+        
         return language;
     }
 }

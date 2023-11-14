@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using Bell.Actions;
 using Bell.Data;
-using Bell.Themes;
 using Bell.Utils;
 
 namespace Bell;
@@ -23,8 +22,6 @@ public partial class TextBox
     public TextBox(IBackend backend)
     {
         Backend = backend;
-
-        Theme = new DarkTheme();
     }
 
     public string GetDebugString()

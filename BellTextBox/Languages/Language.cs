@@ -1,5 +1,5 @@
 ﻿using Bell.Data;
-using Bell.Themes;
+using Bell.Inputs;
 
 namespace Bell.Languages;
 
@@ -17,8 +17,10 @@ public partial class Language
         { TokenType.FoldingEnd, new() },
     };
 
+    public ColorStyle DefaultStyle = new();
     public ColorStyle CommentStyle = new();
-    public ColorStyle TextStyle = new();
+    public ColorStyle StringStyle = new();
+    public ColorStyle FoldingStyle = new();
 
     public Dictionary<string, ColorStyle> PatternsStyle = new();
     public Dictionary<string, ColorStyle> KeywordsStyle = new();
@@ -65,10 +67,10 @@ public partial class Language
         Tokens[TokenType.FoldingEnd].Add(endStr);
     }
 
-    internal bool FindMatching(string source, int charIndex, out string matchedStr, out Token matchedToken)
+    internal bool FindMatching(string source, int lineIndex, int charIndex, out string matchedStr, out Token matchedToken)
     {
         matchedStr = string.Empty;
-        matchedToken = new();
+        matchedToken = new Token();
 
         foreach (KeyValuePair<TokenType, List<string>> kv in Tokens)
         {
@@ -98,6 +100,7 @@ public partial class Language
 
                     matchedToken.Type = tokenType;
                     matchedToken.TokenIndex = tokenIndex;
+                    matchedToken.LineIndex = lineIndex;
                     matchedToken.CharIndex = charIndex;
                     
                     return true;
@@ -111,11 +114,13 @@ public partial class Language
     {
         internal TokenType Type;
         internal int TokenIndex;
+        
+        internal int LineIndex;
         internal int CharIndex;
 
         public bool Equals(Token other)
         {
-            return Type == other.Type && TokenIndex == other.TokenIndex && CharIndex == other.CharIndex;
+            return Type == other.Type && TokenIndex == other.TokenIndex && LineIndex == other.LineIndex && CharIndex == other.CharIndex;
         }
 
         public override bool Equals(object? obj)
@@ -125,7 +130,7 @@ public partial class Language
 
         public override int GetHashCode()
         {
-            return HashCode.Combine((int)Type, TokenIndex, CharIndex);
+            return HashCode.Combine((int)Type, TokenIndex, LineIndex, CharIndex);
         }
     }
 }

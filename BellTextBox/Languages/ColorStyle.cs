@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace Bell.Themes;
+namespace Bell.Languages;
 
 public readonly struct ColorStyle : IComparable<ColorStyle>
 {

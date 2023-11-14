@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 using Bell.Data;
-using Bell.Themes;
+using Bell.Languages;
 using Bell.Utils;
 
 namespace Bell;
@@ -45,7 +45,7 @@ public partial class TextBox
             {
                 Backend.RenderRectangle(new Vector2(lineStartX + row.RowSelection.SelectionStart, lineTextStartY),
                     new Vector2(lineStartX + row.RowSelection.SelectionEnd, lineTextEndY),
-                    Theme.LineSelectedBackgroundColor.ToVector());
+                    LineSelectedBackgroundColor.ToVector());
             }
 
             if (LineManager.GetLine(row.LineSub.Coordinates.LineIndex, out Line line))
@@ -58,11 +58,7 @@ public partial class TextBox
                     int rowCharIndex = row.LineSub.Coordinates.CharIndex + j;
                     float rowCharWidth = row.LineSub.CharWidths[j];
 
-                    ColorStyle charColor = Singleton.TextBox.Theme.DefaultFontColor;
-                    if (line.Colors.Count > rowCharIndex)
-                        charColor = line.Colors[rowCharIndex];
-                    if (charColor == ColorStyle.None)
-                        charColor = Singleton.TextBox.Theme.DefaultFontColor;
+                    ColorStyle charColor = line.GetColorStyle(rowCharIndex);
                     
                     Backend.RenderText(new Vector2(lineStartX + currPosX, lineTextStartY),
                         StringPool<char>.Get(rowChar), charColor.ToVector());
@@ -72,7 +68,7 @@ public partial class TextBox
                         Backend.RenderText(
                             new Vector2(lineStartX + currPosX, lineTextStartY),
                             "·",
-                            Theme.LineWhiteSpaceFontColor.ToVector());
+                            charColor.ToVector());
                     }
                     else if (rowChar == '\t')
                     {
@@ -80,7 +76,7 @@ public partial class TextBox
                             new Vector2(lineStartX + currPosX, lineTextStartY),
                             new Vector2(lineStartX + currPosX + Backend.GetCharWidth(' ') * 4, // TODO setting tab size
                                 lineTextStartY),
-                            Theme.LineWhiteSpaceFontColor.ToVector(),
+                            charColor.ToVector(),
                             1.0f);
                     }
 
@@ -94,36 +90,36 @@ public partial class TextBox
 
                     Backend.RenderText(new Vector2(LineNumberWidth - lineIndexWidth, lineTextStartY),
                         lineIndex,
-                        Theme.DefaultFontColor.ToVector());
+                        UiTextColor.ToVector());
                 }
 
                 if (Folding.None != line.Folding)
                 {
                     Backend.RenderText(new Vector2(LineNumberWidth, lineTextStartY),
                         line.Folding.Folded ? " >" : " V",
-                        Theme.DefaultFontColor.ToVector());
+                        UiTextColor.ToVector());
                 }
             }
 
-            foreach (float caretAnchorPosition in row.RowSelection.CaretAnchorPositions)
-            {
-                Backend.RenderLine(
-                    new Vector2(lineStartX + caretAnchorPosition - 1.0f, lineTextStartY),
-                    new Vector2(lineStartX + caretAnchorPosition - 1.0f, lineTextEndY),
-                    Theme.LineCommentFontColor.ToVector(),
-                    2.0f);
-            }
+            //foreach (float caretAnchorPosition in row.RowSelection.CaretAnchorPositions)
+            //{
+            //    Backend.RenderLine(
+            //        new Vector2(lineStartX + caretAnchorPosition - 1.0f, lineTextStartY),
+            //        new Vector2(lineStartX + caretAnchorPosition - 1.0f, lineTextEndY),
+            //        Language.LineCommentFontColor.ToVector(),
+            //        2.0f);
+            //}
 
             foreach (float caretPosition in row.RowSelection.CaretPositions)
             {
                 Backend.RenderLine(
                     new Vector2(lineStartX + caretPosition - 1.0f, lineTextStartY),
                     new Vector2(lineStartX + caretPosition - 1.0f, lineTextEndY),
-                    Theme.DefaultFontColor.ToVector(),
+                    CaretColor.ToVector(),
                     2.0f);
 
                 Backend.RenderText(new Vector2(lineStartX + caretPosition, lineTextStartY),
-                    _imeComposition, Theme.DefaultFontColor.ToVector());
+                    _imeComposition, ImeInputColor.ToVector());
             }
         }
     }
