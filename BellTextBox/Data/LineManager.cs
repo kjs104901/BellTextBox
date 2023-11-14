@@ -166,12 +166,14 @@ internal partial class LineManager
                         continue;
                     }
 
-                    if (top.Type == Language.TokenType.String &&
-                        token.Type == Language.TokenType.String &&
-                        token.TokenIndex == top.TokenIndex)
+                    if (top.Type == Language.TokenType.String)
                     {
-                        _tokens.Pop();
-                        line.SyntaxList.Add(token);
+                        if (token.Type == Language.TokenType.String &&
+                            token.TokenIndex == top.TokenIndex)
+                        {
+                            _tokens.Pop();
+                            line.SyntaxList.Add(token);
+                        }
                         continue;
                     }
 
