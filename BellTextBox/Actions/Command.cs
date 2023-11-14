@@ -152,8 +152,6 @@ internal class SplitLineCommand : Command
             // Get forward rest of line
             restOfLine = line.RemoveChars(caret.Position.CharIndex, line.CharsCount - caret.Position.CharIndex);
             
-            // TODO auto indent?
-            
             insertLineIndex = caret.Position.LineIndex + 1;
             
             Line newLine = LineManager.InsertLine(insertLineIndex);
@@ -184,8 +182,6 @@ internal class SplitLineCommand : Command
 
     internal override void Undo(Caret caret)
     {
-        // TODO auto indent?
-        
         if (EditDirection.Forward == _direction)
             new MergeLineCommand(EditDirection.Backward).Do(caret);
         else if (EditDirection.Backward == _direction)

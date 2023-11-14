@@ -287,4 +287,51 @@ internal class Line
             charColor = Singleton.TextBox.Language.DefaultStyle;
         return charColor;
     }
+
+    public bool GetWordStart(int charIndex, out int search)
+    {
+        search = charIndex;
+        if (charIndex < 0 || charIndex >= _chars.Count)
+            return false;
+
+        while (search >= 0)
+        {
+            if (_chars[search] == ' ')
+            {
+                search++;
+                break;
+            }
+            search--;
+        }
+        return true;
+    }
+
+    public bool GetWordEnd(int charIndex, out int search)
+    {
+        search = charIndex;
+        if (charIndex < 0 || charIndex >= _chars.Count)
+            return false;
+
+        while (search < _chars.Count)
+        {
+            if (_chars[search] == ' ')
+                break;
+            search++;
+        }
+        return true;
+    }
+
+    public string GetText(int startCharIndex, int endCharIndex)
+    {
+        if (startCharIndex > endCharIndex)
+            return string.Empty;
+        
+        if (startCharIndex < 0)
+            startCharIndex = 0;
+        
+        if (endCharIndex >= _chars.Count)
+            endCharIndex = _chars.Count - 1;
+
+        return String.Substring(startCharIndex, endCharIndex - startCharIndex + 1);
+    }
 }

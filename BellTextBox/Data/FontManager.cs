@@ -36,7 +36,9 @@ internal partial class FontManager
 
     private float GetFontWidth_(char c)
     {
-        // TODO handle \t width?
+        if (c == '\t')
+            return GetFontWhiteSpaceWidth() * Singleton.TextBox.TabSize;
+        
         return _fontCache.GetFontWidth(c);
     }
     

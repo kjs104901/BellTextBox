@@ -23,8 +23,12 @@ internal class Row
     private RowSelection UpdateRowSelection(RowSelection rowSelection)
     {
         rowSelection.Selected = false;
+        
         rowSelection.SelectionStart = 0.0f;
         rowSelection.SelectionEnd = 0.0f;
+
+        rowSelection.SelectionStartChar = 0;
+        rowSelection.SelectionEndChar = 0;
         
         rowSelection.CaretPositions.Clear();
 
@@ -57,12 +61,16 @@ internal class Row
                         float endPosition = LineSub.GetCharPosition(end);
                         rowSelection.SelectionStart = startPosition;
                         rowSelection.SelectionEnd = endPosition;
+                        rowSelection.SelectionStartChar = start.CharIndex;
+                        rowSelection.SelectionEndChar = end.CharIndex;
                         rowSelection.Selected = true;
                     }
                     else if (endLineSub.IsBiggerThan(LineSub))
                     {
                         rowSelection.SelectionStart = startPosition;
                         rowSelection.SelectionEnd = LineSub.CharWidths.Sum();
+                        rowSelection.SelectionStartChar = start.CharIndex;
+                        rowSelection.SelectionEndChar = LineSub.CharWidths.Count - 1;
                         if (rowSelection.SelectionEnd < 1.0f)
                         {
                             rowSelection.SelectionEnd = FontManager.GetFontWhiteSpaceWidth();
@@ -78,12 +86,16 @@ internal class Row
                         float endPosition = LineSub.GetCharPosition(end);
                         rowSelection.SelectionStart = 0.0f;
                         rowSelection.SelectionEnd = endPosition;
+                        rowSelection.SelectionStartChar = 0;
+                        rowSelection.SelectionEndChar = end.CharIndex;
                         rowSelection.Selected = true;
                     }
                     else if (endLineSub.IsBiggerThan(LineSub))
                     {
                         rowSelection.SelectionStart = 0.0f;
                         rowSelection.SelectionEnd = LineSub.CharWidths.Sum();
+                        rowSelection.SelectionStartChar = 0;
+                        rowSelection.SelectionEndChar = LineSub.CharWidths.Count - 1;
                         if (rowSelection.SelectionEnd < 1.0f)
                         {
                             rowSelection.SelectionEnd = FontManager.GetFontWhiteSpaceWidth();
@@ -107,8 +119,12 @@ internal class Row
 internal struct RowSelection
 {
     internal bool Selected;
+    
     internal float SelectionStart;
     internal float SelectionEnd;
+    
+    internal int SelectionStartChar;
+    internal int SelectionEndChar;
 
     internal List<Coordinates> CaretPositions;
 }

@@ -94,9 +94,9 @@ public partial class TextBox
             ActionManager.UndoAction();
         else if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.Y)) // RedoAction
             ActionManager.RedoAction();
-        else if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.C)) // TODO Copy
+        else if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.C)) // Copy
             CaretManager.CopyClipboard();
-        else if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.V)) // TODO Paste
+        else if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.V)) // Paste
             CaretManager.PasteClipboard();
         else if (EnumFlag.Has(hk, HotKeys.Ctrl | HotKeys.X)) // Cut
         {

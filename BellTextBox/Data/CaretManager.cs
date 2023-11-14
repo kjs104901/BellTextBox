@@ -52,6 +52,7 @@ internal partial class CaretManager
 internal partial class CaretManager
 {
     private readonly List<Caret> _carets = new();
+    private readonly List<string> _clipboard = new();
 
     private void ClearCarets_()
     {
@@ -173,38 +174,37 @@ internal partial class CaretManager
 
     private void CopyClipboard_()
     {
-        /*
-        if (CaretManager._carets.Count == 0)
+        if (_carets.Count == 0)
             return;
 
-        StringBuilder.Clear();
-        foreach (Caret caret in CaretManager._carets)
+        _clipboard.Clear();
+        foreach (Row row in RowManager.Rows)
         {
-            if (caret.HasSelection)
+            if (row.RowSelection.Selected)
             {
-                StringBuilder.Append(Text.GetText(caret.SelectionStart, caret.SelectionEnd));
+                if (LineManager.GetLine(row.LineSub.Coordinates.LineIndex, out Line line))
+                {
+                    string text = line.GetText(row.RowSelection.SelectionStartChar, row.RowSelection.SelectionEndChar);
+                    _clipboard.Add(text);
+                }
             }
         }
-
-        SetClipboard(StringBuilder.ToString());
-        */
+        Singleton.TextBox.Backend.SetClipboard(string.Join(Singleton.TextBox.GetEolString(), _clipboard));
     }
 
     private void PasteClipboard_()
     {
-        /*
-        if (CaretManager._carets.Count == 0)
-            return;
+        if (HasCaretsSelection())
+        {
+            Singleton.TextBox.ActionManager.DoAction(new DeleteSelectionAction());
+            RemoveCaretsSelection();
+        }
 
-        string text = GetClipboard();
-        if (text == null)
-            return;
-
-        // if caret number is same as text line number, paste to each line
-
-
-        ActionManager.DoAction(new PasteAction(text));
-        */
+        foreach (char c in Singleton.TextBox.Backend.GetClipboard())
+        {
+            Singleton.TextBox.ActionManager.DoAction(new InputCharAction(EditDirection.Forward, c));
+        }
+        // TODO: If selected row number is same as pasted row number, directly paste
     }
 
     private bool CheckValid_(Caret caret)

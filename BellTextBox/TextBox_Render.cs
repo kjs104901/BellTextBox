@@ -12,6 +12,8 @@ public partial class TextBox
     internal float FoldWidth = 10.0f;
 
     internal Stopwatch CaretBlinkStopwatch = new();
+    
+    internal int LinesPerPage => (int) (_viewSize.Y / FontManager.GetLineHeight());
 
     public void Render(Vector2 viewPos, Vector2 viewSize)
     {
@@ -21,7 +23,7 @@ public partial class TextBox
         FontManager.UpdateReferenceSize();
         FoldWidth = FontManager.GetFontReferenceWidth() * 2;
 
-        Backend.RenderPage(PageSize, new Vector4(0.2f, 0.1f, 0.1f, 1.0f)); // TODO background color
+        Backend.RenderPage(PageSize, PageBackgroundColor.ToVector());
 
         LineNumberWidth = (StringPool<int>.Get(LineManager.Lines.Count).Length + 1) * FontManager.GetFontNumberWidth();
 
@@ -85,7 +87,7 @@ public partial class TextBox
                             Backend.RenderLine(
                                 new Vector2(lineStartX + currPosX, lineTextStartY),
                                 new Vector2(
-                                    lineStartX + currPosX + Backend.GetCharWidth(' ') * 4, // TODO setting tab size
+                                    lineStartX + currPosX + Backend.GetCharWidth(' ') * TabSize,
                                     lineTextStartY),
                                 WhiteSpaceFontColor.ToVector(), 1.0f);
                         }

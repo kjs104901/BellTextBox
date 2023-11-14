@@ -25,7 +25,7 @@ public enum TabMode
 
 public partial class TextBox
 {
-    public bool AutoIndent { get; set; } = true;
+    public bool AutoIndent { get; set; } = true; // TODO
     public bool AutoComplete { get; set; } = true;
     public bool Overwrite { get; set; } = false;
     public bool ReadOnly { get; set; } = false;
@@ -96,13 +96,13 @@ public partial class TextBox
         return text;
     }
 
-    private string ReplaceEol(string text)
+    internal string ReplaceEol(string text)
     {
         return text.Replace("\r\n", "\n")
             .Replace("\r", "\n");
     }
 
-    private string GetEolString()
+    internal string GetEolString()
     {
         switch (EolMode)
         {

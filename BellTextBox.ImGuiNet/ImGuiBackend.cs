@@ -157,7 +157,6 @@ public class ImGuiBackend : IBackend
 
     public void SetClipboard(string text)
     {
-        // TODO using windows dll on windows?
         ImGui.SetClipboardText(text);
     }
 

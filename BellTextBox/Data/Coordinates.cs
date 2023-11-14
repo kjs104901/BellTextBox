@@ -248,13 +248,25 @@ internal struct Coordinates
 
         if (CaretMove.StartOfWord == caretMove)
         {
-            // TODO
+            if (false == LineManager.GetLine(LineIndex, out Line line))
+                return this;
+
+            if (false == line.GetWordStart(CharIndex, out int wordStart))
+                return this;
+            
+            CharIndex = wordStart;
             return this;
         }
 
         if (CaretMove.EndOfWord == caretMove)
         {
-            // TODO
+            if (false == LineManager.GetLine(LineIndex, out Line line))
+                return this;
+
+            if (false == line.GetWordEnd(CharIndex, out int wordEnd))
+                return this;
+            
+            CharIndex = wordEnd;
             return this;
         }
 
@@ -280,13 +292,29 @@ internal struct Coordinates
 
         if (CaretMove.PageUp == caretMove)
         {
-            // TODO
+            int newLineIndex = LineIndex - Singleton.TextBox.LinesPerPage / 2;
+            if (newLineIndex < 0)
+                newLineIndex = 0;
+            
+            if (false == LineManager.GetLine(newLineIndex, out Line line))
+                return this;
+
+            LineIndex = newLineIndex;
+            CharIndex = 0;
             return this;
         }
 
         if (CaretMove.PageDown == caretMove)
         {
-            // TODO
+            int newLineIndex = LineIndex + Singleton.TextBox.LinesPerPage / 2;
+            if (newLineIndex >= LineManager.Lines.Count)
+                newLineIndex = LineManager.Lines.Count - 1;
+            
+            if (false == LineManager.GetLine(newLineIndex, out Line line))
+                return this;
+            
+            LineIndex = newLineIndex;
+            CharIndex = 0;
             return this;
         }
 
