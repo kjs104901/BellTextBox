@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using Bell.Languages;
 using Bell.Utils;
 
@@ -29,7 +30,9 @@ internal class Line
 
     private readonly List<Language.Token> _oldTokens = new();
     internal readonly List<Language.Token> Tokens = new();
-    internal readonly List<Language.Token> SyntaxList = new();
+    
+    internal readonly List<ValueTuple<int, int>> CommentRanges = new();
+    internal readonly List<ValueTuple<int, int>> StringRanges = new();
     
     // buffer to avoid GC
     private readonly StringBuilder _sb = new();
@@ -40,7 +43,7 @@ internal class Line
     {
         Index = index;
         
-        _colorsCache = new("Colors", new(), UpdateColors, SlowUpdateColors);
+        _colorsCache = new("Colors", new(), UpdateColors, updateIntervalMs: 300);
         _cutoffsCache = new("Cutoffs", new(), UpdateCutoff);
         _stringCache = new("String", string.Empty, UpdateString);
         _lineSubsCache = new("Line Subs", new List<LineSub>(), UpdateLineSubs);
@@ -66,6 +69,8 @@ internal class Line
         SetCharsDirty();
         SetCutoffsDirty();
         UpdateTokens();
+        
+        LineManager.Unfold(Index);
     }
     
     internal char[] RemoveChars(int charIndex, int count)
@@ -81,6 +86,8 @@ internal class Line
         SetCharsDirty();
         SetCutoffsDirty();
         UpdateTokens();
+        
+        LineManager.Unfold(Index);
         
         return removed;
     }
@@ -99,11 +106,6 @@ internal class Line
 
     private List<ColorStyle> UpdateColors(List<ColorStyle> colors)
     {
-        return colors;
-    }
-
-    private List<ColorStyle> SlowUpdateColors(List<ColorStyle> colors)
-    {
         colors.Clear();
         if (Singleton.TextBox.SyntaxHighlightEnabled == false)
             return colors;
@@ -112,6 +114,41 @@ internal class Line
             return colors;
         
         colors.AddRange(new ColorStyle[_chars.Count]);
+
+        foreach (var kv in Singleton.TextBox.Language.PatternsStyle)
+        {
+            Regex regex = kv.Key;
+            ColorStyle colorStyle = kv.Value;
+            
+            foreach (Match match in regex.Matches(String))
+            {
+                for (int i = match.Index; i < match.Index + match.Length; i++)
+                {
+                    colors[i] = colorStyle;
+                }
+            }
+        }
+
+        foreach (var range in CommentRanges)
+        {
+            for (int i = range.Item1; i < range.Item2; i++)
+            {
+                colors[i] = Singleton.TextBox.Language.CommentStyle;
+            }
+        }
+
+        foreach (var range in StringRanges)
+        {
+            for (int i = range.Item1; i < range.Item2; i++)
+            {
+                colors[i] = Singleton.TextBox.Language.StringStyle;
+            }
+        }
+
+        //foreach (Language.Token token in SyntaxList)
+        //{
+        //    charIndex = token.LineIndex == Index ? token.CharIndex : 0;
+        //}
         
         /*
         foreach (var c in _chars)
@@ -136,7 +173,7 @@ internal class Line
         
         return colors;
     }
-
+    
     private HashSet<int> UpdateCutoff(HashSet<int> cutoffs)
     {
         cutoffs.Clear();
@@ -226,11 +263,10 @@ internal class Line
         for (int i = 0; i < String.Length; i++)
         {
             if (Singleton.TextBox.Language.FindMatching(String,
-                    Index, i,
-                    out string matchedStr, out Language.Token matchedToken))
+                    Index, i, out Language.Token matchedToken))
             {
                 Tokens.Add(matchedToken);
-                i += matchedStr.Length;
+                i += matchedToken.TokenString.Length;
                 i--; // Ignore i++ in for loop
             }
         }

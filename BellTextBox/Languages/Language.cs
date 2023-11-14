@@ -1,4 +1,5 @@
-﻿using Bell.Data;
+﻿using System.Text.RegularExpressions;
+using Bell.Data;
 using Bell.Inputs;
 
 namespace Bell.Languages;
@@ -20,10 +21,8 @@ public partial class Language
     public ColorStyle DefaultStyle = new();
     public ColorStyle CommentStyle = new();
     public ColorStyle StringStyle = new();
-    public ColorStyle FoldingStyle = new();
 
-    public Dictionary<string, ColorStyle> PatternsStyle = new();
-    public Dictionary<string, ColorStyle> KeywordsStyle = new();
+    internal Dictionary<Regex, ColorStyle> PatternsStyle = new();
     
     public string AutoIndentPattern = "";
 
@@ -66,10 +65,14 @@ public partial class Language
         Tokens[TokenType.FoldingStart].Add(startStr);
         Tokens[TokenType.FoldingEnd].Add(endStr);
     }
-
-    internal bool FindMatching(string source, int lineIndex, int charIndex, out string matchedStr, out Token matchedToken)
+    
+    public void AddPattern(string regex, ColorStyle colorStyle)
     {
-        matchedStr = string.Empty;
+        PatternsStyle.Add(new Regex(regex), colorStyle);
+    }
+    
+    internal bool FindMatching(string source, int lineIndex, int charIndex, out Token matchedToken)
+    {
         matchedToken = new Token();
 
         foreach (KeyValuePair<TokenType, List<string>> kv in Tokens)
@@ -96,10 +99,11 @@ public partial class Language
 
                 if (isSame)
                 {
-                    matchedStr = tokenString;
-
                     matchedToken.Type = tokenType;
                     matchedToken.TokenIndex = tokenIndex;
+                    
+                    matchedToken.TokenString = tokenString;
+                    
                     matchedToken.LineIndex = lineIndex;
                     matchedToken.CharIndex = charIndex;
                     
@@ -114,6 +118,8 @@ public partial class Language
     {
         internal TokenType Type;
         internal int TokenIndex;
+
+        internal string TokenString;
         
         internal int LineIndex;
         internal int CharIndex;

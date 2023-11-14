@@ -33,6 +33,9 @@ internal partial class LineManager
     
     internal static void ShiftFoldingLine(int lineIndex, EditDirection direction) =>
         Singleton.TextBox.LineManager.ShiftFoldingLine_(lineIndex, direction);
+
+    public static void Unfold(int lineIndex) =>
+        Singleton.TextBox.LineManager.Unfold_(lineIndex);
 }
 
 // Implementation
@@ -41,6 +44,8 @@ internal partial class LineManager
     private readonly List<Line> _lines = new();
 
     private readonly List<Folding> _foldingList = new();
+    private readonly List<Folding> _lineFoldingList = new();
+    private readonly List<Folding> _foldedList = new();
     private readonly Dictionary<int, Stack<int>> _foldingStacks = new();
 
     private readonly Stack<Language.Token> _tokens = new();
@@ -127,7 +132,7 @@ internal partial class LineManager
         if (false == _isLanguageDirty || _languageUpdateTime > DateTime.Now)
             return;
 
-        // TODO: hold folding list and update only changed folding
+        SaveFolded_();
         _foldingList.Clear();
         
         int foldingTypeCount = Singleton.TextBox.Language.Tokens[Language.TokenType.FoldingStart].Count;
@@ -141,15 +146,23 @@ internal partial class LineManager
         _tokens.Clear();
         foreach (Line line in _lines)
         {
-            line.SyntaxList.Clear();
-
-            if (_tokens.TryPop(out Language.Token prevTop))
+            line.CommentRanges.Clear();
+            line.StringRanges.Clear();
+            
+            _lineFoldingList.Clear();
+            
+            int commentStart = -1;
+            int stringStart = -1;
+            
+            if (_tokens.TryPeek(out Language.Token prevTop))
             {
-                // 이전 라인이 안 끝난 경우 추가
-                if (prevTop.Type == Language.TokenType.BlockCommentStart ||
-                    prevTop.Type == Language.TokenType.MultilineStringStart)
+                if (prevTop.Type == Language.TokenType.BlockCommentStart)
                 {
-                    line.SyntaxList.Add(prevTop);
+                    commentStart = 0;
+                }
+                else if (prevTop.Type == Language.TokenType.MultilineStringStart)
+                {
+                    stringStart = 0;
                 }
             }
 
@@ -157,7 +170,7 @@ internal partial class LineManager
             {
                 if (_tokens.TryPeek(out Language.Token top))
                 {
-                    // 이전 토큰이 끝나지 않은 경우 continue로 토큰 무시
+                    // If the previous token is not finished, ignore the token with continue
                     if (top.Type == Language.TokenType.BlockCommentStart)
                     {
                         if (token.Type != Language.TokenType.BlockCommentEnd ||
@@ -165,7 +178,8 @@ internal partial class LineManager
                             continue;
 
                         _tokens.Pop();
-                        line.SyntaxList.Add(token);
+                        line.CommentRanges.Add(new ValueTuple<int, int>(commentStart, token.CharIndex + token.TokenString.Length));
+                        commentStart = -1;
                         continue;
                     }
 
@@ -176,7 +190,8 @@ internal partial class LineManager
                             continue;
 
                         _tokens.Pop();
-                        line.SyntaxList.Add(token);
+                        line.StringRanges.Add(new ValueTuple<int, int>(stringStart, token.CharIndex + token.TokenString.Length));
+                        stringStart = -1;
                         continue;
                     }
 
@@ -186,7 +201,8 @@ internal partial class LineManager
                             token.TokenIndex == top.TokenIndex)
                         {
                             _tokens.Pop();
-                            line.SyntaxList.Add(token);
+                            line.StringRanges.Add(new ValueTuple<int, int>(stringStart, token.CharIndex + token.TokenString.Length));
+                            stringStart = -1;
                         }
                         continue;
                     }
@@ -198,20 +214,18 @@ internal partial class LineManager
                 }
 
                 _tokens.Push(token);
-                line.SyntaxList.Add(token);
-            }
 
-            // 라인을 넘을 수 없는 토큰은 제거
-            while (_tokens.TryPeek(out Language.Token lineTop) &&
-                   (lineTop.Type == Language.TokenType.LineComment || lineTop.Type == Language.TokenType.String))
-            {
-                _tokens.Pop();
-            }
-            
-            // Folding 계산
-            foreach (Language.Token token in line.SyntaxList)
-            {
-                if (token.Type == Language.TokenType.FoldingStart)
+                if (token.Type == Language.TokenType.LineComment ||
+                    token.Type == Language.TokenType.BlockCommentStart)
+                {
+                    commentStart = token.CharIndex;
+                }
+                else if (token.Type == Language.TokenType.String ||
+                         token.Type == Language.TokenType.MultilineStringStart)
+                {
+                    stringStart = token.CharIndex;
+                }
+                else if (token.Type == Language.TokenType.FoldingStart)
                 {
                     _foldingStacks[token.TokenIndex].Push(line.Index);
                 }
@@ -227,9 +241,26 @@ internal partial class LineManager
                     }
                 }
             }
+
+            // If there are tokens left until the end of the line, process them as comment or string until the end of the line
+            if (commentStart >= 0)
+            {
+                line.CommentRanges.Add(new ValueTuple<int, int>(commentStart, line.String.Length));
+            }
+            if (stringStart >= 0)
+            {
+                line.StringRanges.Add(new ValueTuple<int, int>(stringStart, line.String.Length));
+            }
+            
+            // Remove tokens that cannot cross lines
+            while (_tokens.TryPeek(out Language.Token lineTop) &&
+                   (lineTop.Type == Language.TokenType.LineComment || lineTop.Type == Language.TokenType.String))
+            {
+                _tokens.Pop();
+            }
         }
             
-        // 남은 Folding 넣어주기
+        // Adding remaining foldings
         foreach (Stack<int> foldingStack in _foldingStacks.Values)
         {
             while (foldingStack.TryPop(out int start))
@@ -241,6 +272,8 @@ internal partial class LineManager
                 }
             }
         }
+        
+        RestoreFolded_();
         
         _isLanguageDirty = false;
     }
@@ -261,6 +294,43 @@ internal partial class LineManager
             }
             
             Logger.Info("ShiftFoldingLine: " + folding.Start + " " + folding.End + " " + moveCount);
+        }
+    }
+
+    private void Unfold_(int lineIndex)
+    {
+        foreach (Folding folding in _foldingList)
+        {
+            if (folding.Start <= lineIndex && lineIndex <= folding.End)
+            {
+                folding.Folded = false;
+            }
+        }
+    }
+
+    private void SaveFolded_()
+    {
+        _foldedList.Clear();
+        foreach (Folding folding in _foldingList)
+        {
+            if (folding.Folded)
+            {
+                _foldedList.Add(folding);
+            }
+        }
+    }
+    
+    private void RestoreFolded_()
+    {
+        foreach (Folding folding in _foldingList)
+        {
+            foreach (Folding folded in _foldedList)
+            {
+                if (folding.Start == folded.Start && folding.End == folded.End)
+                {
+                    folding.Folded = true;
+                }
+            }
         }
     }
 }

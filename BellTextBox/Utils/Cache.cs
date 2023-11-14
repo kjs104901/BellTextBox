@@ -8,32 +8,26 @@ internal class Cache<T>
     private readonly Func<T, T> _updateFunc;
     private bool _isDirty;
 
-    private readonly Func<T, T>? _slowUpdateFunc;
-    private bool _isSlowDirty;
-    private DateTime _slowUpdateTime;
-    private const int SlowUpdateInterval = 300;
+    private DateTime _updateTime;
+    private readonly int _updateIntervalMs;
 
-    internal Cache(string name, T initValue, Func<T, T> updateFunc, Func<T, T>? slowUpdateFunc = null)
+    internal Cache(string name, T initValue, Func<T, T> updateFunc, int updateIntervalMs = 0)
     {
         _name = name;
         _value = initValue;
         
         _updateFunc = updateFunc;
         _isDirty = true;
-        
-        _slowUpdateFunc = slowUpdateFunc;
-        _isSlowDirty = true;
-        _slowUpdateTime = DateTime.Now;
+
+        _updateTime = DateTime.Now;;
+        _updateIntervalMs = updateIntervalMs;
     }
 
     internal T Get()
     {
-        if (_isDirty)
+        if (_isDirty && DateTime.Now > _updateTime)
             Update();
         
-        if (_isSlowDirty && DateTime.Now > _slowUpdateTime)
-            SlowUpdate();
-
         if (DevHelper.IsDebugMode)
             Singleton.TextBox.CacheCounter.CountGet(_name);
         
@@ -46,9 +40,7 @@ internal class Cache<T>
             Singleton.TextBox.CacheCounter.CountSetDirty(_name);
         
         _isDirty = true;
-
-        _isSlowDirty = true;
-        _slowUpdateTime = DateTime.Now.AddMilliseconds(SlowUpdateInterval);
+        _updateTime = DateTime.Now.AddMilliseconds(_updateIntervalMs);
     }
 
     private void Update()
@@ -58,14 +50,5 @@ internal class Cache<T>
         
         _value = _updateFunc(_value);
         _isDirty = false;
-    }
-
-    private void SlowUpdate()
-    {
-        if (null == _slowUpdateFunc)
-            return;
-        
-        _value = _slowUpdateFunc(_value);
-        _isSlowDirty = false;
     }
 }
