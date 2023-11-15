@@ -64,9 +64,9 @@ public partial class Language
         Tokens[TokenType.FoldingEnd].Add(endStr);
     }
     
-    public void AddPattern(string regex, ColorStyle colorStyle)
+    public void AddPattern(string regex, ColorStyle colorStyle, RegexOptions regexOptions = RegexOptions.None)
     {
-        PatternsStyle.Add(new Regex(regex), colorStyle);
+        PatternsStyle.Add(new Regex(regex, regexOptions), colorStyle);
     }
     
     internal bool FindMatching(string source, int lineIndex, int charIndex, out Token matchedToken)

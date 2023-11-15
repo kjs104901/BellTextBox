@@ -30,7 +30,7 @@ public partial class TextBox
     public bool AutoComplete { get; set; } = true;
     public bool Overwrite { get; set; } = false;
     public bool ReadOnly { get; set; } = false;
-    public WrapMode WrapMode { get; set; } = WrapMode.Word;
+    public WrapMode WrapMode { get; set; } = WrapMode.None;
     public bool WordWrapIndent { get; set; } = true;
 
     internal string TabString => _tabStringCache.Get();
@@ -70,7 +70,7 @@ public partial class TextBox
     
     public float LeadingHeight { get; set; } = 1.2f;
     
-    private Language _language = Language.PlainText();
+    private Language _language = Language.CSharpStack();
     public Language Language
     {
         get => _language;

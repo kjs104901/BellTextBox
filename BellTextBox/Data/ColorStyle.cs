@@ -16,6 +16,14 @@ public readonly struct ColorStyle : IComparable<ColorStyle>
         _b = b;
         _a = a;
     }
+    
+    public ColorStyle(float r, float g, float b)
+    {
+        _r = r;
+        _g = g;
+        _b = b;
+        _a = 1.0f;
+    }
 
     public static ColorStyle None = new ColorStyle(0, 0, 0, 0);
 
