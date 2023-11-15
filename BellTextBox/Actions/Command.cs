@@ -268,22 +268,24 @@ internal class IndentSelectionCommand : Command
 {
     internal override void Do(Caret caret)
     {
+        /*
         foreach (Line line in LineManager.Lines)
         {
             caret.GetSorted(out Coordinates start, out Coordinates end);
             if (line.Index < start.LineIndex || line.Index > end.LineIndex)
                 continue;
-            
+
             var tabChars = Singleton.TextBox.TabString;
             line.InsertChars(0, tabChars.ToCharArray());
             RowManager.SetRowCacheDirty();
             CaretManager.ShiftCaretChar(line.Index, 0, EditDirection.Forward, tabChars.Length);
         }
+        */
     }
 
     internal override void Undo(Caret caret)
     {
-        new UnindentSelectionCommand().Do(caret);
+        //new UnindentSelectionCommand().Do(caret);
     }
 
     internal override string GetDebugString()
@@ -296,6 +298,7 @@ internal class UnindentSelectionCommand : Command
 {
     internal override void Do(Caret caret)
     {
+        /*
         foreach (Line line in LineManager.Lines)
         {
             caret.GetSorted(out Coordinates start, out Coordinates end);
@@ -307,15 +310,16 @@ internal class UnindentSelectionCommand : Command
             {
                 line.RemoveChars(0, tabChars.Length);
                 RowManager.SetRowCacheDirty();
-            
+
                 CaretManager.ShiftCaretChar(line.Index, tabChars.Length, EditDirection.Backward, tabChars.Length);
             }
         }
+        */
     }
 
     internal override void Undo(Caret caret)
     {
-        new IndentSelectionCommand().Do(caret);
+        //new IndentSelectionCommand().Do(caret);
     }
 
     internal override string GetDebugString()
