@@ -1,4 +1,6 @@
 ﻿using System.Numerics;
+using System.Reflection.Metadata;
+using System.Runtime.InteropServices;
 using Bell.Utils;
 using ImGuiNET;
 
@@ -8,10 +10,59 @@ public class ImGuiTextBox
 {
     private readonly TextBox _textBox = new(new ImGuiBackend());
 
+    private ImFontPtr _fontPtr;
+    private readonly Action _onFontLoaded;
+    
     public string Text
     {
         get => _textBox.GetText();
         set => _textBox.SetText(value);
+    }
+    
+    public ImGuiTextBox(Action onFontLoaded)
+    {
+        _onFontLoaded = onFontLoaded;
+        SetDefaultFont();
+    }
+
+    public void SetDefaultFont()
+    {
+        _fontPtr = ImGui.GetIO().Fonts.AddFontDefault(null);
+        LoadFontAwesome(13.0f);
+        ImGui.GetIO().Fonts.Build();
+        _onFontLoaded();
+    }
+    
+    public void SetFont(string fontFile, float fontSize, IntPtr glyphRanges)
+    {
+        _fontPtr = ImGui.GetIO().Fonts.AddFontFromFileTTF(fontFile, fontSize, null, glyphRanges);
+        LoadFontAwesome(fontSize);
+        ImGui.GetIO().Fonts.Build();
+        _onFontLoaded();
+    }
+
+    private void LoadFontAwesome(float fontSize)
+    {
+        GCHandle glyphHandle = GCHandle.Alloc(new ushort[] { 0xe005, 0xf8ff, 0x0000 }, GCHandleType.Pinned);
+        GCHandle fontHandle = GCHandle.Alloc(FontResource.fa_solid_900, GCHandleType.Pinned);
+        try
+        {
+            IntPtr glyphPtr = glyphHandle.AddrOfPinnedObject();
+            IntPtr fontPtr = fontHandle.AddrOfPinnedObject();
+            unsafe
+            {
+                ImFontConfigPtr nativeConfig = ImGuiNative.ImFontConfig_ImFontConfig();
+                nativeConfig.MergeMode = true;
+
+                ImGui.GetIO().Fonts.AddFontFromMemoryTTF( fontPtr, FontResource.fa_solid_900.Length,
+                    fontSize / 2.0f, nativeConfig, glyphPtr );
+            }
+        }
+        finally
+        {
+            glyphHandle.Free();
+            fontHandle.Free();
+        }
     }
 
     public void Render(Vector2 size)
@@ -47,6 +98,10 @@ public class ImGuiTextBox
 
     private void RenderTextBox(Vector2 size)
     {
+        ImGui.PushFont(_fontPtr);
+        
+        ImGui.Text("hello \uf59c world");
+        ImGui.Text("test \uf248 build");
         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, new Vector2(0, 0));
         ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, new Vector2(0, 0));
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0, 0));
@@ -87,5 +142,7 @@ public class ImGuiTextBox
         ImGui.EndChild();
         ImGui.PopStyleColor();
         ImGui.PopStyleVar(5);
+            
+        ImGui.PopFont();
     }
 }

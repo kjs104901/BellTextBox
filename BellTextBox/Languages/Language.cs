@@ -23,8 +23,6 @@ public partial class Language
     public ColorStyle StringStyle = new();
 
     internal Dictionary<Regex, ColorStyle> PatternsStyle = new();
-    
-    public string AutoIndentPattern = "";
 
     internal enum TokenType
     {

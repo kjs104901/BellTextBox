@@ -211,22 +211,9 @@ internal partial class CaretManager
             Singleton.TextBox.ActionManager.DoAction(new DeleteSelectionAction());
             RemoveCaretsSelection();
         }
-
+        
         string clipboardText = Singleton.TextBox.ReplaceEol(Singleton.TextBox.Backend.GetClipboard());
-        string[] lines = clipboardText.Split('\n');
-
-        for (int i = 0; i < lines.Length; i++)
-        {
-            string line = lines[i];
-            
-            Singleton.TextBox.ActionManager.DoAction(
-                new InputCharAction(EditDirection.Forward, line.ToCharArray()));
-
-            if (i < lines.Length - 1)
-            {
-                Singleton.TextBox.ActionManager.DoAction(new EnterAction());
-            }
-        }
+        Singleton.TextBox.ActionManager.DoAction(new PasteAction(clipboardText));
         
         // TODO: If selected row number is same as pasted row number, directly paste
     }

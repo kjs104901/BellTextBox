@@ -293,6 +293,35 @@ internal class DeleteSelectionAction : Action
     }
 }
 
+internal class PasteAction : Action
+{
+    private readonly string _text;
+
+    internal PasteAction(string text)
+    {
+        _text = text;
+    }
+
+    protected override List<Command> CreateCommands(Caret caret)
+    {
+        var commands = new List<Command>();
+        
+        string[] lines = _text.Split('\n');
+        for (int i = 0; i < lines.Length; i++)
+        {
+            string line = lines[i];
+            
+            commands.Add(new InputCharCommand(EditDirection.Forward, line.ToCharArray()));
+            if (i < lines.Length - 1)
+            {
+                commands.Add(new SplitLineCommand(EditDirection.Forward));
+            }
+        }
+        
+        return commands;
+    }
+}
+
 internal class InputCharAction : Action
 {
     private readonly EditDirection _direction;

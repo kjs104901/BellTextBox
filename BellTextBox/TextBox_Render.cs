@@ -123,30 +123,19 @@ public partial class TextBox
 
                 if (Folding.None != line.Folding && row.LineSub.Coordinates.LineSubIndex == 0)
                 {
-                    float midX = LineNumberWidth + (FoldWidth / 2.0f);
-                    float midY = (lineTextStartY + lineTextEndY) / 2.0f;
-
-                    float barLength = (FoldWidth) / 6.0f;
-
                     if (line.Folding.Folded)
                     {
-                        Backend.RenderLine(new Vector2(midX - barLength, midY - barLength),
-                            new Vector2(midX, midY),
-                            UiTextColor.ToVector(), 2.0f);
-
-                        Backend.RenderLine(new Vector2(midX - barLength, midY + barLength),
-                            new Vector2(midX, midY),
-                            UiTextColor.ToVector(), 2.0f);
+                        Backend.RenderIcon(
+                            new Vector2(LineNumberWidth + FontManager.GetFontWhiteSpaceWidth(), lineY),
+                            GuiIcon.Fold,
+                            UiTextColor.ToVector());
                     }
                     else
                     {
-                        Backend.RenderLine(new Vector2(midX - barLength, midY - barLength),
-                            new Vector2(midX, midY),
-                            UiTextColor.ToVector(), 2.0f);
-
-                        Backend.RenderLine(new Vector2(midX + barLength, midY - barLength),
-                            new Vector2(midX, midY),
-                            UiTextColor.ToVector(), 2.0f);
+                        Backend.RenderIcon(
+                            new Vector2(LineNumberWidth + FontManager.GetFontWhiteSpaceWidth(), lineY),
+                            GuiIcon.Unfold,
+                            UiTextColor.ToVector());
                     }
                 }
             }

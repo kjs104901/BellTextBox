@@ -80,12 +80,11 @@ public class FontStyle : IComparable<FontStyle>
 
         var stopwatch = Stopwatch.StartNew();
 
-        var imFontPtr = ImGui.GetIO().Fonts
-            .AddFontFromFileTTF(@"Fonts\MaruBuri.ttf", 18.0f, null, ImGui.GetIO().Fonts.GetGlyphRangesKorean());
-        imGuiRenderer.RecreateFontDeviceTexture(graphicsDevice);
-
-        var imGuiBellTextBox = new ImGuiTextBox();
-        imGuiBellTextBox.Text = textInput;
+        ImGuiTextBox imGuiBellTextBox = new(() => { imGuiRenderer.RecreateFontDeviceTexture(graphicsDevice); })
+        {
+            Text = textInput
+        };
+        imGuiBellTextBox.SetFont(@"Fonts/MaruBuri.ttf", 23.0f, ImGui.GetIO().Fonts.GetGlyphRangesKorean());
 
         while (sdl2Window.Exists)
         {
@@ -99,11 +98,9 @@ public class FontStyle : IComparable<FontStyle>
             ImGui.SetNextWindowPos(new Vector2(0, 0));
             ImGui.SetNextWindowSize(new Vector2(sdl2Window.Width, sdl2Window.Height));
             ImGui.Begin("Demo", ImGuiWindowFlags.NoResize);
-            
-            ImGui.PushFont(imFontPtr);
+
             imGuiBellTextBox.Render(new Vector2(-1, -1));
-            ImGui.PopFont();
-            
+
             ImGui.End();
 
             commandList.Begin();

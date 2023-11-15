@@ -139,6 +139,23 @@ public class ImGuiBackend : IBackend
             ImGui.ColorConvertFloat4ToU32(color), text);
     }
 
+    public void RenderIcon(Vector2 pos, GuiIcon icon, Vector4 color)
+    {
+        string iconText = string.Empty;
+
+        switch (icon)
+        {
+            case GuiIcon.Fold:
+                iconText = "\uf105"; // angle-right
+                break;
+            case GuiIcon.Unfold:
+                iconText = "\uf107"; //angle-down
+                break;
+        }
+        ImGui.GetWindowDrawList().AddText(new Vector2(_drawPosOnPage.X + pos.X, _drawPosOnPage.Y + pos.Y),
+            ImGui.ColorConvertFloat4ToU32(color), iconText);
+    }
+
     public void RenderLine(Vector2 start, Vector2 end, Vector4 color, float thickness)
     {
         var startPos = new Vector2(_drawPosOnPage.X + start.X, _drawPosOnPage.Y + start.Y);
