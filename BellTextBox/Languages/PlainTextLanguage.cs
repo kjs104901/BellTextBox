@@ -1,4 +1,6 @@
-﻿namespace Bell.Languages;
+﻿using Bell.Data;
+
+namespace Bell.Languages;
 
 public partial class Language
 {

@@ -1,4 +1,5 @@
-﻿using Bell.Languages;
+﻿using Bell.Data;
+using Bell.Languages;
 
 namespace Bell;
 

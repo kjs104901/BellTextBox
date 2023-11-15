@@ -100,8 +100,6 @@ public class ImGuiTextBox
     {
         ImGui.PushFont(_fontPtr);
         
-        ImGui.Text("hello \uf59c world");
-        ImGui.Text("test \uf248 build");
         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, new Vector2(0, 0));
         ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, new Vector2(0, 0));
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0, 0));
