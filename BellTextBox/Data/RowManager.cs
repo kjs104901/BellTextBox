@@ -22,6 +22,7 @@ internal partial class RowManager
 
     private List<Row> UpdateRows(List<Row> rows)
     {
+        Singleton.TextBox.RowPool.Return(rows);
         rows.Clear();
 
         int foldingCount = 0;
@@ -57,7 +58,10 @@ internal partial class RowManager
             {
                 foreach (var lineSub in line.LineSubs)
                 {
-                    rows.Add(new Row(lineSub));
+                    Row row = Singleton.TextBox.RowPool.Get();
+                    row.LineSub = lineSub;
+                    
+                    rows.Add(row);
                 }
             }
         }

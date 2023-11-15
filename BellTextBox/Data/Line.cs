@@ -119,15 +119,17 @@ internal class Line
     private List<ColorStyle> UpdateColors(List<ColorStyle> colors)
     {
         colors.Clear();
-        
         if (Singleton.TextBox.SyntaxHighlightEnabled == false ||
             _chars.Count > TextBox.SyntaxGiveUpThreshold)
         {
             return colors;
         }
 
-        colors.AddRange(new ColorStyle[_chars.Count]);
-
+        for (int i = 0; i < _chars.Count; i++)
+        {
+            colors.Add(ColorStyle.None);
+        }
+        
         foreach (var kv in Singleton.TextBox.Language.PatternsStyle)
         {
             Regex regex = kv.Key;
@@ -216,11 +218,11 @@ internal class Line
 
     private List<LineSub> UpdateLineSubs(List<LineSub> lineSubs)
     {
-        ObjectPoolManager.LineSub.Return(lineSubs);
+        Singleton.TextBox.LineSubPool.Return(lineSubs);
         lineSubs.Clear();
 
         int lineSubIndex = 0;
-        LineSub lineSub = ObjectPoolManager.LineSub.Get();
+        LineSub lineSub = Singleton.TextBox.LineSubPool.Get();
         lineSub.Coordinates = new Coordinates(Index, 0, lineSubIndex);
         lineSub.IndentWidth = 0.0f;
 
@@ -237,7 +239,7 @@ internal class Line
                 lineSubs.Add(lineSub);
 
                 lineSubIndex++;
-                lineSub = ObjectPoolManager.LineSub.Get();
+                lineSub = Singleton.TextBox.LineSubPool.Get();
                 lineSub.Coordinates = new Coordinates(Index, i + 1, lineSubIndex);
                 lineSub.IndentWidth = GetIndentWidth();
             }

@@ -7,15 +7,10 @@ internal interface IReusable
     void Reset();
 }
 
-internal static class ObjectPoolManager
-{
-    internal static ObjectPool<LineSub> LineSub = new();
-}
-
 internal class ObjectPool<T>
     where T : IReusable, new()
 {
-    private const int MaxCapacity = 4096;
+    private const int MaxCapacity = 65536;
     
     private readonly Stack<T> _stack = new();
     

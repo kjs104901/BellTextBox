@@ -86,10 +86,22 @@ public partial class TextBox
     internal int CountTabStart(string line)
     {
         int count = 0;
-        while (line.StartsWith(TabString))
+        for (int i = 0; i < line.Length; i++)
         {
+            for (int j = 0; j < TabString.Length; j++)
+            {
+                if (i + j >= line.Length)
+                    return count;
+                
+                char lineChar = line[i + j];
+                char tabChar = TabString[j];
+                
+                if (lineChar != tabChar)
+                    return count;
+            }
             count++;
-            line = line.Remove(0, TabString.Length);
+            i += TabString.Length;
+            i -= 1; // To ignore the i++ in the for loop
         }
         return count;
     }

@@ -109,7 +109,12 @@ public partial class TextBox
                 if (row.LineSub.Coordinates.LineSubIndex == 0)
                 {
                     string lineIndex = StringPool<int>.Get(line.Index);
-                    float lineIndexWidth = lineIndex.Sum(FontManager.GetFontWidth);
+
+                    float lineIndexWidth = 0.0f;
+                    foreach (char lineChar in lineIndex)
+                    {
+                        lineIndexWidth += FontManager.GetFontWidth(lineChar);
+                    }
 
                     Backend.RenderText(new Vector2(LineNumberWidth - lineIndexWidth, lineTextStartY),
                         lineIndex,

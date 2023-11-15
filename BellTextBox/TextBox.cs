@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using Bell.Actions;
 using Bell.Data;
+using Bell.Languages;
 using Bell.Utils;
 
 namespace Bell;
@@ -16,6 +17,9 @@ public partial class TextBox
     internal readonly RowManager RowManager = new();
     internal readonly Logger Logger = new ();
     internal readonly CacheCounter CacheCounter = new();
+    
+    internal readonly ObjectPool<LineSub> LineSubPool = new();
+    internal readonly ObjectPool<Row> RowPool = new();
     
     private readonly StringBuilder _sb = new();
 
