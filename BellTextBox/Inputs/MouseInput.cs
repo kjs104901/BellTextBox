@@ -9,8 +9,6 @@ public enum MouseAction
     Click,
     DoubleClick,
     Dragging,
-    
-    MiddleDragging
 }
 
 public enum MouseCursor

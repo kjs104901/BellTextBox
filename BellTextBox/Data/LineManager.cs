@@ -25,12 +25,9 @@ internal partial class LineManager
     internal static void RemoveLine(int removeLineIndex) =>
         Singleton.TextBox.LineManager.RemoveLine_(removeLineIndex);
 
-    internal static void SetLanguageDirty() =>
-        Singleton.TextBox.LineManager.SetLanguageDirty_();
+    internal static void UpdateLanguageToken() => Singleton.TextBox.LineManager._languageTokenCache.Get();
+    internal static void SetLanguageTokenDirty() => Singleton.TextBox.LineManager._languageTokenCache.SetDirty();
 
-    internal static void UpdateLanguage() =>
-        Singleton.TextBox.LineManager.UpdateLanguage_();
-    
     internal static void ShiftFoldingLine(int lineIndex, EditDirection direction) =>
         Singleton.TextBox.LineManager.ShiftFoldingLine_(lineIndex, direction);
 
@@ -48,11 +45,14 @@ internal partial class LineManager
     private readonly List<Folding> _foldedList = new();
     private readonly Dictionary<int, Stack<int>> _foldingStacks = new();
 
-    private readonly Stack<Language.Token> _tokens = new();
+    private readonly Cache<Stack<Language.Token>> _languageTokenCache;
 
-    private bool _isLanguageDirty = true;
-    private DateTime _languageUpdateTime = DateTime.Now;
-    private const int LanguageUpdateInterval = 100;
+    internal LineManager()
+    {
+        _languageTokenCache =
+            new Cache<Stack<Language.Token>>("Language Token", new Stack<Language.Token>(),
+                UpdateLanguageToken_, 100);
+    }
 
     private bool GetLine_(int lineIndex, out Line line)
     {
@@ -121,20 +121,11 @@ internal partial class LineManager
         }
     }
 
-    private void SetLanguageDirty_()
+    private Stack<Language.Token> UpdateLanguageToken_(Stack<Language.Token> tokens)
     {
-        _isLanguageDirty = true;
-        _languageUpdateTime = DateTime.Now.AddMilliseconds(LanguageUpdateInterval);
-    }
-
-    private void UpdateLanguage_()
-    {
-        if (false == _isLanguageDirty || _languageUpdateTime > DateTime.Now)
-            return;
-
         SaveFolded_();
         _foldingList.Clear();
-        
+
         int foldingTypeCount = Singleton.TextBox.Language.Tokens[Language.TokenType.FoldingStart].Count;
         for (int i = 0; i < foldingTypeCount; i++)
         {
@@ -142,19 +133,19 @@ internal partial class LineManager
                 _foldingStacks.TryAdd(i, new Stack<int>());
             _foldingStacks[i].Clear();
         }
-        
-        _tokens.Clear();
+
+        tokens.Clear();
         foreach (Line line in _lines)
         {
             line.CommentRanges.Clear();
             line.StringRanges.Clear();
-            
+
             _lineFoldingList.Clear();
-            
+
             int commentStart = -1;
             int stringStart = -1;
-            
-            if (_tokens.TryPeek(out Language.Token prevTop))
+
+            if (tokens.TryPeek(out Language.Token prevTop))
             {
                 if (prevTop.Type == Language.TokenType.BlockCommentStart)
                 {
@@ -168,7 +159,7 @@ internal partial class LineManager
 
             foreach (Language.Token token in line.Tokens)
             {
-                if (_tokens.TryPeek(out Language.Token top))
+                if (tokens.TryPeek(out Language.Token top))
                 {
                     // If the previous token is not finished, ignore the token with continue
                     if (top.Type == Language.TokenType.BlockCommentStart)
@@ -177,8 +168,9 @@ internal partial class LineManager
                             token.TokenIndex != top.TokenIndex)
                             continue;
 
-                        _tokens.Pop();
-                        line.CommentRanges.Add(new ValueTuple<int, int>(commentStart, token.CharIndex + token.TokenString.Length));
+                        tokens.Pop();
+                        line.CommentRanges.Add(new ValueTuple<int, int>(commentStart,
+                            token.CharIndex + token.TokenString.Length));
                         commentStart = -1;
                         continue;
                     }
@@ -189,8 +181,9 @@ internal partial class LineManager
                             token.TokenIndex != top.TokenIndex)
                             continue;
 
-                        _tokens.Pop();
-                        line.StringRanges.Add(new ValueTuple<int, int>(stringStart, token.CharIndex + token.TokenString.Length));
+                        tokens.Pop();
+                        line.StringRanges.Add(new ValueTuple<int, int>(stringStart,
+                            token.CharIndex + token.TokenString.Length));
                         stringStart = -1;
                         continue;
                     }
@@ -200,10 +193,12 @@ internal partial class LineManager
                         if (token.Type == Language.TokenType.String &&
                             token.TokenIndex == top.TokenIndex)
                         {
-                            _tokens.Pop();
-                            line.StringRanges.Add(new ValueTuple<int, int>(stringStart, token.CharIndex + token.TokenString.Length));
+                            tokens.Pop();
+                            line.StringRanges.Add(new ValueTuple<int, int>(stringStart,
+                                token.CharIndex + token.TokenString.Length));
                             stringStart = -1;
                         }
+
                         continue;
                     }
 
@@ -213,7 +208,7 @@ internal partial class LineManager
                     }
                 }
 
-                _tokens.Push(token);
+                tokens.Push(token);
 
                 if (token.Type == Language.TokenType.LineComment ||
                     token.Type == Language.TokenType.BlockCommentStart)
@@ -247,19 +242,20 @@ internal partial class LineManager
             {
                 line.CommentRanges.Add(new ValueTuple<int, int>(commentStart, line.String.Length));
             }
+
             if (stringStart >= 0)
             {
                 line.StringRanges.Add(new ValueTuple<int, int>(stringStart, line.String.Length));
             }
-            
+
             // Remove tokens that cannot cross lines
-            while (_tokens.TryPeek(out Language.Token lineTop) &&
+            while (tokens.TryPeek(out Language.Token lineTop) &&
                    (lineTop.Type == Language.TokenType.LineComment || lineTop.Type == Language.TokenType.String))
             {
-                _tokens.Pop();
+                tokens.Pop();
             }
         }
-            
+
         // Adding remaining foldings
         foreach (Stack<int> foldingStack in _foldingStacks.Values)
         {
@@ -272,10 +268,9 @@ internal partial class LineManager
                 }
             }
         }
-        
+
         RestoreFolded_();
-        
-        _isLanguageDirty = false;
+        return tokens;
     }
 
     private void ShiftFoldingLine_(int lineIndex, EditDirection direction)
@@ -292,7 +287,7 @@ internal partial class LineManager
             {
                 folding.End += moveCount;
             }
-            
+
             Logger.Info("ShiftFoldingLine: " + folding.Start + " " + folding.End + " " + moveCount);
         }
     }
@@ -319,7 +314,7 @@ internal partial class LineManager
             }
         }
     }
-    
+
     private void RestoreFolded_()
     {
         foreach (Folding folding in _foldingList)

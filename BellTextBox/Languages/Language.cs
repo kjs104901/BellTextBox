@@ -101,10 +101,8 @@ public partial class Language
                 {
                     matchedToken.Type = tokenType;
                     matchedToken.TokenIndex = tokenIndex;
-                    
                     matchedToken.TokenString = tokenString;
                     
-                    matchedToken.LineIndex = lineIndex;
                     matchedToken.CharIndex = charIndex;
                     
                     return true;
@@ -118,15 +116,13 @@ public partial class Language
     {
         internal TokenType Type;
         internal int TokenIndex;
-
         internal string TokenString;
         
-        internal int LineIndex;
         internal int CharIndex;
 
         public bool Equals(Token other)
         {
-            return Type == other.Type && TokenIndex == other.TokenIndex && LineIndex == other.LineIndex && CharIndex == other.CharIndex;
+            return Type == other.Type && TokenIndex == other.TokenIndex && TokenString == other.TokenString;
         }
 
         public override bool Equals(object? obj)
@@ -136,7 +132,7 @@ public partial class Language
 
         public override int GetHashCode()
         {
-            return HashCode.Combine((int)Type, TokenIndex, LineIndex, CharIndex);
+            return HashCode.Combine((int)Type, TokenIndex, TokenString);
         }
     }
 }

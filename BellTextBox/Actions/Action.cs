@@ -22,7 +22,6 @@ internal abstract class Action
         for (int i = 0; i < CaretManager.Count; i++)
         {
             carets.Add(CaretManager.GetCaret(i).Clone());
-            Logger.Info("SaveCarets: " + carets[i].Position.LineIndex + " " + carets[i].Position.CharIndex + " " + carets[i].AnchorPosition.LineIndex + " " + carets[i].AnchorPosition.CharIndex);
         }
     }
 
@@ -32,7 +31,6 @@ internal abstract class Action
         foreach (var caret in carets)
         {
             CaretManager.AddCaret(caret.Clone());
-            Logger.Info("RestoreCarets: " + caret.Position.LineIndex + " " + caret.Position.CharIndex + " " + caret.AnchorPosition.LineIndex + " " + caret.AnchorPosition.CharIndex);
         }
         RowManager.SetRowCacheDirty();
         return true;
@@ -298,18 +296,18 @@ internal class DeleteSelectionAction : Action
 internal class InputCharAction : Action
 {
     private readonly EditDirection _direction;
-    private readonly char _char;
+    private readonly char[] _chars;
 
-    internal InputCharAction(EditDirection direction, char c)
+    internal InputCharAction(EditDirection direction, char[] chars)
     {
         _direction = direction;
-        _char = c;
+        _chars = chars;
     }
 
     protected override List<Command> CreateCommands(Caret caret)
     {
         var commands = new List<Command>();
-        commands.Add(new InputCharCommand(_direction, new[] { _char }));
+        commands.Add(new InputCharCommand(_direction, _chars));
         return commands;
     }
 }

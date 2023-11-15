@@ -53,7 +53,7 @@ public partial class TextBox
         set
         {
             _language = value;
-            LineManager.SetLanguageDirty();
+            LineManager.SetLanguageTokenDirty();
         }
     }
 
@@ -72,15 +72,10 @@ public partial class TextBox
         return count;
     }
 
-    internal float GetTabRenderSize()
-    {
-        return FontManager.GetFontWhiteSpaceWidth() * TabSize;
-    }
-
     internal string GetTabString()
     {
         if (TabMode.Space == TabMode)
-            return new string(' ', TabSize);
+            return new string(' ', TabSize); // TODO: cache this
         return "\t";
     }
 

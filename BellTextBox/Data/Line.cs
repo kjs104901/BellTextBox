@@ -248,7 +248,7 @@ internal class Line
         {
             _oldTokens.Clear();
             _oldTokens.AddRange(Tokens);
-            LineManager.SetLanguageDirty();
+            LineManager.SetLanguageTokenDirty();
         }
     }
     
@@ -270,11 +270,11 @@ internal class Line
         foundLineSub = LineSubs[0];
         return false;
     }
-
+    
     private float GetIndentWidth()
     {
         if (Singleton.TextBox.WordWrapIndent)
-            return Singleton.TextBox.CountTabStart(String) * Singleton.TextBox.GetTabRenderSize();
+            return Singleton.TextBox.CountTabStart(String) * FontManager.GetFontTabWidth();
         return 0.0f;
     }
 
@@ -297,12 +297,10 @@ internal class Line
         while (search >= 0)
         {
             if (_chars[search] == ' ')
-            {
-                search++;
                 break;
-            }
             search--;
         }
+        search++;
         return true;
     }
 

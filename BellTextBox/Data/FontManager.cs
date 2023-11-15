@@ -8,6 +8,7 @@ internal partial class FontManager
     internal static void UpdateReferenceSize() => Singleton.TextBox.FontManager.UpdateReferenceSize_();
     internal static float GetFontReferenceWidth() => Singleton.TextBox.FontManager.GetFontReferenceWidth_();
     internal static float GetFontWhiteSpaceWidth() => Singleton.TextBox.FontManager.GetFontWhiteSpaceWidth_();
+    internal static float GetFontTabWidth() => Singleton.TextBox.FontManager.GetFontTabWidth_();
     internal static float GetFontNumberWidth() => Singleton.TextBox.FontManager.GetFontNumberWidth_();
     internal static float GetFontWidth(char c) => Singleton.TextBox.FontManager.GetFontWidth_(c);
     internal static float GetFontWidth(string str) => Singleton.TextBox.FontManager.GetFontWidth_(str);
@@ -32,6 +33,7 @@ internal partial class FontManager
 
     private float GetFontReferenceWidth_() => GetFontWidth('#');
     private float GetFontWhiteSpaceWidth_() => GetFontWidth(' ');
+    private float GetFontTabWidth_() => GetFontWidth(' ') * Singleton.TextBox.TabSize;
     private float GetFontNumberWidth_() => GetFontWidth('0');
 
     private float GetFontWidth_(char c)

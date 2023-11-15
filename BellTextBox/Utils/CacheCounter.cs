@@ -6,9 +6,9 @@ internal class CacheCounter
 {
     private class Status
     {
-        internal int GetCount;
-        internal int SetDirtyCount;
-        internal int UpdateCount;
+        internal long GetCount;
+        internal long SetDirtyCount;
+        internal long UpdateCount;
     }
     
     private Dictionary<string, Status> _counter = new();

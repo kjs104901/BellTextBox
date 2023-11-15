@@ -11,9 +11,9 @@ public partial class TextBox
     internal float LineNumberWidth = 10.0f;
     internal float FoldWidth = 10.0f;
 
-    internal Stopwatch CaretBlinkStopwatch = new();
-    
-    internal int LinesPerPage => (int) (_viewSize.Y / FontManager.GetLineHeight());
+    internal readonly Stopwatch CaretBlinkStopwatch = new();
+
+    internal int LinesPerPage => (int)(_viewSize.Y / FontManager.GetLineHeight());
 
     public void Render(Vector2 viewPos, Vector2 viewSize)
     {
@@ -27,7 +27,7 @@ public partial class TextBox
 
         LineNumberWidth = (StringPool<int>.Get(LineManager.Lines.Count).Length + 1) * FontManager.GetFontNumberWidth();
 
-        LineManager.UpdateLanguage();
+        LineManager.UpdateLanguageToken();
 
         int rowStart = GetRowIndex(_viewPos, -3);
         int rowEnd = GetRowIndex(_viewPos + _viewSize, 3);
@@ -85,11 +85,14 @@ public partial class TextBox
                         else if (rowChar == '\t')
                         {
                             Backend.RenderLine(
-                                new Vector2(lineStartX + currPosX, lineTextStartY),
                                 new Vector2(
-                                    lineStartX + currPosX + Backend.GetCharWidth(' ') * TabSize,
-                                    lineTextStartY),
-                                WhiteSpaceFontColor.ToVector(), 1.0f);
+                                    lineStartX + currPosX,
+                                    lineY + FontManager.GetLineHeight() / 2.0f),
+                                new Vector2(
+                                    lineStartX + currPosX - FontManager.GetFontWhiteSpaceWidth() +
+                                    FontManager.GetFontTabWidth(),
+                                    lineY + FontManager.GetLineHeight() / 2.0f),
+                                WhiteSpaceFontColor.ToVector(), 2.0f);
                         }
                     }
 
@@ -113,7 +116,7 @@ public partial class TextBox
                         UiTextColor.ToVector());
                 }
 
-                if (Folding.None != line.Folding)
+                if (Folding.None != line.Folding && row.LineSub.Coordinates.LineSubIndex == 0)
                 {
                     float midX = LineNumberWidth + (FoldWidth / 2.0f);
                     float midY = (lineTextStartY + lineTextEndY) / 2.0f;
@@ -125,7 +128,7 @@ public partial class TextBox
                         Backend.RenderLine(new Vector2(midX - barLength, midY - barLength),
                             new Vector2(midX, midY),
                             UiTextColor.ToVector(), 2.0f);
-                        
+
                         Backend.RenderLine(new Vector2(midX - barLength, midY + barLength),
                             new Vector2(midX, midY),
                             UiTextColor.ToVector(), 2.0f);
@@ -135,7 +138,7 @@ public partial class TextBox
                         Backend.RenderLine(new Vector2(midX - barLength, midY - barLength),
                             new Vector2(midX, midY),
                             UiTextColor.ToVector(), 2.0f);
-                        
+
                         Backend.RenderLine(new Vector2(midX + barLength, midY - barLength),
                             new Vector2(midX, midY),
                             UiTextColor.ToVector(), 2.0f);
