@@ -1,6 +1,10 @@
 ﻿namespace Bell.Utils;
 
-internal class DevHelper
+public static class DevHelper
 {
-    internal const bool IsDebugMode = true;
+#if DEBUG
+    public const bool IsDebugMode = true;
+#else
+    public const bool IsDebugMode = false;
+#endif
 }

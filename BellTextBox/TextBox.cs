@@ -22,6 +22,8 @@ public partial class TextBox
     public TextBox(IBackend backend)
     {
         Backend = backend;
+
+        _tabStringCache = new Cache<string>("TabString", string.Empty, UpdateTabString);
     }
 
     public string GetDebugString()

@@ -1,4 +1,6 @@
-﻿namespace Bell.Utils;
+﻿using System.Diagnostics;
+
+namespace Bell.Utils;
 
 internal class Cache<T>
 {
@@ -10,6 +12,8 @@ internal class Cache<T>
 
     private DateTime _updateTime;
     private readonly int _updateIntervalMs;
+    
+    private readonly Stopwatch _updateStopwatch = new();
 
     internal Cache(string name, T initValue, Func<T, T> updateFunc, int updateIntervalMs = 0)
     {
@@ -46,9 +50,18 @@ internal class Cache<T>
     private void Update()
     {
         if (DevHelper.IsDebugMode)
+        {
             Singleton.TextBox.CacheCounter.CountUpdate(_name);
+            _updateStopwatch.Restart();
+        }
         
         _value = _updateFunc(_value);
         _isDirty = false;
+        
+        if (DevHelper.IsDebugMode)
+        {
+            _updateStopwatch.Stop();
+            Singleton.TextBox.CacheCounter.AddUpdateTime(_name, _updateStopwatch.ElapsedMilliseconds);
+        }
     }
 }

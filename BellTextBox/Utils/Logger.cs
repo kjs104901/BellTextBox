@@ -34,7 +34,7 @@ public class Logger
         Singleton.TextBox.Logger.AddLog(Level.Error, callerMemberName, message);
         if (DevHelper.IsDebugMode)
         {
-            //Debugger.Break();
+            Debugger.Break();
         }
     }
     

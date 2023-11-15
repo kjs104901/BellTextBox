@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using Bell.Utils;
 using ImGuiNET;
 
 namespace Bell.ImGuiNet;
@@ -13,10 +14,38 @@ public class ImGuiTextBox
         set => _textBox.SetText(value);
     }
 
-    public string DebugString => _textBox.GetDebugString();
-    public List<string> Logs => _textBox.GetLogs();
-
     public void Render(Vector2 size)
+    {
+        if (DevHelper.IsDebugMode)
+        {
+            if (ImGui.BeginTable("##ImGuiTextBoxDebugTable", 3, ImGuiTableFlags.Resizable))
+            {
+                ImGui.TableSetupColumn("##ImGuiTextBoxDebugTable_Column1", ImGuiTableColumnFlags.None, 100);
+                ImGui.TableSetupColumn("##ImGuiTextBoxDebugTable_Column2", ImGuiTableColumnFlags.None, 100);
+                ImGui.TableSetupColumn("##ImGuiTextBoxDebugTable_Column3", ImGuiTableColumnFlags.None, 200);
+
+                ImGui.TableNextRow();
+
+                ImGui.TableNextColumn();
+                string debugString = _textBox.GetDebugString();
+                ImGui.InputTextMultiline("##Debug", ref debugString, (uint)debugString.Length, new Vector2(-1, -1));
+                
+                ImGui.TableNextColumn();
+                string logString = string.Join("\n", _textBox.GetLogs());
+                ImGui.InputTextMultiline("##Logs", ref logString, (uint)logString.Length, new Vector2(-1, -1));
+                
+                ImGui.TableNextColumn();
+                RenderTextBox(size);
+                ImGui.EndTable();
+            }
+        }
+        else
+        {
+            RenderTextBox(size);
+        }
+    }
+
+    private void RenderTextBox(Vector2 size)
     {
         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, new Vector2(0, 0));
         ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, new Vector2(0, 0));
@@ -36,15 +65,22 @@ public class ImGuiTextBox
 
         Vector2 viewPos = new Vector2(ImGui.GetScrollX(), ImGui.GetScrollY());
         Vector2 viewSize = new Vector2(contentSize.X - ImGui.GetStyle().ScrollbarSize, contentSize.Y);
-        
-        _textBox.Render(viewPos, viewSize);
-        try
+
+        if (DevHelper.IsDebugMode)
         {
-            
+            _textBox.Render(viewPos, viewSize);
         }
-        catch (Exception e)
+        else
         {
-            ImGui.TextColored(new Vector4(1.0f, 0.0f, 0.0f, 1.0f), e.ToString());
+            try
+            {
+                _textBox.Render(viewPos, viewSize);
+            }
+            catch (Exception e)
+            {
+                // TODO color
+                ImGui.TextColored(new Vector4(1.0f, 0.0f, 0.0f, 1.0f), e.ToString());
+            }
         }
 
         ImGui.End();

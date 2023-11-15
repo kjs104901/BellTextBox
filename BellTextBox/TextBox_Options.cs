@@ -1,5 +1,6 @@
 ﻿using Bell.Data;
 using Bell.Languages;
+using Bell.Utils;
 
 namespace Bell;
 
@@ -31,8 +32,31 @@ public partial class TextBox
     public bool ReadOnly { get; set; } = false;
     public WrapMode WrapMode { get; set; } = WrapMode.Word;
     public bool WordWrapIndent { get; set; } = true;
-    public TabMode TabMode = TabMode.Space;
-    public int TabSize = 4;
+
+    internal string TabString => _tabStringCache.Get();
+    private readonly Cache<string> _tabStringCache;
+    
+    private TabMode _tabMode = TabMode.Space;
+    public TabMode TabMode
+    {
+        get => _tabMode;
+        set
+        {
+            _tabMode = value;
+            _tabStringCache.SetDirty();
+        }
+    }
+    
+    private int _tabSize = 4;
+    public int TabSize
+    {
+        get => _tabSize;
+        set
+        {
+            _tabSize = value;
+            _tabStringCache.SetDirty();
+        }
+    }
     
     public EolMode EolMode = EolMode.LF;
     
@@ -61,24 +85,22 @@ public partial class TextBox
 
     internal int CountTabStart(string line)
     {
-        string tabString = GetTabString();
-
         int count = 0;
-        while (line.StartsWith(tabString))
+        while (line.StartsWith(TabString))
         {
             count++;
-            line = line.Remove(0, tabString.Length);
+            line = line.Remove(0, TabString.Length);
         }
         return count;
     }
 
-    internal string GetTabString()
+    private string UpdateTabString(string _)
     {
         if (TabMode.Space == TabMode)
-            return new string(' ', TabSize); // TODO: cache this
+            return new string(' ', TabSize);
         return "\t";
     }
-
+    
     private string ReplaceTab(string text)
     {
         switch (TabMode)

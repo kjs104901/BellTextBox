@@ -81,7 +81,7 @@ public class FontStyle : IComparable<FontStyle>
         var stopwatch = Stopwatch.StartNew();
 
         var imFontPtr = ImGui.GetIO().Fonts
-            .AddFontFromFileTTF(@"Fonts\MaruBuri.ttf", 26.0f, null, ImGui.GetIO().Fonts.GetGlyphRangesKorean());
+            .AddFontFromFileTTF(@"Fonts\MaruBuri.ttf", 18.0f, null, ImGui.GetIO().Fonts.GetGlyphRangesKorean());
         imGuiRenderer.RecreateFontDeviceTexture(graphicsDevice);
 
         var imGuiBellTextBox = new ImGuiTextBox();
@@ -100,30 +100,9 @@ public class FontStyle : IComparable<FontStyle>
             ImGui.SetNextWindowSize(new Vector2(sdl2Window.Width, sdl2Window.Height));
             ImGui.Begin("Demo", ImGuiWindowFlags.NoResize);
             
-
-            if (ImGui.BeginTable("table2", 3, ImGuiTableFlags.Resizable))
-            {
-                ImGui.TableSetupColumn("C1", ImGuiTableColumnFlags.None, 100);
-                ImGui.TableSetupColumn("C2", ImGuiTableColumnFlags.None, 100);
-                ImGui.TableSetupColumn("C3", ImGuiTableColumnFlags.None, 200);
-
-                ImGui.TableNextRow();
-
-                ImGui.TableNextColumn();
-                string debugString = imGuiBellTextBox.DebugString;
-                ImGui.InputTextMultiline("##Debug", ref debugString, (uint)debugString.Length, new Vector2(-1, -1));
-                
-                ImGui.TableNextColumn();
-                string logString = string.Join("\n", imGuiBellTextBox.Logs);
-                ImGui.InputTextMultiline("##Logs", ref logString, (uint)logString.Length, new Vector2(-1, -1));
-                
-                ImGui.TableNextColumn();
-                ImGui.PushFont(imFontPtr);
-                imGuiBellTextBox.Render(new Vector2(-1, -1));
-                ImGui.PopFont();
-
-                ImGui.EndTable();
-            }
+            ImGui.PushFont(imFontPtr);
+            imGuiBellTextBox.Render(new Vector2(-1, -1));
+            ImGui.PopFont();
             
             ImGui.End();
 

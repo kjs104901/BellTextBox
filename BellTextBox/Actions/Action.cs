@@ -378,7 +378,7 @@ internal class TabAction : Action
             return commands;
         }
 
-        commands.Add(new InputCharCommand(EditDirection.Forward, Singleton.TextBox.GetTabString().ToCharArray()));
+        commands.Add(new InputCharCommand(EditDirection.Forward, Singleton.TextBox.TabString.ToCharArray()));
         return commands;
     }
 }

@@ -122,7 +122,7 @@ public partial class Language
 
         public bool Equals(Token other)
         {
-            return Type == other.Type && TokenIndex == other.TokenIndex && TokenString == other.TokenString;
+            return Type == other.Type && TokenIndex == other.TokenIndex && CharIndex == other.CharIndex;
         }
 
         public override bool Equals(object? obj)
@@ -132,7 +132,7 @@ public partial class Language
 
         public override int GetHashCode()
         {
-            return HashCode.Combine((int)Type, TokenIndex, TokenString);
+            return HashCode.Combine((int)Type, TokenIndex, CharIndex);
         }
     }
 }

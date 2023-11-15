@@ -4,8 +4,8 @@ namespace Bell.Data;
 
 internal class Row
 {
-    internal RowSelection RowSelection => RowSelectionCache.Get();
-    internal readonly Cache<RowSelection> RowSelectionCache;
+    internal RowSelection RowSelection => _rowSelectionCache.Get();
+    private readonly Cache<RowSelection> _rowSelectionCache;
 
     internal readonly LineSub LineSub;
 
@@ -13,7 +13,7 @@ internal class Row
     {
         LineSub = lineSub;
 
-        RowSelectionCache = new("Row Selection", new RowSelection()
+        _rowSelectionCache = new("Row Selection", new RowSelection()
             {
                 CaretPositions = new()
             },

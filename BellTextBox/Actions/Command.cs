@@ -274,7 +274,7 @@ internal class IndentSelectionCommand : Command
             if (line.Index < start.LineIndex || line.Index > end.LineIndex)
                 continue;
             
-            var tabChars = Singleton.TextBox.GetTabString();
+            var tabChars = Singleton.TextBox.TabString;
             line.InsertChars(0, tabChars.ToCharArray());
             RowManager.SetRowCacheDirty();
             CaretManager.ShiftCaretChar(line.Index, 0, EditDirection.Forward, tabChars.Length);
@@ -302,7 +302,7 @@ internal class UnindentSelectionCommand : Command
             if (line.Index < start.LineIndex || line.Index > end.LineIndex)
                 continue;
 
-            var tabChars = Singleton.TextBox.GetTabString();
+            var tabChars = Singleton.TextBox.TabString;
             if (line.GetSubString(0, tabChars.Length - 1) == tabChars)
             {
                 line.RemoveChars(0, tabChars.Length);

@@ -1,20 +1,28 @@
-﻿namespace Bell.Data;
+﻿using Bell.Utils;
 
-internal class LineSub
+namespace Bell.Data;
+
+internal class LineSub : IReusable
 {
     internal Coordinates Coordinates;
+    internal float IndentWidth;
 
     internal readonly List<char> Chars = new();
     internal readonly List<float> CharWidths = new();
     
-    internal readonly float IndentWidth;
-    
-    internal static readonly LineSub None = new(-1, -1, -1, 0.0f);
-    
-    internal LineSub(int lineIndex, int charIndex, int lineSubIndex, float indentWidth)
+    internal static readonly LineSub None = new()
     {
-        Coordinates = new Coordinates(lineIndex, charIndex, lineSubIndex);
-        IndentWidth = indentWidth;
+        Coordinates = new Coordinates(-1, -1, -1),
+        IndentWidth = 0.0f
+    };
+    
+    public void Reset()
+    {
+        Coordinates = new Coordinates(-1, -1, -1);
+        IndentWidth = 0.0f;
+        
+        Chars.Clear();
+        CharWidths.Clear();
     }
     
     internal int GetCharIndex(float position)

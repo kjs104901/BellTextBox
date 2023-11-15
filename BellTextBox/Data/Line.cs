@@ -64,7 +64,19 @@ internal class Line
     internal void InsertChars(int charIndex, char[] chars)
     {
         _chars.InsertRange(charIndex, chars);
-        Colors.InsertRange(charIndex, new ColorStyle[chars.Length]);
+
+        ColorStyle prevStyle = ColorStyle.None;
+        int prevIndex = charIndex - 1;
+        if (prevIndex >= 0 && Colors.Count > prevIndex)
+            prevStyle = Colors[prevIndex];
+
+        while (Colors.Count < charIndex)
+            Colors.Add(prevStyle);
+
+        for (int i = 0; i < chars.Length; i++)
+        {
+            Colors.Insert(charIndex, prevStyle);
+        }
         
         SetCharsDirty();
         SetCutoffsDirty();
@@ -78,10 +90,10 @@ internal class Line
         var removed = _chars.GetRange(charIndex, count).ToArray();
         _chars.RemoveRange(charIndex, count);
         
-        if (Colors.Count > charIndex + count)
-            Colors.RemoveRange(charIndex, count);
-        else
-            Colors.RemoveRange(charIndex, Colors.Count - charIndex);
+        while (Colors.Count < charIndex + count)
+            Colors.Add(ColorStyle.None);
+
+        Colors.RemoveRange(charIndex, count);
         
         SetCharsDirty();
         SetCutoffsDirty();
@@ -107,12 +119,13 @@ internal class Line
     private List<ColorStyle> UpdateColors(List<ColorStyle> colors)
     {
         colors.Clear();
-        if (Singleton.TextBox.SyntaxHighlightEnabled == false)
-            return colors;
         
-        if (_chars.Count > TextBox.SyntaxGiveUpThreshold)
+        if (Singleton.TextBox.SyntaxHighlightEnabled == false ||
+            _chars.Count > TextBox.SyntaxGiveUpThreshold)
+        {
             return colors;
-        
+        }
+
         colors.AddRange(new ColorStyle[_chars.Count]);
 
         foreach (var kv in Singleton.TextBox.Language.PatternsStyle)
@@ -203,10 +216,13 @@ internal class Line
 
     private List<LineSub> UpdateLineSubs(List<LineSub> lineSubs)
     {
+        ObjectPoolManager.LineSub.Return(lineSubs);
         lineSubs.Clear();
 
         int lineSubIndex = 0;
-        LineSub lineSub = new LineSub(Index, 0, lineSubIndex, 0.0f);
+        LineSub lineSub = ObjectPoolManager.LineSub.Get();
+        lineSub.Coordinates = new Coordinates(Index, 0, lineSubIndex);
+        lineSub.IndentWidth = 0.0f;
 
         for (int i = 0; i < _chars.Count; i++)
         {
@@ -221,7 +237,9 @@ internal class Line
                 lineSubs.Add(lineSub);
 
                 lineSubIndex++;
-                lineSub = new LineSub(Index, i + 1, lineSubIndex, GetIndentWidth());
+                lineSub = ObjectPoolManager.LineSub.Get();
+                lineSub.Coordinates = new Coordinates(Index, i + 1, lineSubIndex);
+                lineSub.IndentWidth = GetIndentWidth();
             }
         }
 
