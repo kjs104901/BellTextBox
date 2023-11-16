@@ -27,7 +27,7 @@ public enum TabMode
 
 public partial class TextBox
 {
-    public bool AutoIndent { get; set; } = true; // TODO
+    public bool AutoIndent { get; set; } = true;
     public bool AutoComplete { get; set; } = true; // TODO
     public readonly List<string> AutoCompleteList = new();
     

@@ -15,6 +15,7 @@ public class ImGuiTextBox
     
     // Options
     public bool ReadOnly { get => _textBox.ReadOnly; set => _textBox.ReadOnly = value; }
+    public bool AutoIndent { get => _textBox.AutoIndent; set => _textBox.AutoIndent = value; }
     public WrapMode WrapMode { get => _textBox.WrapMode; set => _textBox.WrapMode = value; }
     public bool WordWrapIndent { get => _textBox.WordWrapIndent; set => _textBox.WordWrapIndent = value; }
     public EolMode EolMode { get => _textBox.EolMode; set => _textBox.EolMode = value; }

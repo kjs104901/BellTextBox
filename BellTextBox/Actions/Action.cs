@@ -13,7 +13,7 @@ internal abstract class Action
 
     private string _startText = "";
     private string _endText = "";
-    
+
     protected abstract List<Command> CreateCommands(Caret caret);
 
     private void SaveCarets(List<Caret> carets)
@@ -32,6 +32,7 @@ internal abstract class Action
         {
             CaretManager.AddCaret(caret.Clone());
         }
+
         RowManager.SetRowCacheDirty();
         return true;
     }
@@ -58,11 +59,11 @@ internal abstract class Action
         }
 
         SaveCarets(_endCarets);
-        
+
         if (DevHelper.IsDebugMode)
         {
             _endText = Singleton.TextBox.Text;
-            
+
             bool isAllSame = true;
             for (int i = 0; i < _endCarets.Count; i++)
             {
@@ -80,10 +81,11 @@ internal abstract class Action
                 {
                     isAllSame = false;
                 }
-                
+
                 if (false == CaretManager.CheckValid(endCaret))
                 {
-                    Logger.Error($"DoCommands: invalid end caret: {endCaret.Position.LineIndex} {endCaret.Position.CharIndex} {endCaret.AnchorPosition.LineIndex} {endCaret.AnchorPosition.CharIndex}");
+                    Logger.Error(
+                        $"DoCommands: invalid end caret: {endCaret.Position.LineIndex} {endCaret.Position.CharIndex} {endCaret.AnchorPosition.LineIndex} {endCaret.AnchorPosition.CharIndex}");
                 }
             }
 
@@ -157,7 +159,7 @@ internal abstract class Action
         }
 
         RestoreCarets(_startCarets);
-        
+
         if (DevHelper.IsDebugMode)
         {
             if (Singleton.TextBox.Text != _startText)
@@ -226,7 +228,7 @@ internal class DeleteSelectionAction : Action
                     Logger.Error($"DeleteSelectionAction: failed to get line: {i}");
                     continue;
                 }
-                
+
                 int deleteCount = lineToDelete.CharsCount;
                 if (i == caret.Position.LineIndex)
                 {
@@ -246,12 +248,14 @@ internal class DeleteSelectionAction : Action
                 {
                     Logger.Warning("DeleteSelectionAction: deleteCount is 0");
                 }
+
                 if (i > caret.AnchorPosition.LineIndex)
                 {
                     commands.Add(new MergeLineCommand(EditDirection.Backward));
                 }
             }
         }
+
         if (caret.AnchorPosition.IsBiggerThan(caret.Position))
         {
             // Forward delete
@@ -262,7 +266,7 @@ internal class DeleteSelectionAction : Action
                     Logger.Error($"DeleteSelectionAction: failed to get line: {i}");
                     continue;
                 }
-                
+
                 int deleteCount = lineToDelete.CharsCount;
                 if (i == caret.AnchorPosition.LineIndex)
                 {
@@ -289,6 +293,7 @@ internal class DeleteSelectionAction : Action
                 }
             }
         }
+
         return commands;
     }
 }
@@ -305,19 +310,19 @@ internal class PasteAction : Action
     protected override List<Command> CreateCommands(Caret caret)
     {
         var commands = new List<Command>();
-        
+
         string[] lines = _text.Split('\n');
         for (int i = 0; i < lines.Length; i++)
         {
             string line = lines[i];
-            
+
             commands.Add(new InputCharCommand(EditDirection.Forward, line.ToCharArray()));
             if (i < lines.Length - 1)
             {
                 commands.Add(new SplitLineCommand(EditDirection.Forward));
             }
         }
-        
+
         return commands;
     }
 }
@@ -370,7 +375,7 @@ internal class DeleteCharAction : Action
             Logger.Error($"DeleteCharAction: failed to get line: {caret.Position.LineIndex}");
             return commands;
         }
-        
+
         if (caret.Position.CharIndex == line.CharsCount && _direction == EditDirection.Forward)
         {
             if (caret.Position.LineIndex == LineManager.Lines.Count - 1)
@@ -392,6 +397,27 @@ internal class EnterAction : Action
     {
         var commands = new List<Command>();
         commands.Add(new SplitLineCommand(EditDirection.Forward));
+        if (Singleton.TextBox.AutoIndent)
+        {
+            if (LineManager.GetLine(caret.Position.LineIndex, out Line line))
+            {
+                string lineString = line.String;
+
+                int tabCount = 0;
+                while (lineString.StartsWith(Singleton.TextBox.TabString))
+                {
+                    lineString = lineString.Remove(0, Singleton.TextBox.TabString.Length);
+                    tabCount++;
+                }
+
+                if (tabCount > 0)
+                {
+                    var tabString = string.Concat(Enumerable.Repeat(Singleton.TextBox.TabString, tabCount));
+                    commands.Add(new InputCharCommand(EditDirection.Forward, tabString.ToCharArray()));
+                }
+            }
+        }
+
         return commands;
     }
 }
@@ -421,6 +447,7 @@ internal class UnTabAction : Action
         {
             commands.Add(new UnindentSelectionCommand());
         }
+
         return commands;
     }
 }

@@ -13,6 +13,8 @@ class ImGuiDemo
 {
     private static bool _readOnly = false;
     
+    private static bool _autoIndent = true;
+    
     private static Option<WrapMode> _wrapMode = new()
     {
         Options =  new() { WrapMode.None, WrapMode.Word, WrapMode.BreakWord },
@@ -123,11 +125,16 @@ class ImGuiDemo
                     imGuiBellTextBox.ReadOnly = _readOnly;
                 
                 ImGui.Separator();
+                if (ImGui.Checkbox("AutoIndent" , ref _autoIndent))
+                    imGuiBellTextBox.AutoIndent = _autoIndent;
+                
+                ImGui.Separator();
                 if (ImGui.Combo("WrapMode", ref _wrapMode.Index, _wrapMode.Names, _wrapMode.Names.Length))
                     imGuiBellTextBox.WrapMode = _wrapMode.Options[_wrapMode.Index];
                 if (ImGui.Checkbox("WordWrapIndent", ref _wordWrapIndent))
                     imGuiBellTextBox.WordWrapIndent = _wordWrapIndent;
                 
+                ImGui.Separator();
                 if (ImGui.Combo("EolMode", ref _eolMode.Index, _eolMode.Names, _eolMode.Names.Length))
                     imGuiBellTextBox.EolMode = _eolMode.Options[_eolMode.Index];
                 

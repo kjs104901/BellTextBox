@@ -266,7 +266,7 @@ internal class MergeLineCommand : Command
 
 internal class IndentSelectionCommand : Command
 {
-    private readonly List<int> _indentLineIndexList = new();
+    private readonly HashSet<int> _indentLineIndexList = new();
     
     internal override void Do(Caret caret)
     {
@@ -298,6 +298,10 @@ internal class IndentSelectionCommand : Command
                     RowManager.SetRowCacheDirty();
                     CaretManager.ShiftCaretChar(line.Index, tabChars.Length, EditDirection.Backward, tabChars.Length);
                 }
+                else
+                {
+                    Logger.Error($"IndentSelectionCommand: line.GetSubString != tabChars: {line.GetSubString(0, tabChars.Length - 1)} != {tabChars}");
+                }
             }
         }
     }
@@ -310,7 +314,7 @@ internal class IndentSelectionCommand : Command
 
 internal class UnindentSelectionCommand : Command
 {
-    private readonly List<int> _unindentLineIndexList = new();
+    private readonly HashSet<int> _unindentLineIndexList = new();
     
     internal override void Do(Caret caret)
     {

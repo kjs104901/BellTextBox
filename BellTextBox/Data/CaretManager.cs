@@ -318,14 +318,14 @@ internal partial class CaretManager
             {
                 c.Position.LineIndex = line.Index;
                 c.Position.CharIndex += line.CharsCount;
-                c.Position.Validate();
+                //c.Position.Validate(); Skip this validation because of command order. TODO: Fix this
             }
 
             if (c.AnchorPosition.LineIndex == fromLine.Index)
             {
                 c.AnchorPosition.LineIndex = line.Index;
                 c.AnchorPosition.CharIndex += line.CharsCount;
-                c.AnchorPosition.Validate();
+                //c.AnchorPosition.Validate(); Skip this validation because of command order. TODO: Fix this
             }
 
             Logger.Info("MergeLineCaret: " + c.Position.LineIndex + " " + c.Position.CharIndex);
