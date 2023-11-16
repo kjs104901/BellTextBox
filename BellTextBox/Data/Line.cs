@@ -17,6 +17,8 @@ internal class Line
 
     internal Folding Folding = Folding.None;
 
+    internal float Width = 0.0f;
+
     internal string String => _stringCache.Get();
     private readonly Cache<string> _stringCache;
 
@@ -240,11 +242,13 @@ internal class Line
     {
         Singleton.TextBox.LineSubPool.Return(lineSubs);
         lineSubs.Clear();
+        Width = 0.0f;
 
         int lineSubIndex = 0;
         LineSub lineSub = Singleton.TextBox.LineSubPool.Get();
         lineSub.Coordinates = new Coordinates(Index, 0, lineSubIndex);
         lineSub.IndentWidth = 0.0f;
+        lineSub.Width = 0.0f;
 
         float currentX = 0.0f;
         for (int i = 0; i < _chars.Count; i++)
@@ -262,20 +266,24 @@ internal class Line
 
             lineSub.Chars.Add(c);
             lineSub.CharWidths.Add(cWidth);
+            lineSub.Width += cWidth;
             currentX += cWidth;
 
             if (Cutoffs.Contains(i)) // need new line
             {
                 lineSubs.Add(lineSub);
+                Width = Math.Max(Width, lineSub.Width);
 
                 lineSubIndex++;
                 lineSub = Singleton.TextBox.LineSubPool.Get();
                 lineSub.Coordinates = new Coordinates(Index, i + 1, lineSubIndex);
                 lineSub.IndentWidth = GetIndentWidth();
+                lineSub.Width = GetIndentWidth();
             }
         }
 
         lineSubs.Add(lineSub);
+        Width = Math.Max(Width, lineSub.Width);
         return lineSubs;
     }
 

@@ -27,12 +27,15 @@ internal partial class LineManager
 
     internal static void UpdateLanguageToken() => Singleton.TextBox.LineManager._languageTokenCache.Get();
     internal static void SetLanguageTokenDirty() => Singleton.TextBox.LineManager._languageTokenCache.SetDirty();
-
+    
     internal static void ShiftFoldingLine(int lineIndex, EditDirection direction) =>
         Singleton.TextBox.LineManager.ShiftFoldingLine_(lineIndex, direction);
-
-    public static void Unfold(int lineIndex) =>
+    
+    internal static void Unfold(int lineIndex) =>
         Singleton.TextBox.LineManager.Unfold_(lineIndex);
+
+    internal static float GetMaxLineWidth() =>
+        Singleton.TextBox.LineManager.GetMaxLineWidth_();
 }
 
 // Implementation
@@ -325,5 +328,15 @@ internal partial class LineManager
                 }
             }
         }
+    }
+
+    private float GetMaxLineWidth_()
+    {
+        float maxLineWidth = 0.0f;
+        foreach (Line line in _lines)
+        {
+            maxLineWidth = Math.Max(maxLineWidth, line.Width);
+        }
+        return maxLineWidth;
     }
 }

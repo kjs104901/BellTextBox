@@ -21,6 +21,7 @@ public partial class TextBox
     private string _imeComposition = "";
 
     private const float ScrollSpeed = 10.0f;
+    private const float RenderPadding = 10.0f;
 
     private void ProcessInput(Vector2 viewPos, Vector2 viewSize)
     {
@@ -446,8 +447,11 @@ public partial class TextBox
         {
             PageSize.X = _viewSize.X;
         }
-
-        PageSize.Y = RowManager.Rows.Count * FontManager.GetLineHeight();
+        else
+        {
+            PageSize.X = LineManager.GetMaxLineWidth() + LineNumberWidth + FoldWidth + RenderPadding;
+        }
+        PageSize.Y = RowManager.Rows.Count * FontManager.GetLineHeight() + RenderPadding;
     }
 
     private int GetRowIndex(Vector2 viewCoordinates, int yOffset = 0)

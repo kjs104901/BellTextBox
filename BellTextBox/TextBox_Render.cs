@@ -29,7 +29,6 @@ public partial class TextBox
             renderPageSize.X = _viewSize.X;
         if (renderPageSize.Y < _viewSize.Y)
             renderPageSize.Y = _viewSize.Y;
-        
         Backend.RenderPage(renderPageSize, ReadOnly ? Theme.BackgroundDimmed.ToVector() : Theme.Background.ToVector());
 
         LineNumberWidth = (StringPool<int>.Get(LineManager.Lines.Count).Length + 1) * FontManager.GetFontNumberWidth();
@@ -149,6 +148,26 @@ public partial class TextBox
                     }
                 }
             }
+
+            // TODO: Need auto scroll
+            /*
+            if (CaretManager.Count == 1 &&
+                CaretManager.GetFirstCaret(out var firstCaret) &&
+                firstCaret.Position.LineIndex == line.Index &&
+                LineManager.GetLineSub(firstCaret.Position, out LineSub scrollLineSub))
+            {
+                float startPosition = scrollLineSub.GetCharPosition(firstCaret.Position) - _viewPos.X;
+                
+                if (startPosition < 0.0f)
+                {
+                    Backend.SetScrollX(startPosition);
+                }
+                else if (startPosition > _viewSize.X)
+                {
+                    Backend.SetScrollX(startPosition - _viewSize.X);
+                }
+            }
+            */
 
             if (CaretBlinkStopwatch.ElapsedMilliseconds < 1000 ||
                 CaretBlinkStopwatch.ElapsedMilliseconds % 1000 < 500)

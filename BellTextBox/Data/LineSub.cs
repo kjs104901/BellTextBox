@@ -6,6 +6,7 @@ internal class LineSub : IReusable
 {
     internal Coordinates Coordinates;
     internal float IndentWidth;
+    internal float Width;
 
     internal readonly List<char> Chars = new();
     internal readonly List<float> CharWidths = new();
@@ -13,13 +14,15 @@ internal class LineSub : IReusable
     internal static readonly LineSub None = new()
     {
         Coordinates = new Coordinates(-1, -1, -1),
-        IndentWidth = 0.0f
+        IndentWidth = 0.0f,
+        Width = 0.0f,
     };
     
     public void Reset()
     {
         Coordinates = new Coordinates(-1, -1, -1);
         IndentWidth = 0.0f;
+        Width = 0.0f;
         
         Chars.Clear();
         CharWidths.Clear();

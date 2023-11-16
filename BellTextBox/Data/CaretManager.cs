@@ -151,7 +151,6 @@ internal partial class CaretManager
             caret.Position.LineSubIndex = -1;
             caret.AnchorPosition.LineSubIndex = -1;
         }
-
         RowManager.SetRowCacheDirty();
     }
 
@@ -240,7 +239,6 @@ internal partial class CaretManager
             sb.AppendLine("\tAnchorPosition\t" + caret.AnchorPosition.LineIndex + ":" + caret.AnchorPosition.CharIndex +
                           ":" + caret.AnchorPosition.LineSubIndex);
         }
-
         return sb.ToString();
     }
 
@@ -397,7 +395,6 @@ internal partial class CaretManager
                 Logger.Info("Overlapped caret has been removed");
             }
         }
-
         Singleton.TextBox.CaretBlinkStopwatch.Restart();
     }
 }
