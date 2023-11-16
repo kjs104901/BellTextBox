@@ -1,6 +1,7 @@
-﻿using System.Numerics;
+﻿using System.Globalization;
+using System.Numerics;
 
-namespace Bell.Data;
+namespace Bell.Themes;
 
 public readonly struct ColorStyle : IComparable<ColorStyle>
 {
@@ -9,7 +10,7 @@ public readonly struct ColorStyle : IComparable<ColorStyle>
     private readonly float _b;
     private readonly float _a;
 
-    public ColorStyle(float r, float g, float b, float a)
+    public ColorStyle(float r, float g, float b, float a = 1.0f)
     {
         _r = r;
         _g = g;
@@ -17,12 +18,26 @@ public readonly struct ColorStyle : IComparable<ColorStyle>
         _a = a;
     }
     
-    public ColorStyle(float r, float g, float b)
+    public ColorStyle(string hexColor)
     {
-        _r = r;
-        _g = g;
-        _b = b;
+        if (hexColor.StartsWith("#"))
+            hexColor = hexColor.Substring(1);
+
+        _r = 0.0f;
+        if (hexColor.Length >= 2)
+            _r = int.Parse(hexColor.Substring(0, 2), NumberStyles.HexNumber) / 255.0f;
+        
+        _g = 0.0f;
+        if (hexColor.Length >= 4)
+            _g = int.Parse(hexColor.Substring(2, 2), NumberStyles.HexNumber) / 255.0f;
+        
+        _b = 0.0f;
+        if (hexColor.Length >= 6)
+            _b = int.Parse(hexColor.Substring(4, 2), NumberStyles.HexNumber) / 255.0f;
+        
         _a = 1.0f;
+        if (hexColor.Length >= 8)
+            _a = int.Parse(hexColor.Substring(6, 2), NumberStyles.HexNumber) / 255.0f;
     }
 
     public static ColorStyle None = new ColorStyle(0, 0, 0, 0);

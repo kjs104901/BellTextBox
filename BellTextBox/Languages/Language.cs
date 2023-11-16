@@ -1,41 +1,37 @@
 ﻿using System.Text.RegularExpressions;
 using Bell.Data;
 using Bell.Inputs;
+using Bell.Themes;
 
 namespace Bell.Languages;
 
 public partial class Language
 {
-    internal readonly Dictionary<TokenType, List<string>> Tokens = new()
-    {
-        { TokenType.LineComment, new() },
-        { TokenType.BlockCommentStart, new() },
-        { TokenType.BlockCommentEnd, new() },
-        { TokenType.String, new() },
-        { TokenType.MultilineStringStart, new() },
-        { TokenType.MultilineStringEnd, new() },
-        { TokenType.FoldingStart, new() },
-        { TokenType.FoldingEnd, new() },
-    };
-
-    public ColorStyle DefaultStyle = new();
-    public ColorStyle CommentStyle = new();
-    public ColorStyle StringStyle = new();
-
-    internal Dictionary<Regex, ColorStyle> PatternsStyle = new();
-
     internal enum TokenType
     {
         LineComment,
         BlockCommentStart,
         BlockCommentEnd,
-        String,
         MultilineStringStart,
         MultilineStringEnd,
+        String,
         FoldingStart,
         FoldingEnd
     }
+    internal readonly Dictionary<TokenType, List<string>> Tokens = new()
+    {
+        { TokenType.LineComment, new() },
+        { TokenType.BlockCommentStart, new() },
+        { TokenType.BlockCommentEnd, new() },
+        { TokenType.MultilineStringStart, new() },
+        { TokenType.MultilineStringEnd, new() },
+        { TokenType.String, new() },
+        { TokenType.FoldingStart, new() },
+        { TokenType.FoldingEnd, new() },
+    };
 
+    internal Dictionary<Regex, Theme.Token> PatternsStyle = new();
+    
     public void AddLineComment(string str)
     {
         Tokens[TokenType.LineComment].Add(str);
@@ -64,20 +60,18 @@ public partial class Language
         Tokens[TokenType.FoldingEnd].Add(endStr);
     }
     
-    public void AddPattern(string regex, ColorStyle colorStyle, RegexOptions regexOptions = RegexOptions.None)
+    public void AddPattern(string regex, Theme.Token token, RegexOptions regexOptions = RegexOptions.None)
     {
-        PatternsStyle.Add(new Regex(regex, regexOptions), colorStyle);
+        PatternsStyle.Add(new Regex(regex, regexOptions | RegexOptions.Compiled), token);
     }
     
-    internal bool FindMatching(string source, int lineIndex, int charIndex, out Token matchedToken)
+    internal bool FindMatching(string source, int charIndex, out Token matchedToken)
     {
         matchedToken = new Token();
 
-        foreach (KeyValuePair<TokenType, List<string>> kv in Tokens)
+        foreach (TokenType tokenType in Tokens.Keys.OrderBy(k => k))
         {
-            TokenType tokenType = kv.Key;
-            List<string> tokenStringList = kv.Value;
-
+            List<string> tokenStringList = Tokens[tokenType];
             for (int tokenIndex = 0; tokenIndex < tokenStringList.Count; tokenIndex++)
             {
                 string tokenString = tokenStringList[tokenIndex];

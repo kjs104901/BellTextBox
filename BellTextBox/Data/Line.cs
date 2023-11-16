@@ -2,6 +2,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using Bell.Languages;
+using Bell.Themes;
 using Bell.Utils;
 
 namespace Bell.Data;
@@ -119,7 +120,7 @@ internal class Line
     private List<ColorStyle> UpdateColors(List<ColorStyle> colors)
     {
         colors.Clear();
-        if (Singleton.TextBox.SyntaxHighlightEnabled == false ||
+        if (Singleton.TextBox.SyntaxHighlight == false ||
             _chars.Count > TextBox.SyntaxGiveUpThreshold)
         {
             return colors;
@@ -133,7 +134,7 @@ internal class Line
         foreach (var kv in Singleton.TextBox.Language.PatternsStyle)
         {
             Regex regex = kv.Key;
-            ColorStyle colorStyle = kv.Value;
+            ColorStyle colorStyle = Singleton.TextBox.Theme.TokenColors[kv.Value];
             
             foreach (Match match in regex.Matches(String))
             {
@@ -143,12 +144,12 @@ internal class Line
                 }
             }
         }
-
+        
         foreach (var range in CommentRanges)
         {
             for (int i = range.Item1; i < range.Item2 && i < colors.Count; i++)
             {
-                colors[i] = Singleton.TextBox.Language.CommentStyle;
+                colors[i] = Singleton.TextBox.Theme.TokenColors[Theme.Token.Comment];
             }
         }
 
@@ -156,7 +157,7 @@ internal class Line
         {
             for (int i = range.Item1; i < range.Item2 && i < colors.Count; i++)
             {
-                colors[i] = Singleton.TextBox.Language.StringStyle;
+                colors[i] = Singleton.TextBox.Theme.TokenColors[Theme.Token.String];
             }
         }
         return colors;
@@ -255,8 +256,7 @@ internal class Line
 
         for (int i = 0; i < String.Length; i++)
         {
-            if (Singleton.TextBox.Language.FindMatching(String,
-                    Index, i, out Language.Token matchedToken))
+            if (Singleton.TextBox.Language.FindMatching(String, i, out Language.Token matchedToken))
             {
                 Tokens.Add(matchedToken);
                 i += matchedToken.TokenString.Length;
@@ -300,11 +300,11 @@ internal class Line
 
     internal ColorStyle GetColorStyle(int charIndex)
     {
-        ColorStyle charColor = Singleton.TextBox.Language.DefaultStyle;
+        ColorStyle charColor = Singleton.TextBox.Theme.Foreground;
         if (Colors.Count > charIndex)
             charColor = Colors[charIndex];
         if (charColor == ColorStyle.None)
-            charColor = Singleton.TextBox.Language.DefaultStyle;
+            charColor = Singleton.TextBox.Theme.Foreground;
         return charColor;
     }
 

@@ -1,4 +1,5 @@
 ﻿using Bell.Data;
+using Bell.Themes;
 
 namespace Bell.Languages;
 
@@ -6,33 +7,40 @@ public partial class Language
 {
     public static Language CSharpStack()
     {
-        Language language = new()
-        {
-            DefaultStyle = new ColorStyle(0.4f, 0.8f, 0.2f),
-            CommentStyle = new ColorStyle(0.3f, 0.5f, 0.2f),
-            StringStyle = new ColorStyle(0.2f, 0.3f, 0.3f)
-        };
+        Language language = new();
 
         // File name
         language.AddPattern(@"(?<=in )(?<file>.*?)(?=:line)",
-            new ColorStyle(0.5f, 0.4f, 0.8f));
+            Theme.Token.Comment);
         
         // Line info
         language.AddPattern(@":line\s+\d+",
-            new ColorStyle(0.8f, 0.4f, 0.2f));
+            Theme.Token.Constant);
         
         // Namespace
         language.AddPattern(@"(?<=at\s+)([\w.]+)(?=\.[^.(]+)",
-            new ColorStyle(0.8f, 0.8f, 0.2f));
+            Theme.Token.Namespace);
         
         // Function
         language.AddPattern(@"(?:\.|>)([^>.]+)(?=\()",
-            new ColorStyle(0.4f, 0.8f, 0.8f));
+            Theme.Token.Function);
         
         // Param
         language.AddPattern( @"\(([^)]+)\)",
-            new ColorStyle(0.7f, 0.8f, 0.3f));
-
+            Theme.Token.Variable);
+        
+        // Class
+        language.AddPattern(@"\b(class|struct|enum|interface)\s+(?<range>\w+?)\b",
+            Theme.Token.Type);
+        
+        // Function Call
+        language.AddPattern(@"\b\w+(?=\s*\()",
+            Theme.Token.Function);
+        
+        // Keyword
+        language.AddPattern(@"\b(public|private|protected|internal|class|struct|interface|enum|delegate|int|long|float|double|bool|char|string|object|byte|sbyte|short|ushort|uint|ulong|decimal|lock|new|override|virtual|abstract|sealed|static|readonly|extern|ref|out|in|params|using|namespace|true|false|null|this|base|operator|sizeof|typeof|stackalloc|nameof|async|await|volatile|unchecked|checked|unsafe|fixed|void|get|set)\b",
+            Theme.Token.Keyword);
+        
         return language;
     }
 }

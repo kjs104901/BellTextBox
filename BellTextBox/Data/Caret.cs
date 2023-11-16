@@ -2,8 +2,6 @@
 
 internal enum CaretMove
 {
-    None,
-
     Up,
     Down,
     Left,

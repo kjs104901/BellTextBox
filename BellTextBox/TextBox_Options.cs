@@ -1,5 +1,6 @@
 ﻿using Bell.Data;
 using Bell.Languages;
+using Bell.Themes;
 using Bell.Utils;
 
 namespace Bell;
@@ -28,13 +29,21 @@ public partial class TextBox
 {
     public bool AutoIndent { get; set; } = true; // TODO
     public bool AutoComplete { get; set; } = true;
+    public readonly List<string> AutoCompleteList = new();
+    
     public bool Overwrite { get; set; } = false;
     public bool ReadOnly { get; set; } = false;
+    
     public WrapMode WrapMode { get; set; } = WrapMode.None;
     public bool WordWrapIndent { get; set; } = true;
-
-    internal string TabString => _tabStringCache.Get();
-    private readonly Cache<string> _tabStringCache;
+    
+    public EolMode EolMode = EolMode.LF;
+    
+    public bool SyntaxHighlight { get; set; } = true;
+    public bool SyntaxFolding { get; set; } = true;
+    
+    public bool ShowingWhitespace { get; set; } = true;
+    public float LeadingHeight { get; set; } = 1.2f;
     
     private TabMode _tabMode = TabMode.Space;
     public TabMode TabMode
@@ -47,6 +56,7 @@ public partial class TextBox
         }
     }
     
+    
     private int _tabSize = 4;
     public int TabSize
     {
@@ -58,19 +68,7 @@ public partial class TextBox
         }
     }
     
-    public EolMode EolMode = EolMode.LF;
-    
-    public bool SyntaxHighlighting { get; set; } = true;
-    public bool SyntaxFolding { get; set; } = true;
-
-    public bool SyntaxHighlightEnabled { get; set; } = true;
-    public bool ShowingWhitespace { get; set; } = true;
-    
-    internal const int SyntaxGiveUpThreshold = 1000;
-    
-    public float LeadingHeight { get; set; } = 1.2f;
-    
-    private Language _language = Language.CSharpStack();
+    private Language _language = Language.CSharp();
     public Language Language
     {
         get => _language;
@@ -81,7 +79,15 @@ public partial class TextBox
         }
     }
 
-    public readonly List<string> AutoCompleteList = new();
+    public Theme Theme = Theme.Dark();
+}
+
+public partial class TextBox
+{
+    internal string TabString => _tabStringCache.Get();
+    private readonly Cache<string> _tabStringCache;
+    
+    internal const int SyntaxGiveUpThreshold = 1000;
 
     internal int CountTabStart(string line)
     {
@@ -113,7 +119,7 @@ public partial class TextBox
         return "\t";
     }
     
-    private string ReplaceTab(string text)
+    internal string ReplaceTab(string text)
     {
         switch (TabMode)
         {

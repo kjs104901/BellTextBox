@@ -27,7 +27,6 @@ internal partial class CaretManager
     internal static void SelectRectangle(List<ValueTuple<Coordinates, Coordinates>> ranges, bool isReversed) =>
         Singleton.TextBox.CaretManager.SelectRectangle_(ranges, isReversed);
 
-    internal static List<Caret> GetCaretsInLine(Line line) => Singleton.TextBox.CaretManager.GetCaretsInLine_(line);
     internal static void CopyClipboard() => Singleton.TextBox.CaretManager.CopyClipboard_();
     internal static void PasteClipboard() => Singleton.TextBox.CaretManager.PasteClipboard_();
     internal static bool CheckValid(Caret caret) => Singleton.TextBox.CaretManager.CheckValid_(caret);
@@ -177,11 +176,6 @@ internal partial class CaretManager
         RowManager.SetRowCacheDirty();
     }
 
-    private List<Caret> GetCaretsInLine_(Line line)
-    {
-        return _carets.Where(caret => caret.Position.LineIndex == line.Index).ToList();
-    }
-
     private void CopyClipboard_()
     {
         if (_carets.Count == 0)
@@ -212,7 +206,10 @@ internal partial class CaretManager
             RemoveCaretsSelection();
         }
         
-        string clipboardText = Singleton.TextBox.ReplaceEol(Singleton.TextBox.Backend.GetClipboard());
+        string clipboardText = Singleton.TextBox.Backend.GetClipboard();
+        clipboardText = Singleton.TextBox.ReplaceTab(clipboardText);
+        clipboardText = Singleton.TextBox.ReplaceEol(clipboardText);
+        
         Singleton.TextBox.ActionManager.DoAction(new PasteAction(clipboardText));
         
         // TODO: If selected row number is same as pasted row number, directly paste
