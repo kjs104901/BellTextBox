@@ -46,8 +46,8 @@ class ImGuiDemo
     
     private static Option<Language> _language = new()
     {
-        Options =  new() { Language.CSharp(), Language.Json(), Language.PlainText(), Language.Proto(), Language.Sql() },
-        Names = new[] { "C#", "Json", "PlainText", "Proto", "Sql" },
+        Options =  new() { Language.CSharp(), Language.Json(), Language.Proto(), Language.Sql(), Language.PlainText() },
+        Names = new[] { "C#", "Json", "Proto", "Sql", "PlainText" },
         Index = 0
     };
     
@@ -111,8 +111,8 @@ class ImGuiDemo
             
             if (ImGui.BeginTable("##DemoTable", 2, ImGuiTableFlags.Resizable))
             {
-                ImGui.TableSetupColumn("##DemoTable_Options", ImGuiTableColumnFlags.None, 100);
-                ImGui.TableSetupColumn("##DemoTable_TextBox", ImGuiTableColumnFlags.None, 500);
+                ImGui.TableSetupColumn("##DemoTable_Options", ImGuiTableColumnFlags.None, 30);
+                ImGui.TableSetupColumn("##DemoTable_TextBox", ImGuiTableColumnFlags.None, 100);
 
                 ImGui.TableNextRow();
                 
@@ -155,6 +155,12 @@ class ImGuiDemo
                     string name = _language.Names[_language.Index];
                     if (name == "C#")
                         imGuiBellTextBox.Text = SourceCodeExample.CSharp;
+                    else if (name == "Json")
+                        imGuiBellTextBox.Text = SourceCodeExample.Json;
+                    else if (name == "Proto")
+                        imGuiBellTextBox.Text = SourceCodeExample.Proto;
+                    else if (name == "Sql")
+                        imGuiBellTextBox.Text = SourceCodeExample.Sql;
                     else
                         imGuiBellTextBox.Text = string.Empty;
                 }

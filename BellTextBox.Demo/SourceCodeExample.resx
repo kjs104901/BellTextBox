@@ -121,4 +121,13 @@
   <data name="CSharp" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\CSharp.cs;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;ks_c_5601-1987</value>
   </data>
+  <data name="Json" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Json.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;ks_c_5601-1987</value>
+  </data>
+  <data name="Proto" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Proto.proto;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;ks_c_5601-1987</value>
+  </data>
+  <data name="Sql" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Sql.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;ks_c_5601-1987</value>
+  </data>
 </root>

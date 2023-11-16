@@ -89,5 +89,80 @@ namespace Bell.Demo {
                 return ResourceManager.GetString("CSharp", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   {
+        ///  &quot;web-app&quot;: {
+        ///    &quot;servlet&quot;: [
+        ///      {
+        ///        &quot;servlet-name&quot;: &quot;cofaxCDS&quot;,
+        ///        &quot;servlet-class&quot;: &quot;org.cofax.cds.CDSServlet&quot;,
+        ///        &quot;init-param&quot;: {
+        ///          &quot;templatePath&quot;: &quot;templates&quot;,
+        ///          &quot;templateOverridePath&quot;: &quot;&quot;,
+        ///          &quot;defaultListTemplate&quot;: &quot;listTemplate.htm&quot;,
+        ///          &quot;defaultFileTemplate&quot;: &quot;articleTemplate.htm&quot;,
+        ///          &quot;useJSP&quot;: false,
+        ///          &quot;jspListTemplate&quot;: &quot;listTemplate.jsp&quot;,
+        ///          &quot;jspFileTemplate&quot;: &quot;articleTemplate.jsp&quot;,
+        ///          &quot;cachePackageTagsTr[나머지 문자열은 잘림]&quot;;과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        internal static string Json {
+            get {
+                return ResourceManager.GetString("Json", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   syntax = &quot;proto3&quot;;
+        ///
+        ///option csharp_namespace = &quot;DemoAspNetCore3&quot;;
+        ///
+        ///service MyOwnService {
+        ///  rpc WhoIs(EmptyRequest) returns (WhoIsReply) {}
+        ///  rpc IntroduceYourself (IntroduceYourselfRequest) returns (IntroduceYourselfReply) {}
+        ///}
+        ///
+        ///message EmptyRequest {
+        ///}
+        ///
+        ///message WhoIsReply {
+        ///  string message = 1;
+        ///}
+        ///
+        ///message IntroduceYourselfRequest {
+        ///	string name = 1;
+        ///}
+        ///
+        ///message IntroduceYourselfReply {
+        ///	
+        ///	string name = 1;
+        ///	string job = 2;
+        ///	string country = 3;
+        ///	repeated string citizenship = 4;
+        ///	
+        ///	[나머지 문자열은 잘림]&quot;;과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        internal static string Proto {
+            get {
+                return ResourceManager.GetString("Proto", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   -- Database-Level
+        ///DROP DATABASE databaseName                 -- Delete the database (irrecoverable!)
+        ///DROP DATABASE IF EXISTS databaseName       -- Delete if it exists
+        ///CREATE DATABASE databaseName               -- Create a new database
+        ///CREATE DATABASE IF NOT EXISTS databaseName -- Create only if it does not exists
+        ///SHOW DATABASES                             -- Show all the databases in this server
+        ///USE databaseName                           -- Set the default (current) database
+        ///SELECT DATABASE()        [나머지 문자열은 잘림]&quot;;과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        internal static string Sql {
+            get {
+                return ResourceManager.GetString("Sql", resourceCulture);
+            }
+        }
     }
 }
