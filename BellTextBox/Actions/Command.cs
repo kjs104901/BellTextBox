@@ -266,9 +266,10 @@ internal class MergeLineCommand : Command
 
 internal class IndentSelectionCommand : Command
 {
+    private readonly List<int> _indentLineIndexList = new();
+    
     internal override void Do(Caret caret)
     {
-        /*
         foreach (Line line in LineManager.Lines)
         {
             caret.GetSorted(out Coordinates start, out Coordinates end);
@@ -279,13 +280,26 @@ internal class IndentSelectionCommand : Command
             line.InsertChars(0, tabChars.ToCharArray());
             RowManager.SetRowCacheDirty();
             CaretManager.ShiftCaretChar(line.Index, 0, EditDirection.Forward, tabChars.Length);
+            
+            _indentLineIndexList.Add(line.Index);
         }
-        */
     }
 
     internal override void Undo(Caret caret)
     {
-        //new UnindentSelectionCommand().Do(caret);
+        foreach (int lineIndex in _indentLineIndexList)
+        {
+            if (LineManager.GetLine(lineIndex, out Line line))
+            {
+                var tabChars = Singleton.TextBox.TabString;
+                if (line.GetSubString(0, tabChars.Length - 1) == tabChars)
+                {
+                    line.RemoveChars(0, tabChars.Length);
+                    RowManager.SetRowCacheDirty();
+                    CaretManager.ShiftCaretChar(line.Index, tabChars.Length, EditDirection.Backward, tabChars.Length);
+                }
+            }
+        }
     }
 
     internal override string GetDebugString()
@@ -296,9 +310,10 @@ internal class IndentSelectionCommand : Command
 
 internal class UnindentSelectionCommand : Command
 {
+    private readonly List<int> _unindentLineIndexList = new();
+    
     internal override void Do(Caret caret)
     {
-        /*
         foreach (Line line in LineManager.Lines)
         {
             caret.GetSorted(out Coordinates start, out Coordinates end);
@@ -310,16 +325,25 @@ internal class UnindentSelectionCommand : Command
             {
                 line.RemoveChars(0, tabChars.Length);
                 RowManager.SetRowCacheDirty();
-
                 CaretManager.ShiftCaretChar(line.Index, tabChars.Length, EditDirection.Backward, tabChars.Length);
+                
+                _unindentLineIndexList.Add(line.Index);
             }
         }
-        */
     }
 
     internal override void Undo(Caret caret)
     {
-        //new IndentSelectionCommand().Do(caret);
+        foreach (int lineIndex in _unindentLineIndexList)
+        {
+            if (LineManager.GetLine(lineIndex, out Line line))
+            {
+                var tabChars = Singleton.TextBox.TabString;
+                line.InsertChars(0, tabChars.ToCharArray());
+                RowManager.SetRowCacheDirty();
+                CaretManager.ShiftCaretChar(line.Index, 0, EditDirection.Forward, tabChars.Length);
+            }
+        }
     }
 
     internal override string GetDebugString()

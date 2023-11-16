@@ -401,7 +401,7 @@ internal class TabAction : Action
     protected override List<Command> CreateCommands(Caret caret)
     {
         var commands = new List<Command>();
-        if (caret.HasSelection)
+        if (CaretManager.Count == 1 && caret.HasSelection)
         {
             commands.Add(new IndentSelectionCommand());
             return commands;
@@ -417,7 +417,10 @@ internal class UnTabAction : Action
     protected override List<Command> CreateCommands(Caret caret)
     {
         var commands = new List<Command>();
-        commands.Add(new UnindentSelectionCommand());
+        if (CaretManager.Count == 1)
+        {
+            commands.Add(new UnindentSelectionCommand());
+        }
         return commands;
     }
 }
