@@ -316,7 +316,7 @@ internal class Line
 
         while (search >= 0)
         {
-            if (_chars[search] == ' ')
+            if (false == char.IsLetter(_chars[search]))
                 break;
             search--;
         }
@@ -332,7 +332,7 @@ internal class Line
 
         while (search < _chars.Count)
         {
-            if (_chars[search] == ' ')
+            if (false == char.IsLetter(_chars[search]))
                 break;
             search++;
         }

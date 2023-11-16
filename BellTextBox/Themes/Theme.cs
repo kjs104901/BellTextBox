@@ -1,11 +1,11 @@
 ﻿namespace Bell.Themes;
 
+
 public class Theme
 {
     // Background
     public ColorStyle Background;
     public ColorStyle BackgroundSelection;
-    public ColorStyle BackgroundMenu;
 
     // Foreground
     public ColorStyle Foreground;
@@ -33,27 +33,26 @@ public class Theme
     {
         return new Theme()
         {
-            Background            = new ("#1E1E1E"),
-            BackgroundSelection   = new ("#ADD6FF26"),
-            BackgroundMenu        = new ("#252525"),
+            Background            = new ColorStyle("#1E1E1E",       isSrgb: true),
+            BackgroundSelection   = new ColorStyle("#ADD6FF26",     isSrgb: true),
             
-            Foreground            = new ("#D4D4D4"),
-            ForegroundDimmed      = new ("#A6A6A6"),
+            Foreground            = new ColorStyle("#D4D4D4",       isSrgb: true),
+            ForegroundDimmed      = new ColorStyle("#767676",       isSrgb: true),
             
             TokenColors = new Dictionary<Token, ColorStyle>()
             {
-                { Token.Comment,           new ColorStyle("#6A9955") },
-                { Token.Constant,          new ColorStyle("#569CD6") },
-                { Token.Attribute,         new ColorStyle("#D7BA7D") },
-                { Token.Invalid,           new ColorStyle("#F44747") },
-                { Token.String,            new ColorStyle("#CE9178") },
-                { Token.Keyword,           new ColorStyle("#569CD6") },
-                { Token.KeywordControl,    new ColorStyle("#C586C0") },
-                { Token.Function,          new ColorStyle("#DCDCAA") },
-                { Token.Namespace,         new ColorStyle("#4EC9B0") },
-                { Token.Type,              new ColorStyle("#4EC9B0") },
-                { Token.Numeric,           new ColorStyle("#B5CEA8") },
-                { Token.Variable,          new ColorStyle("#9CDCFE") }
+                { Token.Comment,           new ColorStyle("#6A9955",    isSrgb: true) },
+                { Token.Constant,          new ColorStyle("#569CD6",    isSrgb: true) },
+                { Token.Attribute,         new ColorStyle("#D7BA7D",    isSrgb: true) },
+                { Token.Invalid,           new ColorStyle("#F44747",    isSrgb: true) },
+                { Token.String,            new ColorStyle("#CE9178",    isSrgb: true) },
+                { Token.Keyword,           new ColorStyle("#569CD6",    isSrgb: true) },
+                { Token.KeywordControl,    new ColorStyle("#C586C0",    isSrgb: true) },
+                { Token.Function,          new ColorStyle("#DCDCAA",    isSrgb: true) },
+                { Token.Namespace,         new ColorStyle("#4EC9B0",    isSrgb: true) },
+                { Token.Type,              new ColorStyle("#4EC9B0",    isSrgb: true) },
+                { Token.Numeric,           new ColorStyle("#B5CEA8",    isSrgb: true) },
+                { Token.Variable,          new ColorStyle("#9CDCFE",    isSrgb: true) }
             }
         };
     }

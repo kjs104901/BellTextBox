@@ -10,15 +10,7 @@ public readonly struct ColorStyle : IComparable<ColorStyle>
     private readonly float _b;
     private readonly float _a;
 
-    public ColorStyle(float r, float g, float b, float a = 1.0f)
-    {
-        _r = r;
-        _g = g;
-        _b = b;
-        _a = a;
-    }
-    
-    public ColorStyle(string hexColor)
+    public ColorStyle(string hexColor, bool isSrgb = false, double gamma = 1.8)
     {
         if (hexColor.StartsWith("#"))
             hexColor = hexColor.Substring(1);
@@ -38,9 +30,28 @@ public readonly struct ColorStyle : IComparable<ColorStyle>
         _a = 1.0f;
         if (hexColor.Length >= 8)
             _a = int.Parse(hexColor.Substring(6, 2), NumberStyles.HexNumber) / 255.0f;
+
+        if (isSrgb)
+        {
+            double linearR = _r;
+            double linearG = _g;
+            double linearB = _b;
+            
+            linearR = (linearR > 0.04045) ? Math.Pow((linearR + 0.055) / 1.055, 2.4) : linearR / 12.92;
+            linearG = (linearG > 0.04045) ? Math.Pow((linearG + 0.055) / 1.055, 2.4) : linearG / 12.92;
+            linearB = (linearB > 0.04045) ? Math.Pow((linearB + 0.055) / 1.055, 2.4) : linearB / 12.92;
+
+            _r = (float)Math.Pow(linearR, 1 / gamma);
+            _g = (float)Math.Pow(linearG, 1 / gamma);
+            _b = (float)Math.Pow(linearB, 1 / gamma);
+            
+            _r = Math.Min(Math.Max(_r, 0.0f), 1.0f);
+            _g = Math.Min(Math.Max(_g, 0.0f), 1.0f);
+            _b = Math.Min(Math.Max(_b, 0.0f), 1.0f);
+        }
     }
 
-    public static ColorStyle None = new ColorStyle(0, 0, 0, 0);
+    public static ColorStyle None = new ColorStyle("#00000000");
 
     public int CompareTo(ColorStyle other)
     {

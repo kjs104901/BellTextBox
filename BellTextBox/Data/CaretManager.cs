@@ -49,6 +49,9 @@ internal partial class CaretManager
 
     internal static void SplitLineCaret(Caret caret, Line line, Line toLine) =>
         Singleton.TextBox.CaretManager.SplitLineCaret_(caret, line, toLine);
+    
+    internal static bool IsLineHasCaret(int lineIndex) =>
+        Singleton.TextBox.CaretManager.IsLineHasCaret_(lineIndex);
 }
 
 // Implementation
@@ -252,11 +255,7 @@ internal partial class CaretManager
                 if (charIndex < caret.Position.CharIndex)
                 {
                     caret.Position.CharIndex += moveCount;
-
-                    if (caret.Position.CharIndex < 0)
-                    {
-                        caret.Position.CharIndex = 0;
-                    }
+                    caret.Position.Validate();
                 }
             }
 
@@ -265,11 +264,7 @@ internal partial class CaretManager
                 if (charIndex < caret.AnchorPosition.CharIndex)
                 {
                     caret.AnchorPosition.CharIndex += moveCount;
-
-                    if (caret.AnchorPosition.CharIndex < 0)
-                    {
-                        caret.AnchorPosition.CharIndex = 0;
-                    }
+                    caret.AnchorPosition.Validate();
                 }
             }
 
@@ -281,6 +276,7 @@ internal partial class CaretManager
     private void InputCharCaret_(Caret caret, int count)
     {
         caret.Position.CharIndex += count;
+        caret.Position.Validate();
         caret.RemoveSelection();
         RemoveDuplicatedCarets_();
     }
@@ -288,6 +284,7 @@ internal partial class CaretManager
     private void DeleteCharCaret_(Caret caret, int count)
     {
         caret.Position.CharIndex -= count;
+        caret.Position.Validate();
         caret.RemoveSelection();
         RemoveDuplicatedCarets_();
     }
@@ -300,11 +297,13 @@ internal partial class CaretManager
             if (lineIndex < c.Position.LineIndex)
             {
                 c.Position.LineIndex += moveCount;
+                c.Position.Validate();
             }
 
             if (lineIndex < c.AnchorPosition.LineIndex)
             {
                 c.AnchorPosition.LineIndex += moveCount;
+                c.AnchorPosition.Validate();
             }
 
             Logger.Info("ShiftCaretLine: " + c.Position.LineIndex + " " + c.Position.CharIndex + " " + moveCount);
@@ -319,12 +318,14 @@ internal partial class CaretManager
             {
                 c.Position.LineIndex = line.Index;
                 c.Position.CharIndex += line.CharsCount;
+                c.Position.Validate();
             }
 
             if (c.AnchorPosition.LineIndex == fromLine.Index)
             {
                 c.AnchorPosition.LineIndex = line.Index;
                 c.AnchorPosition.CharIndex += line.CharsCount;
+                c.AnchorPosition.Validate();
             }
 
             Logger.Info("MergeLineCaret: " + c.Position.LineIndex + " " + c.Position.CharIndex);
@@ -344,11 +345,7 @@ internal partial class CaretManager
                 {
                     c.Position.LineIndex = toLine.Index;
                     c.Position.CharIndex -= line.CharsCount;
-
-                    if (c.Position.CharIndex < 0)
-                    {
-                        c.Position.CharIndex = 0;
-                    }
+                    c.Position.Validate();
                 }
             }
 
@@ -358,11 +355,7 @@ internal partial class CaretManager
                 {
                     c.AnchorPosition.LineIndex = toLine.Index;
                     c.AnchorPosition.CharIndex -= line.CharsCount;
-
-                    if (c.AnchorPosition.CharIndex < 0)
-                    {
-                        c.AnchorPosition.CharIndex = 0;
-                    }
+                    c.AnchorPosition.Validate();
                 }
             }
 
@@ -371,6 +364,16 @@ internal partial class CaretManager
 
         caret.RemoveSelection();
         RemoveDuplicatedCarets_();
+    }
+
+    private bool IsLineHasCaret_(int lineIndex)
+    {
+        foreach (Caret caret in _carets)
+        {
+            if (caret.Position.LineIndex == lineIndex)
+                return true;
+        }
+        return false;
     }
 
     private void RemoveDuplicatedCarets_()

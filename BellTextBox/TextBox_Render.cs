@@ -24,7 +24,7 @@ public partial class TextBox
         FontManager.UpdateReferenceSize();
         FoldWidth = FontManager.GetFontReferenceWidth() * 2;
 
-        Backend.RenderPage(PageSize, PageBackgroundColor.ToVector());
+        Backend.RenderPage(PageSize, Theme.Background.ToVector());
 
         LineNumberWidth = (StringPool<int>.Get(LineManager.Lines.Count).Length + 1) * FontManager.GetFontNumberWidth();
 
@@ -45,13 +45,13 @@ public partial class TextBox
             var lineEndY = (i + 1) * FontManager.GetLineHeight();
             var lineTextEndY = lineEndY - FontManager.GetLineHeightOffset();
 
-            var lineStartX = LineNumberWidth + FoldWidth + row.LineSub.IndentWidth;
+            var lineStartX = LineNumberWidth + FoldWidth + row.LineSub!.IndentWidth;
 
             if (row.RowSelection.Selected)
             {
                 Backend.RenderRectangle(new Vector2(lineStartX + row.RowSelection.SelectionStart, lineTextStartY),
                     new Vector2(lineStartX + row.RowSelection.SelectionEnd, lineTextEndY),
-                    SelectedBackgroundColor.ToVector());
+                    Theme.BackgroundSelection.ToVector());
             }
 
             if (LineManager.GetLine(row.LineSub.Coordinates.LineIndex, out Line line))
@@ -81,7 +81,7 @@ public partial class TextBox
                         {
                             Backend.RenderText(
                                 new Vector2(lineStartX + currPosX, lineTextStartY),
-                                "·", WhiteSpaceFontColor.ToVector());
+                                "·", Theme.ForegroundDimmed.ToVector());
                         }
                         else if (rowChar == '\t')
                         {
@@ -93,7 +93,7 @@ public partial class TextBox
                                     lineStartX + currPosX - FontManager.GetFontWhiteSpaceWidth() +
                                     FontManager.GetFontTabWidth(),
                                     lineY + FontManager.GetLineHeight() / 2.0f),
-                                WhiteSpaceFontColor.ToVector(), 2.0f);
+                                Theme.ForegroundDimmed.ToVector(), 2.0f);
                         }
                     }
 
@@ -109,7 +109,7 @@ public partial class TextBox
 
                 if (row.LineSub.Coordinates.LineSubIndex == 0)
                 {
-                    string lineIndex = StringPool<int>.Get(line.Index);
+                    string lineIndex = StringPool<int>.Get(line.Index + 1);
 
                     float lineIndexWidth = 0.0f;
                     foreach (char lineChar in lineIndex)
@@ -117,9 +117,13 @@ public partial class TextBox
                         lineIndexWidth += FontManager.GetFontWidth(lineChar);
                     }
 
+                    var lineIndexColor = CaretManager.IsLineHasCaret(line.Index)
+                        ? Theme.Foreground
+                        : Theme.ForegroundDimmed;
+                    
                     Backend.RenderText(new Vector2(LineNumberWidth - lineIndexWidth, lineTextStartY),
                         lineIndex,
-                        UiTextColor.ToVector());
+                        lineIndexColor.ToVector());
                 }
 
                 if (Folding.None != line.Folding && row.LineSub.Coordinates.LineSubIndex == 0)
@@ -129,14 +133,14 @@ public partial class TextBox
                         Backend.RenderIcon(
                             new Vector2(LineNumberWidth + FontManager.GetFontWhiteSpaceWidth(), lineY),
                             GuiIcon.Fold,
-                            UiTextColor.ToVector());
+                            Theme.Foreground.ToVector());
                     }
                     else
                     {
                         Backend.RenderIcon(
                             new Vector2(LineNumberWidth + FontManager.GetFontWhiteSpaceWidth(), lineY),
                             GuiIcon.Unfold,
-                            UiTextColor.ToVector());
+                            Theme.Foreground.ToVector());
                     }
                 }
             }
@@ -150,7 +154,7 @@ public partial class TextBox
                     Backend.RenderLine(
                         new Vector2(lineStartX + caretX - 1.0f, lineTextStartY),
                         new Vector2(lineStartX + caretX - 1.0f, lineTextEndY),
-                        CaretColor.ToVector(),
+                        Theme.Foreground.ToVector(),
                         2.0f);
                 }
             }
@@ -163,13 +167,13 @@ public partial class TextBox
             return;
 
         Backend.RenderText(new Vector2(lineStartX + currPosX, lineTextStartY), _imeComposition,
-            ImeInputColor.ToVector());
+            Theme.Foreground.ToVector());
 
         float compositionWidth = FontManager.GetFontWidth(_imeComposition);
 
         Backend.RenderLine(new Vector2(lineStartX + currPosX, lineTextEndY),
             new Vector2(lineStartX + currPosX + compositionWidth, lineTextEndY),
-            ImeInputColor.ToVector(), 1.0f);
+            Theme.Foreground.ToVector(), 1.0f);
 
         currPosX += compositionWidth;
     }

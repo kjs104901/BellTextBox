@@ -105,8 +105,8 @@ public class ImGuiTextBox
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0, 0));
         ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, new Vector2(0, 0));
         ImGui.PushStyleVar(ImGuiStyleVar.WindowMinSize, new Vector2(0, 0));
-
-        ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.1f, 0.1f, 0.2f, 1.0f));
+        
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, _textBox.Theme.Background.ToVector());
         ImGui.BeginChild("##TextBox", size, true, ImGuiWindowFlags.HorizontalScrollbar);
         Vector2 contentSize = ImGui.GetWindowContentRegionMax();
 
@@ -119,22 +119,7 @@ public class ImGuiTextBox
         Vector2 viewPos = new Vector2(ImGui.GetScrollX(), ImGui.GetScrollY());
         Vector2 viewSize = new Vector2(contentSize.X - ImGui.GetStyle().ScrollbarSize, contentSize.Y);
 
-        if (DevHelper.IsDebugMode)
-        {
-            _textBox.Render(viewPos, viewSize);
-        }
-        else
-        {
-            try
-            {
-                _textBox.Render(viewPos, viewSize);
-            }
-            catch (Exception e)
-            {
-                // TODO color
-                ImGui.TextColored(new Vector4(1.0f, 0.0f, 0.0f, 1.0f), e.ToString());
-            }
-        }
+        _textBox.Render(viewPos, viewSize);
 
         ImGui.End();
         ImGui.EndChild();

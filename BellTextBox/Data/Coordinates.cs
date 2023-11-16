@@ -75,6 +75,43 @@ internal struct Coordinates
         return true;
     }
 
+    internal void Validate()
+    {
+        if (LineIndex < 0)
+        {
+            Logger.Error($"Validate failed. LineIndex < 0. {LineIndex}:{CharIndex}");
+            LineIndex = 0;
+            return;
+        }
+        
+        if (LineIndex >= LineManager.Lines.Count)
+        {
+            Logger.Error($"Validate failed. LineIndex > Lines.Count. {LineIndex}:{CharIndex}");
+            LineIndex = LineManager.Lines.Count - 1;
+            return;
+        }
+
+        if (false == LineManager.GetLine(LineIndex, out Line line))
+        {
+            Logger.Error($"Validate failed. GetLine. {LineIndex}:{CharIndex}");
+            return;
+        }
+        
+        if (CharIndex < 0)
+        {
+            Logger.Error($"Validate failed. CharIndex < 0. {LineIndex}:{CharIndex}");
+            CharIndex = 0;
+            return;
+        }
+        
+        if (CharIndex > line.CharsCount + 1)
+        {
+            Logger.Error($"Validate failed. CharIndex > CharsCount. {LineIndex}:{CharIndex}");
+            CharIndex = line.CharsCount;
+            return;
+        }
+    }
+
     internal Coordinates FindMove(CaretMove caretMove, int count = 1)
     {
         Coordinates newCoordinates = this;

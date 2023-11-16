@@ -59,78 +59,63 @@ public class ImGuiBackend : IBackend
 
     public void RenderPage(Vector2 size, Vector4 color)
     {
-        try
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, color);
+        ImGui.BeginChild("##Page", size, false, ImGuiWindowFlags.NoScrollbar);
+
+        _drawPosOnPage = ImGui.GetCursorScreenPos();
+
+        if (ImGui.IsWindowFocused() ||
+            (ImGui.IsWindowHovered() && ImGui.IsMouseClicked(0)))
         {
-            ImGui.PushStyleColor(ImGuiCol.ChildBg, color);
-            ImGui.BeginChild("##Page", size, false, ImGuiWindowFlags.NoScrollbar);
-
-            _drawPosOnPage = ImGui.GetCursorScreenPos();
-
-            ImGui.GetWindowDrawList().AddText(_drawPosOnPage,
-                ImGui.ColorConvertFloat4ToU32(new Vector4(0.2f, 0.1f, 0.1f, 1.0f)),
-                ImGui.IsWindowFocused().ToString());
-
-            ImGui.Text(ImGui.IsWindowFocused().ToString());
-            if (ImGui.IsWindowFocused() ||
-                (ImGui.IsWindowHovered() && ImGui.IsMouseClicked(0)))
+            var io = ImGui.GetIO();
+            if (io.KeyShift)
+                _keyboardInput.HotKeys |= HotKeys.Shift;
+            if (io.KeyCtrl)
+                _keyboardInput.HotKeys |= HotKeys.Ctrl;
+            if (io.KeyAlt)
+                _keyboardInput.HotKeys |= HotKeys.Alt;
+            foreach (var keyMap in _keyboardMapping)
             {
-                var io = ImGui.GetIO();
-                if (io.KeyShift)
-                    _keyboardInput.HotKeys |= HotKeys.Shift;
-                if (io.KeyCtrl)
-                    _keyboardInput.HotKeys |= HotKeys.Ctrl;
-                if (io.KeyAlt)
-                    _keyboardInput.HotKeys |= HotKeys.Alt;
-                foreach (var keyMap in _keyboardMapping)
-                {
-                    if (ImGui.IsKeyPressed(ImGui.GetKeyIndex(keyMap.Item1)))
-                        _keyboardInput.HotKeys |= keyMap.Item2;
-                }
-
-                _keyboardInput.Chars.Clear();
-                if (io.InputQueueCharacters.Size > 0)
-                {
-                    _keyboardInput.Chars = new List<char>();
-                    for (int i = 0; i < io.InputQueueCharacters.Size; i++)
-                    {
-                        _keyboardInput.Chars.Add((char)io.InputQueueCharacters[i]);
-                    }
-                }
-                
-                if (OperatingSystem.IsWindows())
-                {
-                    _keyboardInput.ImeComposition = WindowsNative.GetCompositionString();
-                }
-
-                if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
-                    _mouseInput.LeftAction = MouseAction.Click;
-                if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
-                    _mouseInput.LeftAction = MouseAction.DoubleClick;
-                if (ImGui.IsMouseDragging(ImGuiMouseButton.Left) && ImGui.IsMouseDown(ImGuiMouseButton.Left))
-                    _mouseInput.LeftAction = MouseAction.Dragging;
-
-                if (ImGui.IsMouseClicked(ImGuiMouseButton.Middle))
-                    _mouseInput.MiddleAction = MouseAction.Click;
-                if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Middle))
-                    _mouseInput.MiddleAction = MouseAction.DoubleClick;
-                if (ImGui.IsMouseDragging(ImGuiMouseButton.Middle) && ImGui.IsMouseDown(ImGuiMouseButton.Middle))
-                    _mouseInput.MiddleAction = MouseAction.Dragging;
+                if (ImGui.IsKeyPressed(ImGui.GetKeyIndex(keyMap.Item1)))
+                    _keyboardInput.HotKeys |= keyMap.Item2;
             }
 
-            var mouse = ImGui.GetMousePos();
-            _mouseInput.Position.X = mouse.X - _drawPosOnPage.X;
-            _mouseInput.Position.Y = mouse.Y - _drawPosOnPage.Y;
+            _keyboardInput.Chars.Clear();
+            if (io.InputQueueCharacters.Size > 0)
+            {
+                _keyboardInput.Chars = new List<char>();
+                for (int i = 0; i < io.InputQueueCharacters.Size; i++)
+                {
+                    _keyboardInput.Chars.Add((char)io.InputQueueCharacters[i]);
+                }
+            }
+
+            if (OperatingSystem.IsWindows())
+            {
+                _keyboardInput.ImeComposition = WindowsNative.GetCompositionString();
+            }
+
+            if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+                _mouseInput.LeftAction = MouseAction.Click;
+            if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+                _mouseInput.LeftAction = MouseAction.DoubleClick;
+            if (ImGui.IsMouseDragging(ImGuiMouseButton.Left) && ImGui.IsMouseDown(ImGuiMouseButton.Left))
+                _mouseInput.LeftAction = MouseAction.Dragging;
+
+            if (ImGui.IsMouseClicked(ImGuiMouseButton.Middle))
+                _mouseInput.MiddleAction = MouseAction.Click;
+            if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Middle))
+                _mouseInput.MiddleAction = MouseAction.DoubleClick;
+            if (ImGui.IsMouseDragging(ImGuiMouseButton.Middle) && ImGui.IsMouseDown(ImGuiMouseButton.Middle))
+                _mouseInput.MiddleAction = MouseAction.Dragging;
         }
-        catch (Exception e)
-        {
-            ImGui.TextColored(new Vector4(1.0f, 0.0f, 0.0f, 1.0f), e.ToString());
-            throw;
-        }
-        finally
-        {
-            ImGui.EndChild();
-            ImGui.PopStyleColor();
-        }
+
+        var mouse = ImGui.GetMousePos();
+        _mouseInput.Position.X = mouse.X - _drawPosOnPage.X;
+        _mouseInput.Position.Y = mouse.Y - _drawPosOnPage.Y;
+        
+        ImGui.EndChild();
+        ImGui.PopStyleColor();
     }
 
     public void RenderText(Vector2 pos, string text, Vector4 color)
@@ -152,6 +137,7 @@ public class ImGuiBackend : IBackend
                 iconText = "\uf107"; //angle-down
                 break;
         }
+
         ImGui.GetWindowDrawList().AddText(new Vector2(_drawPosOnPage.X + pos.X, _drawPosOnPage.Y + pos.Y),
             ImGui.ColorConvertFloat4ToU32(color), iconText);
     }
