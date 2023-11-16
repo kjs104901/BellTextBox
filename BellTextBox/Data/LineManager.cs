@@ -138,7 +138,9 @@ internal partial class LineManager
         foreach (Line line in _lines)
         {
             line.CommentRanges.Clear();
+            line.CommentStart = -1;
             line.StringRanges.Clear();
+            line.StringStart = -1;
 
             _lineFoldingList.Clear();
 
@@ -239,14 +241,10 @@ internal partial class LineManager
 
             // If there are tokens left until the end of the line, process them as comment or string until the end of the line
             if (commentStart >= 0)
-            {
-                line.CommentRanges.Add(new ValueTuple<int, int>(commentStart, line.String.Length));
-            }
+                line.CommentStart = commentStart;
 
             if (stringStart >= 0)
-            {
-                line.StringRanges.Add(new ValueTuple<int, int>(stringStart, line.String.Length));
-            }
+                line.StringStart = stringStart;
 
             // Remove tokens that cannot cross lines
             while (tokens.TryPeek(out Language.Token lineTop) &&

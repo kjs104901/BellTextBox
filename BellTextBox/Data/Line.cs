@@ -33,7 +33,9 @@ internal class Line
     internal readonly List<Language.Token> Tokens = new();
 
     internal readonly List<ValueTuple<int, int>> CommentRanges = new();
+    internal int CommentStart = -1;
     internal readonly List<ValueTuple<int, int>> StringRanges = new();
+    internal int StringStart = -1;
 
     // buffer to avoid GC
     private readonly StringBuilder _sb = new();
@@ -153,6 +155,14 @@ internal class Line
             }
         }
 
+        if (CommentStart > 0)
+        {
+            for (int i = CommentStart; i < colors.Count; i++)
+            {
+                colors[i] = Singleton.TextBox.Theme.TokenColors[Theme.Token.Comment];
+            }
+        }
+
         foreach (var range in StringRanges)
         {
             for (int i = range.Item1; i < range.Item2 && i < colors.Count; i++)
@@ -161,6 +171,14 @@ internal class Line
             }
         }
 
+        if (StringStart > 0)
+        {
+            for (int i = StringStart; i < colors.Count; i++)
+            {
+                colors[i] = Singleton.TextBox.Theme.TokenColors[Theme.Token.String];
+            }
+        }
+        
         return colors;
     }
 
