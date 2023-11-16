@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using System.Runtime.InteropServices;
+using Bell.Languages;
 using Bell.Utils;
 using ImGuiNET;
 
@@ -12,11 +13,19 @@ public class ImGuiTextBox
     private ImFontPtr _fontPtr;
     private readonly Action _onFontLoaded;
     
-    public string Text
-    {
-        get => _textBox.GetText();
-        set => _textBox.SetText(value);
-    }
+    // Options
+    public bool ReadOnly { get => _textBox.ReadOnly; set => _textBox.ReadOnly = value; }
+    public WrapMode WrapMode { get => _textBox.WrapMode; set => _textBox.WrapMode = value; }
+    public bool WordWrapIndent { get => _textBox.WordWrapIndent; set => _textBox.WordWrapIndent = value; }
+    public EolMode EolMode { get => _textBox.EolMode; set => _textBox.EolMode = value; }
+    public bool SyntaxHighlight { get => _textBox.SyntaxHighlight; set => _textBox.SyntaxHighlight = value; }
+    public bool SyntaxFolding { get => _textBox.SyntaxFolding; set => _textBox.SyntaxFolding = value; }
+    public bool ShowingWhitespace { get => _textBox.ShowingWhitespace; set => _textBox.ShowingWhitespace = value; }
+    public float LeadingHeight { get => _textBox.LeadingHeight; set => _textBox.LeadingHeight = value; }
+    public TabMode TabMode { get => _textBox.TabMode; set => _textBox.TabMode = value; }
+    public int TabSize { get => _textBox.TabSize; set => _textBox.TabSize = value; }
+    public Language Language { get => _textBox.Language; set => _textBox.Language = value; }
+    public string Text { get => _textBox.Text; set => _textBox.Text = value; }
     
     public ImGuiTextBox(Action onFontLoaded)
     {
@@ -49,12 +58,12 @@ public class ImGuiTextBox
             _fontPtr = ImGui.GetIO().Fonts.AddFontFromMemoryTTF(fontPtr, fontBytes.Length, fontSize, null, glyphRanges);
             LoadFontAwesome(fontSize);
             ImGui.GetIO().Fonts.Build();
+            _onFontLoaded();
         }
         finally
         {
             fontHandle.Free();
         }
-        _onFontLoaded();
     }
 
     private void LoadFontAwesome(float fontSize)

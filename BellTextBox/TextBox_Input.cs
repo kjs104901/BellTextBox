@@ -299,7 +299,7 @@ public partial class TextBox
             {
                 if (LineManager.GetLine(coordinates.LineIndex, out Line line))
                 {
-                    if (Folding.None != line.Folding)
+                    if (SyntaxFolding && Folding.None != line.Folding)
                     {
                         line.Folding.Switch();
                         RowManager.SetRowCacheDirty();
@@ -479,6 +479,9 @@ public partial class TextBox
             isLineNumber = true;
             return;
         }
+        
+        if (rowIndex < 0)
+            return;
 
         if (RowManager.Rows.Count > rowIndex)
         {
@@ -489,7 +492,7 @@ public partial class TextBox
 
                 if (x < -FontManager.GetFontWhiteSpaceWidth())
                 {
-                    if (Folding.None != line.Folding && row.LineSub.Coordinates.LineSubIndex == 0)
+                    if (SyntaxFolding && Folding.None != line.Folding && row.LineSub.Coordinates.LineSubIndex == 0)
                     {
                         isFold = true;
                         return;
@@ -523,7 +526,7 @@ public partial class TextBox
 
         for (int i = fromRow; i <= toRow; i++)
         {
-            if (RowManager.Rows.Count <= i)
+            if (RowManager.Rows.Count <= i || i < 0)
                 break;
 
             Row row = RowManager.Rows[i];

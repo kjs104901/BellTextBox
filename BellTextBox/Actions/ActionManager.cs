@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Bell.Utils;
 
 namespace Bell.Actions;
 
@@ -10,6 +11,9 @@ internal class ActionManager
     
     internal void DoAction(Action action)
     {
+        if (Singleton.TextBox.ReadOnly)
+            return;
+        
         action.DoCommands();
         
         _actionHistory.AddLast(action);

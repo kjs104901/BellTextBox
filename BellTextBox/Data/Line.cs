@@ -155,7 +155,7 @@ internal class Line
             }
         }
 
-        if (CommentStart > 0)
+        if (CommentStart >= 0)
         {
             for (int i = CommentStart; i < colors.Count; i++)
             {
@@ -171,7 +171,7 @@ internal class Line
             }
         }
 
-        if (StringStart > 0)
+        if (StringStart >= 0)
         {
             for (int i = StringStart; i < colors.Count; i++)
             {
@@ -330,6 +330,9 @@ internal class Line
     internal ColorStyle GetColorStyle(int charIndex)
     {
         ColorStyle charColor = Singleton.TextBox.Theme.Foreground;
+        if (false == Singleton.TextBox.SyntaxHighlight)
+            return charColor;
+        
         if (Colors.Count > charIndex)
             charColor = Colors[charIndex];
         if (charColor == ColorStyle.None)

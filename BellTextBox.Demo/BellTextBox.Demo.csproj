@@ -10,6 +10,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Resources\CSharp.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Resources\CSharp.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Veldrid" Version="4.9.0" />
     <PackageReference Include="Veldrid.ImGui" Version="5.89.2-ga121087cad" />
     <PackageReference Include="Veldrid.StartupUtilities" Version="4.9.0" />
@@ -33,6 +41,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Fonts.resx</DependentUpon>
     </Compile>
+    <Compile Update="SourceCodeExample.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SourceCodeExample.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
 
@@ -43,6 +56,10 @@
     <EmbeddedResource Update="Fonts.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Fonts.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="SourceCodeExample.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>SourceCodeExample.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 

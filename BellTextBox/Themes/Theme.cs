@@ -5,6 +5,7 @@ public class Theme
 {
     // Background
     public ColorStyle Background;
+    public ColorStyle BackgroundDimmed;
     public ColorStyle BackgroundSelection;
 
     // Foreground
@@ -34,6 +35,7 @@ public class Theme
         return new Theme()
         {
             Background            = new ColorStyle("#1E1E1E",       isSrgb: true),
+            BackgroundDimmed      = new ColorStyle("#2B2B2B",       isSrgb: true),
             BackgroundSelection   = new ColorStyle("#ADD6FF26",     isSrgb: true),
             
             Foreground            = new ColorStyle("#D4D4D4",       isSrgb: true),

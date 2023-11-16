@@ -1,15 +1,64 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
 using Bell.ImGuiNet;
+using Bell.Languages;
 using ImGuiNET;
 using Veldrid;
-using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
 
 namespace Bell.Demo;
 
+
 class ImGuiDemo
 {
+    private static bool _readOnly = false;
+    
+    private static Option<WrapMode> _wrapMode = new()
+    {
+        Options =  new() { WrapMode.None, WrapMode.Word, WrapMode.BreakWord },
+        Names = new[] { "None", "Word", "BreakWord" },
+        Index = 0
+    };
+    
+    private static bool _wordWrapIndent = true;
+    
+    private static Option<EolMode> _eolMode = new()
+    {
+        Options =  new() {  EolMode.CRLF, EolMode.LF, EolMode.CR },
+        Names = new[] { "CRLF", "LF", "CR" },
+        Index = 1
+    };
+    
+    private static bool _syntaxHighlight = true;
+    private static bool _syntaxFolding = true;
+    private static bool _showingWhitespace = true;
+
+    private static float _leadingHeight = 1.2f;
+    
+    private static Option<TabMode> _tabMode = new()
+    {
+        Options =  new() { TabMode.Space, TabMode.Tab },
+        Names = new[] { "Space", "Tab" },
+        Index = 1
+    };
+    
+    private static int _tabSize = 4;
+    
+    private static Option<Language> _language = new()
+    {
+        Options =  new() { Language.CSharp(), Language.Json(), Language.PlainText(), Language.Proto(), Language.Sql() },
+        Names = new[] { "C#", "Json", "PlainText", "Proto", "Sql" },
+        Index = 0
+    };
+    
+    private static Option<byte[]> _font = new()
+    {
+        Options =  new() { Fonts.D2Coding, Fonts.MaruBuri, Fonts.NanumGothic },
+        Names = new []{ "D2Coding", "MaruBuri", "NanumGothic" },
+        Index = 0
+    };
+    private static float _fontSize = 18.0f;
+    
     public static Thread ThreadStart()
     {
         var thread = new Thread(ThreadMain)
@@ -23,43 +72,6 @@ class ImGuiDemo
     private static void ThreadMain()
     {
         Vector3 clearColor = new(0.45f, 0.55f, 0.6f);
-        string textInput = @"--- START ---
-}}}}}}}}}
-||||||||
-aaaaaaaa
-
-namespace Bell.Languages;
-
-public class FontStyle : IComparable<FontStyle>
-{
-    private readonly string _id;
-    
-    // 한글 주석 테스트
-" + '\t' + @"
-    public float R;
-    public float G;
-    public float B;
-    public float A;
-    
-    public FontStyle(string id)
-    {
-        _id = id;
-    }
-    
-    // 한글 주석 테스트
-
-    public static readonly FontStyle DefaultFontStyle = new(""Default"") { R = 0.4f, G = 0.8f, B = 0.2f, A = 1.0f };
-    public static readonly FontStyle LineCommentFontStyle = new(""LineComment"") { R = 0.3f, G = 0.4f, B = 0.8f, A = 1.0f };
-    public static readonly FontStyle BlockCommentFontStyle = new(""BlockComment"") { R = 0.9f, G = 0.1f, B = 0.1f, A = 1.0f };
-
-    public int CompareTo(FontStyle? other)
-    {
-        if (ReferenceEquals(this, other)) return 0;
-        if (ReferenceEquals(null, other)) return 1;
-        return string.Compare(_id, other._id, StringComparison.Ordinal);
-    }
-}
---- END ---";
 
         VeldridStartup.CreateWindowAndGraphicsDevice(
             new WindowCreateInfo(50, 50, 1280, 720, WindowState.Normal, "ImGui.NET Sample Program"),
@@ -80,12 +92,9 @@ public class FontStyle : IComparable<FontStyle>
 
         var stopwatch = Stopwatch.StartNew();
 
-        ImGuiTextBox imGuiBellTextBox = new(() => { imGuiRenderer.RecreateFontDeviceTexture(graphicsDevice); })
-        {
-            Text = textInput
-        };
-        
-        imGuiBellTextBox.SetFont(Fonts.D2Coding, 18.0f, ImGui.GetIO().Fonts.GetGlyphRangesKorean());
+        ImGuiTextBox imGuiBellTextBox = new(() => { imGuiRenderer.RecreateFontDeviceTexture(graphicsDevice); });
+        imGuiBellTextBox.SetFont(Fonts.D2Coding, _fontSize, ImGui.GetIO().Fonts.GetGlyphRangesKorean());
+        imGuiBellTextBox.Text = SourceCodeExample.CSharp;
 
         while (sdl2Window.Exists)
         {
@@ -99,8 +108,67 @@ public class FontStyle : IComparable<FontStyle>
             ImGui.SetNextWindowPos(new Vector2(0, 0));
             ImGui.SetNextWindowSize(new Vector2(sdl2Window.Width, sdl2Window.Height));
             ImGui.Begin("Demo", ImGuiWindowFlags.NoResize);
+            
+            if (ImGui.BeginTable("##DemoTable", 2, ImGuiTableFlags.Resizable))
+            {
+                ImGui.TableSetupColumn("##DemoTable_Options", ImGuiTableColumnFlags.None, 100);
+                ImGui.TableSetupColumn("##DemoTable_TextBox", ImGuiTableColumnFlags.None, 500);
 
-            imGuiBellTextBox.Render(new Vector2(-1, -1));
+                ImGui.TableNextRow();
+                
+                // Options
+                ImGui.TableNextColumn();
+                ImGui.Separator();
+                if (ImGui.Checkbox("ReadOnly" , ref _readOnly))
+                    imGuiBellTextBox.ReadOnly = _readOnly;
+                
+                ImGui.Separator();
+                if (ImGui.Combo("WrapMode", ref _wrapMode.Index, _wrapMode.Names, _wrapMode.Names.Length))
+                    imGuiBellTextBox.WrapMode = _wrapMode.Options[_wrapMode.Index];
+                if (ImGui.Checkbox("WordWrapIndent", ref _wordWrapIndent))
+                    imGuiBellTextBox.WordWrapIndent = _wordWrapIndent;
+                
+                if (ImGui.Combo("EolMode", ref _eolMode.Index, _eolMode.Names, _eolMode.Names.Length))
+                    imGuiBellTextBox.EolMode = _eolMode.Options[_eolMode.Index];
+                
+                ImGui.Separator();
+                if (ImGui.Checkbox("SyntaxHighlight", ref _syntaxHighlight))
+                    imGuiBellTextBox.SyntaxHighlight = _syntaxHighlight;
+                if (ImGui.Checkbox("SyntaxFolding", ref _syntaxFolding))
+                    imGuiBellTextBox.SyntaxFolding = _syntaxFolding;
+                if (ImGui.Checkbox("ShowingWhitespace", ref _showingWhitespace))
+                    imGuiBellTextBox.ShowingWhitespace = _showingWhitespace;
+                
+                if (ImGui.InputFloat("LeadingHeight", ref _leadingHeight, 0.01f, 0.05f, "%.2f"))
+                    imGuiBellTextBox.LeadingHeight = _leadingHeight;
+                
+                if (ImGui.Combo("TabMode", ref _tabMode.Index, _tabMode.Names, _tabMode.Names.Length))
+                    imGuiBellTextBox.TabMode = _tabMode.Options[_tabMode.Index];
+                if (ImGui.InputInt("TabSize", ref _tabSize))
+                    imGuiBellTextBox.TabSize = _tabSize;
+                
+                ImGui.Separator();
+                if (ImGui.Combo("Language", ref _language.Index, _language.Names, _language.Names.Length))
+                {
+                    imGuiBellTextBox.Language =  _language.Options[_language.Index];
+                    
+                    string name = _language.Names[_language.Index];
+                    if (name == "C#")
+                        imGuiBellTextBox.Text = SourceCodeExample.CSharp;
+                    else
+                        imGuiBellTextBox.Text = string.Empty;
+                }
+                
+                ImGui.Separator();
+                if (ImGui.Combo("Font", ref _font.Index, _font.Names, _font.Names.Length))
+                    imGuiBellTextBox.SetFont(_font.Options[_font.Index], _fontSize, ImGui.GetIO().Fonts.GetGlyphRangesKorean());
+                
+                // TextBox
+                ImGui.TableNextColumn();
+                imGuiBellTextBox.Render(new Vector2(-1, -1));
+                
+                ImGui.EndTable();
+            }
 
             ImGui.End();
 
@@ -118,5 +186,12 @@ public class FontStyle : IComparable<FontStyle>
         imGuiRenderer.Dispose();
         commandList.Dispose();
         graphicsDevice.Dispose();
+    }
+    
+    private struct Option<T>
+    {
+        public int Index;
+        public List<T> Options;
+        public string[] Names;
     }
 }

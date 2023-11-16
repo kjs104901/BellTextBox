@@ -28,15 +28,43 @@ public enum TabMode
 public partial class TextBox
 {
     public bool AutoIndent { get; set; } = true; // TODO
-    public bool AutoComplete { get; set; } = true;
+    public bool AutoComplete { get; set; } = true; // TODO
     public readonly List<string> AutoCompleteList = new();
     
-    public bool Overwrite { get; set; } = false;
+    public bool Overwrite { get; set; } = false; // TODO
     public bool ReadOnly { get; set; } = false;
     
-    public WrapMode WrapMode { get; set; } = WrapMode.None;
-    public bool WordWrapIndent { get; set; } = true;
-    
+    private WrapMode _wrapMode = WrapMode.None;
+    public WrapMode WrapMode
+    {
+        get => _wrapMode;
+        set
+        {
+            _wrapMode = value;
+            foreach (Line line in LineManager.Lines)
+            {
+                line.SetCutoffsDirty();
+            }
+            RowManager.SetRowCacheDirty();
+        }
+    }
+
+    private bool _wordWrapIndent = true;
+
+    public bool WordWrapIndent
+    {
+        get => _wordWrapIndent;
+        set
+        {
+            _wordWrapIndent = value;
+            foreach (Line line in LineManager.Lines)
+            {
+                line.SetCutoffsDirty();
+            }
+            RowManager.SetRowCacheDirty();
+        }
+    }
+
     public EolMode EolMode = EolMode.LF;
     
     public bool SyntaxHighlight { get; set; } = true;
@@ -55,7 +83,6 @@ public partial class TextBox
             _tabStringCache.SetDirty();
         }
     }
-    
     
     private int _tabSize = 4;
     public int TabSize

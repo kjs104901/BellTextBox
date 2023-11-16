@@ -24,7 +24,13 @@ public partial class TextBox
         FontManager.UpdateReferenceSize();
         FoldWidth = FontManager.GetFontReferenceWidth() * 2;
 
-        Backend.RenderPage(PageSize, Theme.Background.ToVector());
+        Vector2 renderPageSize = PageSize;
+        if (renderPageSize.X < _viewSize.X)
+            renderPageSize.X = _viewSize.X;
+        if (renderPageSize.Y < _viewSize.Y)
+            renderPageSize.Y = _viewSize.Y;
+        
+        Backend.RenderPage(renderPageSize, ReadOnly ? Theme.BackgroundDimmed.ToVector() : Theme.Background.ToVector());
 
         LineNumberWidth = (StringPool<int>.Get(LineManager.Lines.Count).Length + 1) * FontManager.GetFontNumberWidth();
 
@@ -35,7 +41,7 @@ public partial class TextBox
 
         for (int i = rowStart; i <= rowEnd; i++)
         {
-            if (RowManager.Rows.Count <= i)
+            if (RowManager.Rows.Count <= i || i < 0)
                 break;
 
             Row row = RowManager.Rows[i];
@@ -119,13 +125,13 @@ public partial class TextBox
                     var lineIndexColor = CaretManager.IsLineHasCaret(line.Index)
                         ? Theme.Foreground
                         : Theme.ForegroundDimmed;
-                    
+
                     Backend.RenderText(new Vector2(LineNumberWidth - lineIndexWidth, lineTextStartY),
                         lineIndex,
                         lineIndexColor.ToVector());
                 }
 
-                if (Folding.None != line.Folding && row.LineSub.Coordinates.LineSubIndex == 0)
+                if (SyntaxFolding && Folding.None != line.Folding && row.LineSub.Coordinates.LineSubIndex == 0)
                 {
                     if (line.Folding.Folded)
                     {

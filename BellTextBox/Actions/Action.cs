@@ -42,7 +42,7 @@ internal abstract class Action
 
         SaveCarets(_startCarets);
         if (DevHelper.IsDebugMode)
-            _startText = Singleton.TextBox.GetText();
+            _startText = Singleton.TextBox.Text;
 
         for (int i = 0; i < CaretManager.Count; i++)
         {
@@ -61,7 +61,7 @@ internal abstract class Action
         
         if (DevHelper.IsDebugMode)
         {
-            _endText = Singleton.TextBox.GetText();
+            _endText = Singleton.TextBox.Text;
             
             bool isAllSame = true;
             for (int i = 0; i < _endCarets.Count; i++)
@@ -104,7 +104,7 @@ internal abstract class Action
 
         if (DevHelper.IsDebugMode)
         {
-            if (Singleton.TextBox.GetText() != _startText)
+            if (Singleton.TextBox.Text != _startText)
                 Logger.Error("RedoCommands: Text not match");
         }
 
@@ -124,7 +124,7 @@ internal abstract class Action
 
         if (DevHelper.IsDebugMode)
         {
-            if (Singleton.TextBox.GetText() != _endText)
+            if (Singleton.TextBox.Text != _endText)
                 Logger.Error("RedoCommands: Text not match");
         }
     }
@@ -139,7 +139,7 @@ internal abstract class Action
 
         if (DevHelper.IsDebugMode)
         {
-            if (Singleton.TextBox.GetText() != _endText)
+            if (Singleton.TextBox.Text != _endText)
                 Logger.Error("UndoCommands: Text not match");
         }
 
@@ -160,7 +160,7 @@ internal abstract class Action
         
         if (DevHelper.IsDebugMode)
         {
-            if (Singleton.TextBox.GetText() != _startText)
+            if (Singleton.TextBox.Text != _startText)
                 Logger.Error("UndoCommands: Text not match");
         }
     }
