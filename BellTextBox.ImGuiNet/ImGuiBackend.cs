@@ -126,20 +126,25 @@ public class ImGuiBackend : IBackend
 
     public void RenderIcon(Vector2 pos, GuiIcon icon, Vector4 color)
     {
-        string iconText = string.Empty;
-
+        char iconChar = ' ';
+        string iconString = string.Empty; // To avoid garbage collection
         switch (icon)
         {
             case GuiIcon.Fold:
-                iconText = "\uf105"; // angle-right
+                iconChar = '\uf105'; // angle-right
+                iconString = "\uf105";
                 break;
             case GuiIcon.Unfold:
-                iconText = "\uf107"; //angle-down
+                iconChar = '\uf107'; //angle-down
+                iconString = "\uf107";
                 break;
         }
+        
+        float posX = _drawPosOnPage.X + pos.X - (GetCharWidth(iconChar) / 2.0f);
+        float posY = _drawPosOnPage.Y + pos.Y;
 
-        ImGui.GetWindowDrawList().AddText(new Vector2(_drawPosOnPage.X + pos.X, _drawPosOnPage.Y + pos.Y),
-            ImGui.ColorConvertFloat4ToU32(color), iconText);
+        ImGui.GetWindowDrawList().AddText(new Vector2(posX, posY),
+            ImGui.ColorConvertFloat4ToU32(color), iconString);
     }
 
     public void RenderLine(Vector2 start, Vector2 end, Vector4 color, float thickness)

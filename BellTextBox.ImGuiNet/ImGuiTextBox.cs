@@ -1,5 +1,4 @@
 ﻿using System.Numerics;
-using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using Bell.Utils;
 using ImGuiNET;
@@ -41,10 +40,27 @@ public class ImGuiTextBox
         _onFontLoaded();
     }
 
+    public void SetFont(byte[] fontBytes, float fontSize, IntPtr glyphRanges)
+    {
+        GCHandle fontHandle = GCHandle.Alloc(fontBytes, GCHandleType.Pinned);
+        try
+        {
+            IntPtr fontPtr = fontHandle.AddrOfPinnedObject();
+            _fontPtr = ImGui.GetIO().Fonts.AddFontFromMemoryTTF(fontPtr, fontBytes.Length, fontSize, null, glyphRanges);
+            LoadFontAwesome(fontSize);
+            ImGui.GetIO().Fonts.Build();
+        }
+        finally
+        {
+            fontHandle.Free();
+        }
+        _onFontLoaded();
+    }
+
     private void LoadFontAwesome(float fontSize)
     {
         GCHandle glyphHandle = GCHandle.Alloc(new ushort[] { 0xe005, 0xf8ff, 0x0000 }, GCHandleType.Pinned);
-        GCHandle fontHandle = GCHandle.Alloc(FontResource.fa_solid_900, GCHandleType.Pinned);
+        GCHandle fontHandle = GCHandle.Alloc(Fonts.fa_solid_900, GCHandleType.Pinned);
         try
         {
             IntPtr glyphPtr = glyphHandle.AddrOfPinnedObject();
@@ -54,7 +70,7 @@ public class ImGuiTextBox
                 ImFontConfigPtr nativeConfig = ImGuiNative.ImFontConfig_ImFontConfig();
                 nativeConfig.MergeMode = true;
 
-                ImGui.GetIO().Fonts.AddFontFromMemoryTTF( fontPtr, FontResource.fa_solid_900.Length,
+                ImGui.GetIO().Fonts.AddFontFromMemoryTTF( fontPtr, Fonts.fa_solid_900.Length,
                     fontSize / 2.0f, nativeConfig, glyphPtr );
             }
         }

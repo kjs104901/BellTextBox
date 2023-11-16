@@ -84,7 +84,8 @@ public class FontStyle : IComparable<FontStyle>
         {
             Text = textInput
         };
-        imGuiBellTextBox.SetFont(@"Fonts/NanumGothic.ttf", 18.0f, ImGui.GetIO().Fonts.GetGlyphRangesKorean());
+        
+        imGuiBellTextBox.SetFont(Fonts.D2Coding, 18.0f, ImGui.GetIO().Fonts.GetGlyphRangesKorean());
 
         while (sdl2Window.Exists)
         {

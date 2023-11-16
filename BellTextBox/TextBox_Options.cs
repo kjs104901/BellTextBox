@@ -45,7 +45,7 @@ public partial class TextBox
     public bool ShowingWhitespace { get; set; } = true;
     public float LeadingHeight { get; set; } = 1.2f;
     
-    private TabMode _tabMode = TabMode.Space;
+    private TabMode _tabMode = TabMode.Tab;
     public TabMode TabMode
     {
         get => _tabMode;

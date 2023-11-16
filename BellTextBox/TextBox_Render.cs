@@ -41,9 +41,9 @@ public partial class TextBox
             Row row = RowManager.Rows[i];
 
             var lineY = i * FontManager.GetLineHeight();
-            var lineTextStartY = lineY + FontManager.GetLineHeightOffset();
-            var lineEndY = (i + 1) * FontManager.GetLineHeight();
-            var lineTextEndY = lineEndY - FontManager.GetLineHeightOffset();
+            var lineTextStartY = lineY + (int)FontManager.GetLineHeightOffset();
+            var lineEndY = lineY + FontManager.GetLineHeight();
+            var lineTextEndY = lineY + FontManager.GetLineHeight() - (int)FontManager.GetLineHeightOffset();
 
             var lineStartX = LineNumberWidth + FoldWidth + row.LineSub!.IndentWidth;
 
@@ -90,10 +90,9 @@ public partial class TextBox
                                     lineStartX + currPosX,
                                     lineY + FontManager.GetLineHeight() / 2.0f),
                                 new Vector2(
-                                    lineStartX + currPosX - FontManager.GetFontWhiteSpaceWidth() +
-                                    FontManager.GetFontTabWidth(),
+                                    lineStartX + currPosX + rowCharWidth - FontManager.GetFontWhiteSpaceWidth(),
                                     lineY + FontManager.GetLineHeight() / 2.0f),
-                                Theme.ForegroundDimmed.ToVector(), 2.0f);
+                                Theme.ForegroundDimmed.ToVector(), 1.0f);
                         }
                     }
 
@@ -131,14 +130,14 @@ public partial class TextBox
                     if (line.Folding.Folded)
                     {
                         Backend.RenderIcon(
-                            new Vector2(LineNumberWidth + FontManager.GetFontWhiteSpaceWidth(), lineY),
+                            new Vector2(LineNumberWidth + FoldWidth / 2.0f, lineY),
                             GuiIcon.Fold,
                             Theme.Foreground.ToVector());
                     }
                     else
                     {
                         Backend.RenderIcon(
-                            new Vector2(LineNumberWidth + FontManager.GetFontWhiteSpaceWidth(), lineY),
+                            new Vector2(LineNumberWidth + FoldWidth / 2.0f, lineY),
                             GuiIcon.Unfold,
                             Theme.Foreground.ToVector());
                     }

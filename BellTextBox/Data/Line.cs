@@ -12,7 +12,7 @@ internal class Line
     internal int Index;
 
     internal int CharsCount => _chars.Count;
-    
+
     private readonly List<char> _chars = new();
 
     internal Folding Folding = Folding.None;
@@ -31,10 +31,10 @@ internal class Line
 
     private readonly List<Language.Token> _oldTokens = new();
     internal readonly List<Language.Token> Tokens = new();
-    
+
     internal readonly List<ValueTuple<int, int>> CommentRanges = new();
     internal readonly List<ValueTuple<int, int>> StringRanges = new();
-    
+
     // buffer to avoid GC
     private readonly StringBuilder _sb = new();
 
@@ -43,25 +43,25 @@ internal class Line
     internal Line(int index)
     {
         Index = index;
-        
+
         _colorsCache = new("Colors", new(), UpdateColors, updateIntervalMs: 300);
         _cutoffsCache = new("Cutoffs", new(), UpdateCutoff);
         _stringCache = new("String", string.Empty, UpdateString);
         _lineSubsCache = new("Line Subs", new List<LineSub>(), UpdateLineSubs);
     }
-    
+
     internal void ChangeLineIndex(int newIndex)
     {
         if (Index == newIndex)
             return;
-        
+
         Index = newIndex;
         foreach (LineSub lineSub in LineSubs)
         {
             lineSub.Coordinates.LineIndex = newIndex;
         }
     }
-    
+
     internal void InsertChars(int charIndex, char[] chars)
     {
         _chars.InsertRange(charIndex, chars);
@@ -78,30 +78,30 @@ internal class Line
         {
             Colors.Insert(charIndex, prevStyle);
         }
-        
+
         SetCharsDirty();
         SetCutoffsDirty();
         UpdateTokens();
-        
+
         LineManager.Unfold(Index);
     }
-    
+
     internal char[] RemoveChars(int charIndex, int count)
     {
         var removed = _chars.GetRange(charIndex, count).ToArray();
         _chars.RemoveRange(charIndex, count);
-        
+
         while (Colors.Count < charIndex + count)
             Colors.Add(ColorStyle.None);
 
         Colors.RemoveRange(charIndex, count);
-        
+
         SetCharsDirty();
         SetCutoffsDirty();
         UpdateTokens();
-        
+
         LineManager.Unfold(Index);
-        
+
         return removed;
     }
 
@@ -110,7 +110,7 @@ internal class Line
         _colorsCache.SetDirty();
         _stringCache.SetDirty();
     }
-    
+
     internal void SetCutoffsDirty()
     {
         _cutoffsCache.SetDirty();
@@ -130,12 +130,12 @@ internal class Line
         {
             colors.Add(ColorStyle.None);
         }
-        
+
         foreach (var kv in Singleton.TextBox.Language.PatternsStyle)
         {
             Regex regex = kv.Key;
             ColorStyle colorStyle = Singleton.TextBox.Theme.TokenColors[kv.Value];
-            
+
             foreach (Match match in regex.Matches(String))
             {
                 for (int i = match.Index; i < match.Index + match.Length && i < colors.Count; i++)
@@ -144,7 +144,7 @@ internal class Line
                 }
             }
         }
-        
+
         foreach (var range in CommentRanges)
         {
             for (int i = range.Item1; i < range.Item2 && i < colors.Count; i++)
@@ -160,9 +160,10 @@ internal class Line
                 colors[i] = Singleton.TextBox.Theme.TokenColors[Theme.Token.String];
             }
         }
+
         return colors;
     }
-    
+
     private HashSet<int> UpdateCutoff(HashSet<int> cutoffs)
     {
         cutoffs.Clear();
@@ -227,13 +228,23 @@ internal class Line
         lineSub.Coordinates = new Coordinates(Index, 0, lineSubIndex);
         lineSub.IndentWidth = 0.0f;
 
+        float currentX = 0.0f;
         for (int i = 0; i < _chars.Count; i++)
         {
             char c = _chars[i];
             float cWidth = FontManager.GetFontWidth(c);
+            if (c == '\t' && Singleton.TextBox.TabMode == TabMode.Tab)
+            {
+                float posX = ((int)((lineSub.IndentWidth + currentX + cWidth) / FontManager.GetFontTabWidth())) *
+                             FontManager.GetFontTabWidth();
+                cWidth = posX - lineSub.IndentWidth - currentX;
+                if (cWidth < FontManager.GetFontWhiteSpaceWidth())
+                    cWidth += FontManager.GetFontTabWidth();
+            }
 
             lineSub.Chars.Add(c);
             lineSub.CharWidths.Add(cWidth);
+            currentX += cWidth;
 
             if (Cutoffs.Contains(i)) // need new line
             {
@@ -263,7 +274,7 @@ internal class Line
                 i--; // Ignore i++ in for loop
             }
         }
-        
+
         if (false == _oldTokens.SequenceEqual(Tokens))
         {
             _oldTokens.Clear();
@@ -271,7 +282,7 @@ internal class Line
             LineManager.SetLanguageTokenDirty();
         }
     }
-    
+
     internal bool GetLineSub(int charIndex, out LineSub foundLineSub)
     {
         foundLineSub = LineSub.None;
@@ -290,7 +301,7 @@ internal class Line
         foundLineSub = LineSubs[0];
         return false;
     }
-    
+
     private float GetIndentWidth()
     {
         if (Singleton.TextBox.WordWrapIndent)
@@ -320,6 +331,7 @@ internal class Line
                 break;
             search--;
         }
+
         search++;
         return true;
     }
@@ -336,6 +348,7 @@ internal class Line
                 break;
             search++;
         }
+
         return true;
     }
 
@@ -343,10 +356,10 @@ internal class Line
     {
         if (startCharIndex > endCharIndex)
             return string.Empty;
-        
+
         if (startCharIndex < 0)
             startCharIndex = 0;
-        
+
         if (endCharIndex >= _chars.Count)
             endCharIndex = _chars.Count - 1;
 
